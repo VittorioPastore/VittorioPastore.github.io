@@ -1,0 +1,38 @@
+---
+// src/pages/neural-trader.astro
+import Layout from '../layouts/Layout.astro';
+const title = "Neural Trader (AI Project)";
+const publishDate = "April 10, 2025";
+---
+<Layout title={`${title} - Project`}>
+  <main class="container mx-auto px-4 py-16">
+    <article class="glass p-12 rounded-3xl max-w-3xl mx-auto">
+      <!-- Project Header -->
+      <header class="mb-8">
+        <h1 class="text-5xl font-bold mb-2">{title}</h1>
+        <p class="text-gray-200 text-lg">Published on {publishDate}</p>
+      </header>
+
+      <!-- Project Content -->
+      <section class="prose max-w-none text-gray-200">
+        <p>
+          Neural Trader is a neural network–based financial advisor developed after earning my Machine Learning certification from Matlab. The project uses Matlab’s Neural Network Toolbox to analyze current stock data.
+        </p>
+        <p>
+          A custom Python script scrapes daily data from Yahoo Finance and Google Trends into a CSV file, which is then processed in Matlab through a bagged trees algorithm. This method proved to be the most accurate, outperforming both convolutional and sequential neural network approaches.
+        </p>
+        <p>
+          In a backtest from January 2018 to December 2022, Neural Trader showed an average monthly portfolio increase of about 1%, significantly outperforming the S&P500 over the same period.
+        </p>
+
+        <!-- Project Image -->
+        <figure class="my-8">
+          <img src="/neural-trader.png" alt="Neural Trader (AI Project)" class="rounded-2xl w-full" />
+          <figcaption class="text-center text-sm text-gray-400 mt-2">
+            Performance metrics of Neural Trader.
+          </figcaption>
+        </figure>
+      </section>
+    </article>
+  </main>
+</Layout>

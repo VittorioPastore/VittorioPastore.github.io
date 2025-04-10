@@ -1,0 +1,106 @@
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+import AnimatedButton from '../components/AnimatedButton';
+
+const skills = [
+  'Python', 'PyTorch', 'TensorFlow', 'ROS', 'OpenAI Gym', 'Raisim', 'Control Theory', 'C++'
+];
+---
+
+<Layout title="Vittorio Pastore - Portfolio">
+  <main class="container mx-auto px-4 py-16 relative z-10">
+    <!-- Hero Section -->
+    <section class="flex flex-col items-center justify-center min-h-[80vh] text-center">
+      <div class="glass p-12 rounded-3xl max-w-3xl mx-auto relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 pointer-events-none"></div>
+        
+        <!-- Headshot Image -->
+        <!-- <img
+          src="/headshot.jpg" 
+          alt="Vitto's Headshot" 
+          class="w-32 h-32 rounded-full mx-auto mb-6 object-cover border-2 border-white"
+        /> -->
+        
+        <h1 class="text-5xl md:text-7xl font-bold mb-8">
+          Hi, I'm <span class="text-gradient">Vitto</span>
+        </h1>
+        <p class="text-xl md:text-2xl mb-10 text-gray-200">
+          Robotics Researcher at Virginia Tech <br/>
+          Hobby Musician and Photographer
+        </p>
+        <div class="flex flex-wrap gap-6 justify-center">
+          <AnimatedButton text="View Projects" href="#projects" client:load />
+          <AnimatedButton text="Contact Me" href="#contact" client:load />
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section class="my-32">
+      <h2 class="text-4xl font-bold text-center mb-16">Skills & Technologies</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {skills.map(skill => (
+          <div class="glass p-6 rounded-2xl text-center hover:bg-white/20 transition-all duration-500 transform hover:-translate-y-2">
+            <span class="text-lg font-medium">{skill}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="my-32">
+      <h2 class="text-4xl font-bold text-center mb-16">Featured Projects</h2>
+      <div class="grid md:grid-cols-2 gap-10">
+        <!-- Project Card: Squeaky and Greyhound -->
+        <div class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group">
+          <h3 class="text-2xl font-bold mb-4 text-gradient">Squeaky and Greyhound</h3>
+          <p class="text-gray-200 mb-6 leading-relaxed">
+            A 3D printed quadruped robot project featuring advanced inverse kinematics and a sleek mechanical design for enhanced mobility.
+          </p>
+          <AnimatedButton text="View Project" href="/squeaky-greyhound" client:load />
+        </div>
+
+        <!-- Project Card: Senior Design: NAWCAD -->
+        <div class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group">
+          <h3 class="text-2xl font-bold mb-4 text-gradient">Senior Design: NAWCAD</h3>
+          <p class="text-gray-200 mb-6 leading-relaxed">
+            Integrated test stand system design connecting mechanical engineering with a drone’s flight stack using a custom Matlab GUI.
+          </p>
+          <AnimatedButton text="View Project" href="/nawcad" client:load />
+        </div>
+
+        <!-- Project Card: Controls IOS Application -->
+        <div class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group">
+          <h3 class="text-2xl font-bold mb-4 text-gradient">Controls IOS Application</h3>
+          <p class="text-gray-200 mb-6 leading-relaxed">
+            A personal project experimenting with PID control, Apple's Swift language, and custom UI design for simulating control systems.
+          </p>
+          <AnimatedButton text="View Project" href="/controls-ios-application" client:load />
+        </div>
+
+        <!-- Project Card: Neural Trader (AI Project) -->
+        <div class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group">
+          <h3 class="text-2xl font-bold mb-4 text-gradient">Neural Trader (AI Project)</h3>
+          <p class="text-gray-200 mb-6 leading-relaxed">
+            A neural network based financial advisor built with Matlab’s Neural Network Toolbox and Python for data scraping and analysis.
+          </p>
+          <AnimatedButton text="View Project" href="/neural-trader" client:load />
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="my-32">
+      <div class="glass p-12 rounded-3xl max-w-2xl mx-auto relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-pink-500/10 pointer-events-none"></div>
+        <h2 class="text-4xl font-bold text-center mb-12">Get In Touch</h2>
+        <div class="flex flex-col gap-6 items-center">
+          <AnimatedButton text="Email Me" href="mailto:vitto@vt.edu" client:load />
+          <AnimatedButton text="LinkedIn" href="https://www.linkedin.com/in/vittorio-pastore-6474691b1/" client:load />
+          <AnimatedButton text="GitHub" href="https://github.com/VittorioPastore" client:load />
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

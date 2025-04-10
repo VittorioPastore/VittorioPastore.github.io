@@ -1,0 +1,62 @@
+---
+// src/pages/project.astro
+import Layout from '../layouts/Layout.astro';
+
+// You can add any page-specific frontmatter here.
+// For instance, set a title or publish date.
+const title = "My Amazing Project";
+const publishDate = "March 10, 2025";
+---
+<Layout title={`${title} - Project`}>
+  <main class="container mx-auto px-4 py-16">
+    <article class="glass p-12 rounded-3xl max-w-3xl mx-auto">
+      <!-- Blog Post Header -->
+      <header class="mb-8">
+        <h1 class="text-5xl font-bold mb-2">{title}</h1>
+        <p class="text-gray-200 text-lg">Published on {publishDate}</p>
+      </header>
+
+      <!-- Blog Post Content -->
+      <section class="prose max-w-none text-gray-200">
+        <p>
+          Welcome to this detailed overview of my project. In this post, I'll discuss the background, the challenges I faced,
+          and the cutting edge technologies I employed. Follow along as I walk you through the project.
+        </p>
+
+        <!-- Image Section -->
+        <figure class="my-8">
+          <img src="/images/project-screenshot.jpg" alt="Project Screenshot" class="rounded-2xl w-full" />
+          <figcaption class="text-center text-sm text-gray-400 mt-2">
+            A screenshot highlighting the main interface of the project.
+          </figcaption>
+        </figure>
+
+        <!-- Project Details -->
+        <h2 class="text-3xl font-bold mt-10">Project Details</h2>
+        <p>
+          Here, you can delve into technical details, methodologies used, and insights into the development process. The design
+          strategy behind the project is also explained in depth.
+        </p>
+
+        <!-- Embedded YouTube Video -->
+        <div class="video-container my-8">
+          <iframe 
+            width="560" 
+            height="315" 
+            src="https://www.youtube.com/embed/La2TCeWXSwQ" 
+            title="YouTube video player" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen 
+            class="rounded-2xl w-full">
+          </iframe>
+        </div>
+
+        <!-- Additional Content -->
+        <p>
+          I hope this post provides some insight into the complexities and creative processes behind my project. Stay tuned for more updates and follow my journey as I further develop new and exciting projects.
+        </p>
+      </section>
+    </article>
+  </main>
+</Layout>
