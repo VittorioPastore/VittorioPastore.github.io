@@ -6,5 +6,7 @@ export default defineConfig({
   integrations: [tailwind(), react()],
   server: {
     host: true
-  }
+  },
+  site: 'https://vittoriopastore.github.io'
+  //base: 'Portfolio',
 });

@@ -1,0 +1,53 @@
+---
+// src/pages/nawcad.astro
+import Layout from '../layouts/Layout.astro';
+const title = "Senior Design: NAWCAD";
+const publishDate = "May 30, 2024";
+---
+<Layout title={`${title} - Project`}>
+  <main class="container mx-auto px-4 py-16">
+    <article class="glass p-12 rounded-3xl max-w-3xl mx-auto">
+      <!-- Project Header -->
+      <header class="mb-8">
+        <h1 class="text-5xl font-bold mb-2">{title}</h1>
+        <p class="text-gray-200 text-lg">Published on {publishDate}</p>
+      </header>
+
+      <!-- Project Content -->
+      <section class="prose max-w-none text-gray-200">
+        <p>
+          As the Integration Lead for my senior design team, I designed the systems connecting a test stand's mechanical setup to a drone's flight stack.
+        </p>
+        <p>
+          I developed the electrical system and software package to actuate and acquire data from three motors on each axis. The system utilizes Dynamixel MX 106t Servos connected via a U2D2 serial converter and communicates with a custom Matlab GUI.
+        </p>
+        <p>
+          The Matlab GUI, built using Matlab App Designer, guides the user through test setup, operation, and data analysis. It interfaces with the stand via serial and with the drone via ROS2, ensuring the data accurately represents the drone by compensating for the test stand’s impact.
+        </p>
+        
+
+
+        <!-- Project Image -->
+        <figure class="my-8">
+          <img src="/images/nawcad.png" alt="Senior Design: NAWCAD" class="rounded-2xl w-full" />
+          <figcaption class="text-center text-sm text-gray-400 mt-2">
+            Final presentation poster.
+          </figcaption>
+        </figure>
+      </section>
+              <!-- Embedded YouTube Video -->
+        <div class="video-container my-8">
+            <iframe 
+              width="560" 
+              height="315" 
+              src="https://www.youtube.com/embed/sBN4cxRAoqA" 
+              title="YouTube video player" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen 
+              class="rounded-2xl w-full">
+              
+            </iframe>
+          </div>
+    </article>
+  </main>
+</Layout>

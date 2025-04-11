@@ -1,0 +1,53 @@
+---
+// src/pages/controls-ios-application.astro
+import Layout from '../layouts/Layout.astro';
+const title = "Controls IOS Application";
+const publishDate = "April 10, 2025";
+---
+<Layout title={`${title} - Project`}>
+  <main class="container mx-auto px-4 py-16">
+    <article class="glass p-12 rounded-3xl max-w-3xl mx-auto">
+      <!-- Project Header -->
+      <header class="mb-8">
+        <h1 class="text-5xl font-bold mb-2">{title}</h1>
+        <p class="text-gray-200 text-lg">Published on {publishDate}</p>
+      </header>
+
+      <!-- Project Content -->
+      <section class="prose max-w-none text-gray-200">
+        <p>
+          The PID Controls Simulator is a personal project created to experiment with Apple's Swift language, PID control implementation, and functional UI design.
+        </p>
+        <p>
+          The iOS application features a simulator with a desired setpoint of 50 along with six critical variables: Kp, Ki, Kd, Current Value, Signal, and Noise. The current value is graphically plotted on a custom bitmap that automatically scales without going out of bounds.
+        </p>
+        <p>
+          The control signal is computed with:
+        </p>
+        <ul>
+          <li><strong>Proportional:</strong> Kp * current error</li>
+          <li><strong>Integral:</strong> Ki * cumulative error</li>
+          <li><strong>Derivative:</strong> Kd * (difference in error over time)</li>
+        </ul>
+        <p>
+          The app also features noise and nudge controls to simulate disturbances and adjust the value in real time.
+        </p>
+
+        <!-- Embedded YouTube Video -->
+        <div class="video-container my-8">
+          <iframe 
+            width="360" 
+            height="415" 
+            src="https://www.youtube.com/embed/wM4RfHS1H-I" 
+            title="YouTube video player" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen 
+            class="rounded-2xl w-full">
+          </iframe>
+        </div>
+        
+      </section>
+    </article>
+  </main>
+</Layout>
