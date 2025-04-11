@@ -7,6 +7,6 @@ export default defineConfig({
   server: {
     host: true
   },
-  site: 'https://vittoriopastore.com',
+  site: 'https://www.vittoriopastore.com',
   //base: 'Portfolio',
 });
