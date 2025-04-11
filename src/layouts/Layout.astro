@@ -8,7 +8,7 @@ interface Props {
 const { title } = Astro.props;
 ---
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -23,7 +23,7 @@ const { title } = Astro.props;
   </head>
 
   <body class="min-h-screen font-poppins text-white">   
-    <div class="fixed-background" id="zoom-background"></div>
+    <div class="fixed-background"></div>
     <div class="stars"></div>
     <div class="glow-orb"></div>
     <slot />
@@ -55,93 +55,40 @@ const { title } = Astro.props;
 </html>
 
 <script>
-  // Cache viewport height
-  let viewportHeight = window.innerHeight;
   let lastScrollY = window.scrollY;
   let ticking = false;
-  let currentScale = 1;
-  let targetScale = 1;
 
-  // Lerp function for smooth interpolation
-  const lerp = (start, end, factor) => {
-    return start + (end - start) * factor;
-  };
-
-  // Debounce function
-  const debounce = (fn, ms = 300) => {
-    let timeoutId;
-    return function (...args) {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => fn.apply(this, args), ms);
-    };
-  };
-
-  // Update viewport height with debounce
-  const updateViewportHeight = debounce(() => {
-    viewportHeight = window.innerHeight;
-  }, 100);
-
-  // Home button handling
   const homeButton = document.getElementById('home-button');
+  
   const updateHomeButton = () => {
     if (!homeButton) return;
+    
     const currentScrollY = window.scrollY;
+    
     if (currentScrollY > lastScrollY) {
+      // Scrolling down
       homeButton.style.transform = 'translate(-50%, 150%)';
     } else {
+      // Scrolling up
       homeButton.style.transform = 'translate(-50%, 0)';
     }
+    
     lastScrollY = currentScrollY;
     ticking = false;
   };
 
-  // Smooth scroll handler with RAF
-  const background = document.getElementById('zoom-background');
-  let animationFrame;
-
-  const animate = () => {
-    const scrollPosition = window.scrollY;
-    const scrollPercentage = scrollPosition / viewportHeight;
-    targetScale = scrollPosition > viewportHeight ? 1.6 : 1 + (scrollPercentage * 0.6);
-    targetScale = Math.min(1.6, targetScale);
-    
-    // Smooth interpolation
-    currentScale = lerp(currentScale, targetScale, 0.1);
-    
-    if (background && Math.abs(currentScale - targetScale) > 0.001) {
-      background.style.transform = `scale(${currentScale})`;
-      animationFrame = requestAnimationFrame(animate);
-    } else {
-      ticking = false;
-    }
-  };
-
-  const handleScroll = () => {
+  const onScroll = () => {
     if (!ticking) {
-      animationFrame = requestAnimationFrame(animate);
+      window.requestAnimationFrame(updateHomeButton);
       ticking = true;
     }
-    updateHomeButton();
   };
 
-  // Event listeners
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  window.addEventListener('resize', updateViewportHeight, { passive: true });
-  window.addEventListener('orientationchange', updateViewportHeight);
-
-  // Cleanup on page unload
-  window.addEventListener('unload', () => {
-    if (animationFrame) {
-      cancelAnimationFrame(animationFrame);
-    }
-  });
+  // Add scroll event listener
+  window.addEventListener('scroll', onScroll, { passive: true });
 </script>
 
 <style is:global>
-  html {
-    scroll-behavior: smooth;
-  }
-
   .glass {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(12px);
@@ -158,23 +105,11 @@ const { title } = Astro.props;
     background: url('/back3.jpg') no-repeat center center;
     background-size: cover;
     z-index: -1;
-    transition: none; /* Remove transition as we're handling it with RAF */
-    transform-origin: center center;
-    will-change: transform;
   }
 
   @supports (-webkit-touch-callout: none) {
     .fixed-background {
       background-attachment: scroll;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-    .fixed-background {
-      transition: none;
     }
   }
 
