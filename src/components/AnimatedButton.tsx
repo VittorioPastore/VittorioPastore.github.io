@@ -9,9 +9,9 @@ export default function AnimatedButton({ text, href }: ButtonProps) {
   return (
     <motion.a
       href={href}
-      className="relative glass px-8 py-4 rounded-full text-white font-medium 
+      className="relative glass px-4 md:px-8 py-3 md:py-4 rounded-full text-white text-sm md:text-base font-medium 
                  hover:bg-white/20 transition-all duration-300 inline-block
-                 overflow-hidden group"
+                 overflow-hidden group whitespace-nowrap"
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
