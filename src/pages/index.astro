@@ -13,22 +13,22 @@ const skills = [
 <Layout title="Vittorio Pastore - Portfolio">
   <main class="container mx-auto px-4 py-16 relative z-10">
     <!-- Hero Section -->
-    <section class="flex flex-col items-center justify-center min-h-[80vh] text-center">
+    <section class="flex flex-col items-center justify-center min-h-[80vh] text-center relative">
       <div class="glass p-12 rounded-3xl max-w-3xl mx-auto relative overflow-hidden float">
-        <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 pointer-events-none"></div>
-        
-        <h1 class="text-5xl md:text-7xl font-bold mb-8">
-          Hi, I'm <span class="text-gradient">Vittorio</span>
-        </h1>
-        <p class="text-xl md:text-2xl mb-10 text-gray-200">
-          Robotics Researcher at Virginia Tech. <br/>
-          Passionate about Reinforcement Learning, Music, and Photography
-        </p>
-        <div class="flex gap-6 justify-center">
-          <AnimatedButton text="View Projects" href="#projects" client:load />
-          <AnimatedButton text="Contact Me" href="#contact" client:load />
-        </div>
-        </div>
+
+
+      <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 pointer-events-none"></div>
+      
+      <h1 class="text-5xl md:text-7xl font-bold mb-8">
+      Hi, I'm <span class="text-gradient">Vittorio</span>
+      </h1>
+      <p class="text-xl md:text-2xl mb-10 text-gray-200">
+      Robotics Researcher at Virginia Tech. <br/>
+      Passionate about Reinforcement Learning, Music, and Photography
+      </p>
+      <div class="flex gap-6 justify-center">
+      <AnimatedButton text="View Projects" href="#projects" client:load class="w-40"/>
+      <AnimatedButton text="Contact Me" href="#contact" client:load class="w-40"/>
       </div>
     </section>
 

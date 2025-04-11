@@ -1,4 +1,5 @@
 ---
+// Astro front matter remains the same
 import '@fontsource/poppins';
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 
 const { title } = Astro.props;
 ---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -24,10 +26,22 @@ const { title } = Astro.props;
   </head>
 
   <body>
-    <!-- Fixed background layers -->
+    <!-- Fixed background container for smooth transitioning -->
     <div class="fixed-background"></div>
     <div class="stars"></div>
     <div class="glow-orb"></div>
+    <!-- Subtle Centered Toggle Button -->
+    <button
+      type="button"
+      id="theme-toggle"
+      class="absolute top-4 left-1/2 -translate-x-1/2 toggle-button glass px-3 py-1.5 rounded-full transition-all duration-300 z-50 opacity-70 hover:opacity-90 flex items-center gap-1 text-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 theme-toggle-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+      <span class="text-sm font-medium">Toggle Theme</span>
+    </button>
 
     <!-- Page Content -->
     <slot />
@@ -60,6 +74,48 @@ const { title } = Astro.props;
 
     <!-- Scroll & Link Scripts -->
     <script>
+      // Theme handling
+      const html = document.documentElement;
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeIcon = themeToggle?.querySelector('.theme-toggle-icon');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+      
+      const updateThemeUI = (isDark) => {
+        if (themeIcon) {
+          if (isDark) {
+            // Show sun icon when in dark mode (click to switch to light)
+            themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                     d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>`;
+          } else {
+            // Show moon icon when in light mode (click to switch to dark)
+            themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                     d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>`;
+          }
+        }
+      };
+
+      const setTheme = (isDark) => {
+        html.classList.toggle('light-mode', !isDark);
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateThemeUI(isDark);
+      };
+
+      // Initialize theme
+      const savedTheme = localStorage.getItem('theme');
+      const initialTheme = savedTheme ? savedTheme === 'dark' : prefersDark.matches;
+      setTheme(initialTheme);
+
+      // Toggle the theme on button click
+      themeToggle?.addEventListener('click', () => {
+        const currentDark = !(html.classList.contains('light-mode'));
+        setTheme(!currentDark);
+      });
+
+      // Listen for system theme changes
+      prefersDark.addEventListener('change', (e) => {
+        setTheme(e.matches);
+      });
+
       let lastScrollY = window.scrollY;
       let ticking = false;
 
@@ -92,7 +148,7 @@ const { title } = Astro.props;
       // Add scroll event listener
       window.addEventListener('scroll', onScroll, { passive: true });
 
-      // Smooth scroll handler
+      // Smooth scroll handler for internal links
       const smoothScroll = (e) => {
         const targetId = e.currentTarget.getAttribute('href');
         if (targetId && targetId.startsWith('#')) {
@@ -119,35 +175,37 @@ const { title } = Astro.props;
 </html>
 
 <style is:global>
-  /* Ensure the base page fills the screen without a border and uses a black background on html */
+  /* Base styles for html and body */
   html {
     height: 100%;
-    height: -webkit-fill-available; /* iOS Safari fill screen */
     margin: 0;
     padding: 0;
-    background-color: #000; /* Used as the primary background color */
+    background-color: #000;
+    /* iOS Safari full-screen */
+    height: -webkit-fill-available;
   }
 
-  /* Remove the opaque background from body so the fixed background image is visible */
   body {
     display: flex;
     flex-direction: column;
     max-width: 1440px;
     margin: 0 auto;
     padding: 0;
-    padding-bottom: env(safe-area-inset-bottom); /* Respect safe area insets */
+    padding-bottom: env(safe-area-inset-bottom);
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
     color: white;
-    background-color: transparent; /* Make body transparent */
-    
-    /* Fallback for other browsers: 100vh */
+    background-color: transparent;
+    transition: color 0.3s ease;
     height: 100vh;
-    /* iOS Safari fill screen without resizing on scroll */
     height: -webkit-fill-available;
   }
 
-  /* Glass / translucent styling */
+  .light-mode body {
+    color: black;
+  }
+
+  /* Glass/translucent styling */
   .glass {
     background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(12px);
@@ -155,24 +213,59 @@ const { title } = Astro.props;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
-  /* Fixed background with -webkit-fill-available to avoid dynamic resizing */
+  .light-mode .glass {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  /* Fixed background container using pseudo-elements for smooth cross-fade */
   .fixed-background {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    /* Fallback for non-Safari browsers */
     height: 100vh;
-    /* iOS Safari fill screen */
-    height: -webkit-fill-available;
-    background: url('/back3.jpg') no-repeat center center;
-    background-size: cover;
+    /* Ensure the background is behind content */
     z-index: -1;
+    pointer-events: none;
+    background: none;
+  }
+
+  .fixed-background::before,
+  .fixed-background::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  /* Dark theme background (default) */
+  .fixed-background::before {
+    background-image: url('/back3.jpg');
+    opacity: 1;
+  }
+
+  /* Light theme background */
+  .fixed-background::after {
+    background-image: url('/back5.png');
+    opacity: 0;
+  }
+
+  /* When light mode is active, swap opacities */
+  html.light-mode .fixed-background::before {
+    opacity: 0;
+  }
+  html.light-mode .fixed-background::after {
+    opacity: 1;
   }
 
   /*
-    On some iOS devices where background-attachment: fixed isn’t fully supported,
-    use "scroll" as a fallback to avoid stuttering issues.
+    iOS Safari fallback: change background-attachment if needed.
   */
   @supports (-webkit-touch-callout: none) {
     .fixed-background {
@@ -198,6 +291,10 @@ const { title } = Astro.props;
     animation: twinkle 5s ease-in-out infinite;
   }
 
+  .light-mode .stars {
+    opacity: 0;
+  }
+
   /* Glow orb layer (decorative) */
   .glow-orb {
     position: fixed;
@@ -214,21 +311,25 @@ const { title } = Astro.props;
     filter: blur(30px);
   }
 
-  /* Twinkling effect for the stars */
+  .light-mode .glow-orb {
+    background: radial-gradient(circle at center, rgba(100,149,237,0.4) 0%, rgba(100,149,237,0) 70%);
+  }
+
+  /* Twinkling animation for stars */
   @keyframes twinkle {
     0% { opacity: 0.7; }
     50% { opacity: 1; }
     100% { opacity: 0.7; }
   }
 
-  /* Floating effect for the orb */
+  /* Floating animation for the glow orb */
   @keyframes float {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     50% { transform: translate(-30%, -30%) rotate(180deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
   }
 
-  /* Float animation for any elements with this class */
+  /* Floating effect for any elements with this class */
   .float {
     animation: contentFloat 6s ease-in-out infinite;
   }
@@ -245,5 +346,28 @@ const { title } = Astro.props;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+
+  /* Override text colors when in light mode */
+  html.light-mode body,
+  html.light-mode h1,
+  html.light-mode h2,
+  html.light-mode h3,
+  html.light-mode h4,
+  html.light-mode h5,
+  html.light-mode h6,
+  html.light-mode p,
+  html.light-mode a,
+  html.light-mode li,
+  html.light-mode span {
+    color: black !important;
+  }
+
+  /* Optionally override common Tailwind text classes if needed */
+  html.light-mode .text-gray-200 {
+    color: #222 !important;
+  }
+  html.light-mode .text-white {
+    color: #000 !important;
   }
 </style>
