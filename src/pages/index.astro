@@ -101,10 +101,12 @@ const skills = [
       <div class="glass p-12 rounded-3xl max-w-2xl mx-auto relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-pink-500/10 pointer-events-none"></div>
         <h2 class="text-4xl font-bold text-center mb-12">Get In Touch</h2>
-        <div class="flex flex-row gap-6 items-center justify-center">
+        <div class="flex flex-col gap-6 items-center justify-center">
+          <div class="flex flex-row gap-6 items-center justify-center">
+            <AnimatedButton text="LinkedIn" href="https://www.linkedin.com/in/vittorio-pastore-6474691b1/" client:load />
+            <AnimatedButton text="GitHub" href="https://github.com/VittorioPastore" client:load />
+          </div>
           <AnimatedButton text="Email Me" href="mailto:vitto@vt.edu" client:load />
-          <AnimatedButton text="LinkedIn" href="https://www.linkedin.com/in/vittorio-pastore-6474691b1/" client:load />
-          <AnimatedButton text="GitHub" href="https://github.com/VittorioPastore" client:load />
         </div>
       </div>
     </section>
