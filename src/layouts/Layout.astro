@@ -22,13 +22,11 @@ const { title } = Astro.props;
     <meta name="author" content="Vittorio Pastore" />
   </head>
 
-  <!-- Updated background: dark gradient with a hint of color in the center -->
-  <body class="bg-gradient-to-br from-gray-900 via-black-900 to-blue-950 min-h-screen font-poppins text-white">   
+  <!-- Updated background: use provided image -->
+  <body class="min-h-screen font-poppins text-white" style="background: url('back3.jpg') no-repeat center center fixed; background-size: cover;">   
     <div class="stars"></div>
     <div class="glow-orb"></div>
     <slot />
-  </body>
-</html>
 
     <!-- Home Button -->
     <a
@@ -98,15 +96,6 @@ const { title } = Astro.props;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
   
-
-<style is:global>
-  .glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  }
-  
   .stars {
     position: fixed;
     top: 0;
@@ -123,17 +112,19 @@ const { title } = Astro.props;
     background-size: 200px 200px;
     animation: twinkle 5s ease-in-out infinite;
   }
-
   .glow-orb {
     position: fixed;
+    top: 15%;
+    left: 85%;
+    transform: translate(-50%, -50%);
     width: 600px;
     height: 600px;
     border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(255,182,255,0.2) 0%, rgba(255,182,255,0) 70%);
+    background: radial-gradient(circle at center, rgba(255,182,255,0.4) 0%, rgba(255,182,255,0) 70%);
     pointer-events: none;
     z-index: 0;
     animation: float 20s ease-in-out infinite;
-    filter: blur(40px);
+    filter: blur(30px);
   }
 
   @keyframes twinkle {
@@ -159,8 +150,7 @@ const { title } = Astro.props;
   }
 
   .text-gradient {
-    background: linear-gradient(to right, #FF6B6B, #4ECDC4);
-    -webkit-background-clip: text;
+    background: linear-gradient(to right, #B388FF, #7FDBFF, #FFB6C1);    -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
