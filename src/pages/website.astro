@@ -1,0 +1,39 @@
+---
+// src/pages/neural-trader.astro
+import Layout from '../layouts/Layout.astro';
+const title = "This Website";
+const publishDate = "April 11, 2025";
+---
+<Layout title={`${title} - Project`}>
+  <main class="container mx-auto px-4 py-16">
+    <article class="glass p-12 rounded-3xl max-w-3xl mx-auto">
+      <!-- Project Header -->
+      <header class="mb-8">
+        <h1 class="text-5xl font-bold mb-2">{title}</h1>
+        <p class="text-gray-200 text-lg">Published on {publishDate}</p>
+      </header>
+
+      <!-- Project Content -->
+      <section class="prose max-w-none text-gray-200">
+        <p>
+            I have recently become fascinated with glassmorphic UI design, like the one on VisionOS and rumored to arrive to IOS 19. My previous website was a simple google site that was quick to make and, more importantly, free. It was functional, yet bland. <br>
+            I wanted to create a website that truly represented my personality as a creative and tech enthusiast. Therefore, I chose a new tech stack, that I was previously unfamiliar with, based on the astro framework to push myself to create something stunning. <br>  
+            Check out the source code on <a href="https://github.com/VittorioPastore/VittorioPastore.github.io" class="underline">Github</a>! <br>
+            <hr class="border-gray-200 my-8">
+            I used the following pinterest post as inspiration fro my UI design. I learned along the way that the best way to get this look is to have bright and high-contrast shapes in the background. Otherwise it will look like your "glass" elements are simply static gradients. Other than that, having a blur effect on each element and adding opacity is the simplest way to achieve this beautiful effect<br>
+          </p>
+
+            <div class="mt-8 w-full aspect-w-1 aspect-h-1 flex justify-center">
+                <iframe
+                src="https://assets.pinterest.com/ext/embed.html?id=953074339895381511"
+                height="500"
+                width="500"
+                loading="lazy"
+                class="rounded-3xl"
+                ></iframe>
+                </div>
+        
+      </section>
+    </article>
+  </main>
+</Layout>
