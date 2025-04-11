@@ -8,7 +8,7 @@ interface Props {
 const { title } = Astro.props;
 ---
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -58,89 +58,16 @@ const { title } = Astro.props;
   // State variables
   let viewportHeight = window.innerHeight;
   let lastScrollY = window.scrollY;
+  let ticking = false;
   let currentScale = 1;
   let targetScale = 1;
-  let scrollVelocity = 0;
-  let lastTimestamp = 0;
-  let isAnimating = false;
-  
-  // Set initial viewport height
-  document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-  
-  // Throttle function for resize events
-  const throttle = (func, limit) => {
-    let inThrottle;
-    return function(...args) {
-      if (!inThrottle) {
-        func.apply(this, args);
-        inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
-      }
-    }
+
+  // Lerp function for smooth interpolation
+  const lerp = (start, end, factor) => {
+    return start + (end - start) * factor;
   };
 
-  // Update viewport height without triggering reflow
-  const updateVH = throttle(() => {
-    requestAnimationFrame(() => {
-      viewportHeight = window.innerHeight;
-      document.documentElement.style.setProperty('--vh', `${viewportHeight * 0.01}px`);
-    });
-  }, 100);
-
-  const smoothingFactor = 0.035; // Lower value = smoother animation
-  const velocityFactor = 0.8; // Momentum decay
-  
-  // Improved lerp with momentum
-  const smoothLerp = (current, target, velocity, deltaTime) => {
-    const diff = target - current;
-    scrollVelocity = scrollVelocity * velocityFactor + (diff * smoothingFactor);
-    return current + (scrollVelocity * deltaTime);
-  };
-
-  const animate = (timestamp) => {
-    if (!lastTimestamp) lastTimestamp = timestamp;
-    const deltaTime = (timestamp - lastTimestamp) / 16; // Normalize to ~60fps
-    
-    const scrollPosition = window.scrollY;
-    const scrollPercentage = scrollPosition / viewportHeight;
-    targetScale = scrollPosition > viewportHeight ? 1.6 : 1 + (scrollPercentage * 0.6);
-    targetScale = Math.min(1.6, targetScale);
-    
-    // Smooth interpolation with momentum
-    currentScale = smoothLerp(currentScale, targetScale, scrollVelocity, deltaTime);
-    
-    if (background) {
-      background.style.transform = `scale(${currentScale})`;
-    }
-    
-    lastTimestamp = timestamp;
-    
-    // Continue animation only if there's significant movement
-    if (Math.abs(currentScale - targetScale) > 0.0001 || Math.abs(scrollVelocity) > 0.0001) {
-      isAnimating = true;
-      requestAnimationFrame(animate);
-    } else {
-      isAnimating = false;
-    }
-  };
-
-  const handleScroll = () => {
-    if (!isAnimating) {
-      lastTimestamp = 0;
-      requestAnimationFrame(animate);
-    }
-    updateHomeButton();
-  };
-
-  // Touch-specific handling
-  let touchStartY = 0;
-  
-  window.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-    scrollVelocity = 0; // Reset velocity on touch
-  }, { passive: true });
-
-  // Update viewport height with debounce
+  // Debounce function
   const debounce = (fn, ms = 300) => {
     let timeoutId;
     return function (...args) {
@@ -164,29 +91,53 @@ const { title } = Astro.props;
       homeButton.style.transform = 'translate(-50%, 0)';
     }
     lastScrollY = currentScrollY;
+    ticking = false;
+  };
+
+  // Smooth scroll handler with RAF
+  const background = document.getElementById('zoom-background');
+  let animationFrame;
+
+  const animate = () => {
+    const scrollPosition = window.scrollY;
+    const scrollPercentage = scrollPosition / viewportHeight;
+    targetScale = scrollPosition > viewportHeight ? 1.6 : 1 + (scrollPercentage * 0.6);
+    targetScale = Math.min(1.6, targetScale);
+    
+    // Smooth interpolation
+    currentScale = lerp(currentScale, targetScale, 0.1);
+    
+    if (background && Math.abs(currentScale - targetScale) > 0.001) {
+      background.style.transform = `scale(${currentScale})`;
+      animationFrame = requestAnimationFrame(animate);
+    } else {
+      ticking = false;
+    }
+  };
+
+  const handleScroll = () => {
+    if (!ticking) {
+      animationFrame = requestAnimationFrame(animate);
+      ticking = true;
+    }
+    updateHomeButton();
   };
 
   // Event listeners
   const background = document.getElementById('zoom-background');
   window.addEventListener('scroll', handleScroll, { passive: true });
-  window.addEventListener('resize', updateVH, { passive: true });
-  window.addEventListener('orientationchange', () => {
-    setTimeout(updateVH, 100); // Wait for orientation change to complete
-  });
+  window.addEventListener('resize', updateViewportHeight, { passive: true });
+  window.addEventListener('orientationchange', updateViewportHeight);
 
   // Cleanup on page unload
   window.addEventListener('unload', () => {
-    if (isAnimating) {
-      cancelAnimationFrame(animate);
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
     }
   });
 </script>
 
 <style is:global>
-  :root {
-    --vh: 1vh;
-  }
-
   html {
     scroll-behavior: smooth;
   }
@@ -207,7 +158,7 @@ const { title } = Astro.props;
     background: url('/back3.jpg') no-repeat center center;
     background-size: cover;
     z-index: -1;
-    transition: none; /* Remove transition as we're handling it with RAF */
+    transition: transform 0.3s ease-out;
     transform-origin: center center;
     will-change: transform;
     transform: translate3d(0, 0, 0); /* Force GPU acceleration */
@@ -219,15 +170,6 @@ const { title } = Astro.props;
     .fixed-background {
       background-attachment: scroll;
       height: calc(var(--vh) * 100);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-    .fixed-background {
-      transition: none;
     }
   }
 
