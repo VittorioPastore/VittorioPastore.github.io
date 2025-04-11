@@ -11,7 +11,8 @@ const { title } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <!-- Added viewport-fit=cover to handle safe areas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
@@ -22,10 +23,13 @@ const { title } = Astro.props;
     <meta name="author" content="Vittorio Pastore" />
   </head>
 
-  <body class="min-h-screen font-poppins text-white">   
+  <body>
+    <!-- Fixed background layers -->
     <div class="fixed-background"></div>
     <div class="stars"></div>
     <div class="glow-orb"></div>
+
+    <!-- Page Content -->
     <slot />
 
     <!-- Home Button -->
@@ -46,96 +50,137 @@ const { title } = Astro.props;
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
-          d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+          d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 
+             .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 
+             1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
         />
       </svg>
       Home
     </a>
+
+    <!-- Scroll & Link Scripts -->
+    <script>
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+
+      const homeButton = document.getElementById('home-button');
+      
+      const updateHomeButton = () => {
+        if (!homeButton) return;
+        
+        const currentScrollY = window.scrollY;
+        
+        if (currentScrollY > lastScrollY) {
+          // Scrolling down
+          homeButton.style.transform = 'translate(-50%, 150%)';
+        } else {
+          // Scrolling up
+          homeButton.style.transform = 'translate(-50%, 0)';
+        }
+        
+        lastScrollY = currentScrollY;
+        ticking = false;
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          window.requestAnimationFrame(updateHomeButton);
+          ticking = true;
+        }
+      };
+
+      // Add scroll event listener
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      // Smooth scroll handler
+      const smoothScroll = (e) => {
+        const targetId = e.currentTarget.getAttribute('href');
+        if (targetId && targetId.startsWith('#')) {
+          e.preventDefault();
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({
+              top: targetPosition,
+              behavior: 'smooth'
+            });
+          }
+        }
+      };
+
+      // Add click handlers to all internal links
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', smoothScroll);
+        });
+      });
+    </script>
   </body>
 </html>
 
-<script>
-  let lastScrollY = window.scrollY;
-  let ticking = false;
-
-  const homeButton = document.getElementById('home-button');
-  
-  const updateHomeButton = () => {
-    if (!homeButton) return;
-    
-    const currentScrollY = window.scrollY;
-    
-    if (currentScrollY > lastScrollY) {
-      // Scrolling down
-      homeButton.style.transform = 'translate(-50%, 150%)';
-    } else {
-      // Scrolling up
-      homeButton.style.transform = 'translate(-50%, 0)';
-    }
-    
-    lastScrollY = currentScrollY;
-    ticking = false;
-  };
-
-  const onScroll = () => {
-    if (!ticking) {
-      window.requestAnimationFrame(updateHomeButton);
-      ticking = true;
-    }
-  };
-
-  // Add scroll event listener
-  window.addEventListener('scroll', onScroll, { passive: true });
-
-  // Smooth scroll handler
-  const smoothScroll = (e) => {
-    const targetId = e.currentTarget.getAttribute('href');
-    if (targetId && targetId.startsWith('#')) {
-      e.preventDefault();
-      const targetElement = document.querySelector(targetId);
-      if (targetElement) {
-        const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth'
-        });
-      }
-    }
-  };
-
-  // Add click handlers to all internal links
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', smoothScroll);
-    });
-  });
-</script>
-
 <style is:global>
+  /* Ensure the base page fills the screen without a border and uses a black background on html */
+  html {
+    height: 100%;
+    height: -webkit-fill-available; /* iOS Safari fill screen */
+    margin: 0;
+    padding: 0;
+    background-color: #000; /* Used as the primary background color */
+  }
+
+  /* Remove the opaque background from body so the fixed background image is visible */
+  body {
+    display: flex;
+    flex-direction: column;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0;
+    padding-bottom: env(safe-area-inset-bottom); /* Respect safe area insets */
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+    background-color: transparent; /* Make body transparent */
+    
+    /* Fallback for other browsers: 100vh */
+    height: 100vh;
+    /* iOS Safari fill screen without resizing on scroll */
+    height: -webkit-fill-available;
+  }
+
+  /* Glass / translucent styling */
   .glass {
     background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
-  
+
+  /* Fixed background with -webkit-fill-available to avoid dynamic resizing */
   .fixed-background {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    /* Fallback for non-Safari browsers */
+    height: 100vh;
+    /* iOS Safari fill screen */
+    height: -webkit-fill-available;
     background: url('/back3.jpg') no-repeat center center;
     background-size: cover;
     z-index: -1;
   }
 
+  /*
+    On some iOS devices where background-attachment: fixed isn’t fully supported,
+    use "scroll" as a fallback to avoid stuttering issues.
+  */
   @supports (-webkit-touch-callout: none) {
     .fixed-background {
       background-attachment: scroll;
     }
   }
 
+  /* Star layer (decorative) */
   .stars {
     position: fixed;
     top: 0;
@@ -152,6 +197,8 @@ const { title } = Astro.props;
     background-size: 200px 200px;
     animation: twinkle 5s ease-in-out infinite;
   }
+
+  /* Glow orb layer (decorative) */
   .glow-orb {
     position: fixed;
     top: 15%;
@@ -167,18 +214,21 @@ const { title } = Astro.props;
     filter: blur(30px);
   }
 
+  /* Twinkling effect for the stars */
   @keyframes twinkle {
     0% { opacity: 0.7; }
     50% { opacity: 1; }
     100% { opacity: 0.7; }
   }
 
+  /* Floating effect for the orb */
   @keyframes float {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     50% { transform: translate(-30%, -30%) rotate(180deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
   }
 
+  /* Float animation for any elements with this class */
   .float {
     animation: contentFloat 6s ease-in-out infinite;
   }
@@ -189,8 +239,10 @@ const { title } = Astro.props;
     100% { transform: translateY(0px); }
   }
 
+  /* Gradient text helper class */
   .text-gradient {
-    background: linear-gradient(to right, #B388FF, #7FDBFF, #FFB6C1);    -webkit-background-clip: text;
+    background: linear-gradient(to right, #B388FF, #7FDBFF, #FFB6C1);
+    -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
