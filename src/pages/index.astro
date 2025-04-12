@@ -3,11 +3,51 @@
 import Layout from '../layouts/Layout.astro';
 import AnimatedButton from '../components/AnimatedButton';
 import GitHubFeed from '../components/GitHubFeed';
-import FunnyFeed from '../components/FunnyFeed'; // Changed import from ScholarFeed to FunnyFeed
+import FunnyFeed from '../components/FunnyFeed';
 
 const skills = [
-  'Python', 'PyTorch', 'TensorFlow', 'ROS', 'Raisim', 'Controls Theory', 'C++', 'Web Development'
+  { name: 'Python', projects: ['neural-trader', 'squeaky-greyhound'] },
+  { name: 'PyTorch', projects: ['neural-trader'] },
+  { name: 'TensorFlow', projects: ['neural-trader'] },
+  { name: 'ROS', projects: ['squeaky-greyhound'] },
+  { name: 'Raisim', projects: ['squeaky-greyhound'] },
+  { name: 'Controls Theory', projects: ['controls-ios-application', 'nawcad'] },
+  { name: 'C++', projects: ['squeaky-greyhound'] },
+  { name: 'Web Development', projects: ['website'] }
 ];
+
+const projects = {
+  'squeaky-greyhound': {
+    title: 'Squeaky and Greyhound',
+    description: 'A 3D printed quadruped robot project featuring advanced inverse kinematics and a sleek mechanical design for enhanced mobility.',
+    skills: ['Python', 'ROS', 'Raisim', 'C++'],
+    href: '/squeaky-greyhound'
+  },
+  'nawcad': {
+    title: 'Senior Design: NAWCAD',
+    description: 'Integrated test stand system design connecting mechanical engineering with a drone\'s flight stack using a custom Matlab GUI.',
+    skills: ['Controls Theory', 'Matlab'],
+    href: '/nawcad'
+  },
+  'controls-ios-application': {
+    title: 'Controls IOS Application',
+    description: 'A personal project experimenting with PID control, Apple\'s Swift language, and custom UI design for simulating control systems.',
+    skills: ['Controls Theory', 'Swift'],
+    href: '/controls-ios-application'
+  },
+  'neural-trader': {
+    title: 'Neural Trader (AI Project)',
+    description: 'A neural network based financial advisor built with Matlab\'s Neural Network Toolbox and Python for data scraping and analysis.',
+    skills: ['Python', 'PyTorch', 'TensorFlow'],
+    href: '/neural-trader'
+  },
+  'website': {
+    title: 'This Website',
+    description: 'Yes, I made this website from scratch! No online website builders here. Check out the source code on GitHub.',
+    skills: ['Web Development', 'JavaScript', 'Astro'],
+    href: '/website'
+  }
+};
 ---
 
 <Layout title="Vittorio Pastore - Portfolio">
@@ -15,20 +55,18 @@ const skills = [
     <!-- Hero Section -->
     <section class="flex flex-col items-center justify-center min-h-[80vh] text-center relative">
       <div class="glass p-12 rounded-3xl max-w-3xl mx-auto relative overflow-hidden float">
-
-
-      <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 pointer-events-none"></div>
-      
-      <h1 class="text-5xl md:text-7xl font-bold mb-8">
-      Hi, I'm <span class="text-gradient">Vittorio</span>
-      </h1>
-      <p class="text-xl md:text-2xl mb-10 text-gray-200">
-      Robotics Researcher at Virginia Tech. <br/>
-      Passionate about Reinforcement Learning, Music, and Photography
-      </p>
-      <div class="flex gap-6 justify-center">
-      <AnimatedButton text="View Projects" href="#projects" client:load class="w-40"/>
-      <AnimatedButton text="Contact Me" href="#contact" client:load class="w-40"/>
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 pointer-events-none"></div>
+        <h1 class="text-5xl md:text-7xl font-bold mb-8">
+          Hi, I'm <span class="text-gradient">Vittorio</span>
+        </h1>
+        <p class="text-xl md:text-2xl mb-10 text-gray-200">
+          Robotics Researcher at Virginia Tech. <br/>
+          Passionate about Reinforcement Learning, Music, and Photography
+        </p>
+        <div class="flex gap-6 justify-center">
+          <AnimatedButton text="View Projects" href="#projects" client:load class="w-40"/>
+          <AnimatedButton text="Contact Me" href="#contact" client:load class="w-40"/>
+        </div>
       </div>
     </section>
 
@@ -36,11 +74,14 @@ const skills = [
     <section class="my-32">
       <h2 class="text-4xl font-bold text-center mb-16">Skills & Technologies</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-      {skills.map(skill => (
-        <div class="glass p-6 rounded-2xl text-center hover:bg-white/20 transition-all duration-500 transform hover:-translate-y-2 h-20 flex items-center justify-center">
-        <span class="text-lg font-medium">{skill}</span>
-        </div>
-      ))}
+        {skills.map(skill => (
+          <button
+            class="glass p-6 rounded-2xl text-center hover:bg-white/20 transition-all duration-500 transform hover:-translate-y-2 h-20 flex items-center justify-center cursor-pointer"
+            data-skill={skill.name}
+          >
+            <span class="text-lg font-medium">{skill.name}</span>
+          </button>
+        ))}
       </div>
     </section>
 
@@ -48,50 +89,26 @@ const skills = [
     <section id="projects" class="my-32">
       <h2 class="text-4xl font-bold text-center mb-16">Featured Projects</h2>
       <div class="grid md:grid-cols-2 gap-10">
-        {/* Project Card: Squeaky and Greyhound */}
-        <div class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group">
-          <h3 class="text-2xl font-bold mb-4 text-gradient">Squeaky and Greyhound</h3>
-          <p class="text-gray-200 mb-6 leading-relaxed">
-            A 3D printed quadruped robot project featuring advanced inverse kinematics and a sleek mechanical design for enhanced mobility.
-          </p>
-          <AnimatedButton text="View Project" href="/squeaky-greyhound" client:load />
-        </div>
-
-        {/* Project Card: Senior Design: NAWCAD */}
-        <div class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group">
-          <h3 class="text-2xl font-bold mb-4 text-gradient">Senior Design: NAWCAD</h3>
-          <p class="text-gray-200 mb-6 leading-relaxed">
-            Integrated test stand system design connecting mechanical engineering with a drone’s flight stack using a custom Matlab GUI.
-          </p>
-          <AnimatedButton text="View Project" href="/nawcad" client:load />
-        </div>
-
-        {/* Project Card: Controls IOS Application */}
-        <div class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group">
-          <h3 class="text-2xl font-bold mb-4 text-gradient">Controls IOS Application</h3>
-          <p class="text-gray-200 mb-6 leading-relaxed">
-            A personal project experimenting with PID control, Apple's Swift language, and custom UI design for simulating control systems.
-          </p>
-          <AnimatedButton text="View Project" href="/controls-ios-application" client:load />
-        </div>
-
-        {/* Project Card: Neural Trader (AI Project) */}
-        <div class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group">
-          <h3 class="text-2xl font-bold mb-4 text-gradient">Neural Trader (AI Project)</h3>
-          <p class="text-gray-200 mb-6 leading-relaxed">
-            A neural network based financial advisor built with Matlab’s Neural Network Toolbox and Python for data scraping and analysis.
-          </p>
-          <AnimatedButton text="View Project" href="/neural-trader" client:load />
-        </div>
-
-        {/* Project Card: Portfolio Website */}
-        <div class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group">
-          <h3 class="text-2xl font-bold mb-4 text-gradient">This Website</h3>
-          <p class="text-gray-200 mb-6 leading-relaxed">
-            Yes, I made this website from scratch! No online website builders here. Check out the source code on GitHub.
-          </p>
-          <AnimatedButton text="View Project" href="/website" client:load />
-        </div>
+        {Object.entries(projects).map(([id, project]) => (
+          <div 
+            id={`project-${id}`}
+            class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group"
+            data-skills={project.skills.join(',')}
+          >
+            <h3 class="text-2xl font-bold mb-4 text-gradient">{project.title}</h3>
+            <p class="text-gray-200 mb-4 leading-relaxed">
+              {project.description}
+            </p>
+            <div class="flex flex-wrap gap-2 mb-6">
+              {project.skills.map(skill => (
+                <span class="text-sm px-3 py-1 rounded-full bg-white/10">
+                  {skill}
+                </span>
+              ))}
+            </div>
+            <AnimatedButton text="View Project" href={project.href} client:load />
+          </div>
+        ))}
       </div>
     </section>
 
@@ -103,7 +120,6 @@ const skills = [
         <FunnyFeed client:load />
       </div>
     </section>    
-        
 
     <!-- Contact Section -->
     <section id="contact" class="my-32">
@@ -121,3 +137,49 @@ const skills = [
     </section>
   </main>
 </Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const skillButtons = document.querySelectorAll('[data-skill]');
+    skillButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const skillName = button.getAttribute('data-skill');
+        highlightProjects(skillName);
+      });
+    });
+  });
+
+  function highlightProjects(skillName) {
+    // Remove any existing highlights
+    document.querySelectorAll('[id^="project-"]').forEach(project => {
+      project.classList.remove('highlight');
+      project.style.transform = 'scale(1)';
+    });
+    
+    // Find projects with matching skills
+    const projectElements = document.querySelectorAll(`[data-skills*="${skillName}"]`);
+    
+    if (projectElements.length > 0) {
+      // Scroll to the first matching project
+      projectElements[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Highlight matching projects
+      projectElements.forEach(project => {
+        project.classList.add('highlight');
+        project.style.transform = 'scale(1.05)';
+        
+        // Remove highlight after a few seconds
+        setTimeout(() => {
+          project.classList.remove('highlight');
+          project.style.transform = 'scale(1)';
+        }, 2000); // 2 seconds
+      });
+    }
+  }
+</script>
+<style>
+  .highlight {
+    box-shadow: 0 0 20px rgb(138, 142, 255, 0.3);
+    transition: all 0.5s ease;
+  }
+</style>
