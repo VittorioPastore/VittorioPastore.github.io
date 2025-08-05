@@ -13,10 +13,16 @@ const skills = [
   { name: 'Raisim', projects: ['squeaky-greyhound'] },
   { name: 'Controls Theory', projects: ['controls-ios-application', 'nawcad'] },
   { name: 'C++', projects: ['squeaky-greyhound'] },
-  { name: 'Web Development', projects: ['website'] }
+  { name: 'Embodied AI', projects: ['mailclient'] }
 ];
 
 const projects = {
+  'mailclient': {
+    title: 'Prysm Mail',
+    description: 'A new type of email client leveraging local LLMs for enhanced privacy and user experience.',
+    skills: ['Swift', 'CoreML', 'Embodied AI', 'Natural Language Processing'],
+    href: '/mailclient'
+  },
   'squeaky-greyhound': {
     title: 'Squeaky and Greyhound',
     description: 'A 3D printed quadruped robot project featuring advanced inverse kinematics and a sleek mechanical design for enhanced mobility.',
@@ -92,7 +98,7 @@ const projects = {
         {Object.entries(projects).map(([id, project]) => (
           <div 
             id={`project-${id}`}
-            class="glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group"
+            class={`glass p-8 rounded-3xl hover:bg-white/20 transition-all duration-500 group relative ${id === 'mailclient' ? 'ai-gradient-border' : ''}`}
             data-skills={project.skills.join(',')}
           >
             <h3 class="text-2xl font-bold mb-4 text-gradient">{project.title}</h3>
@@ -181,5 +187,54 @@ const projects = {
   .highlight {
     box-shadow: 0 0 20px rgb(138, 142, 255, 0.3);
     transition: all 0.5s ease;
+  }
+
+  /* AI Rainbow Gradient Border for MailClient */
+  .ai-gradient-border {
+    position: relative;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .ai-gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 28px; /* slightly larger than the rounded-3xl (24px) */
+    padding: 2px;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 0, 150, 0.4),   /* Pink */
+      rgba(0, 204, 255, 0.4),   /* Cyan */
+      rgba(128, 0, 255, 0.4),   /* Purple */
+      rgba(255, 204, 0, 0.4),   /* Yellow */
+      rgba(255, 0, 150, 0.4)    /* Pink again for smooth loop */
+    );
+    background-size: 300% 300%;
+    animation: aiGradientShift 8s ease-in-out infinite;
+    z-index: -1;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .ai-gradient-border:hover::before {
+    animation-duration: 4s;
+  }
+
+  @keyframes aiGradientShift {
+    0%, 100% {
+      background-position: 0% 0%;
+    }
+    25% {
+      background-position: 100% 0%;
+    }
+    50% {
+      background-position: 100% 100%;
+    }
+    75% {
+      background-position: 0% 100%;
+    }
   }
 </style>

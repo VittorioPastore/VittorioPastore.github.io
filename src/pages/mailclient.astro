@@ -1,0 +1,597 @@
+---
+// src/pages/mailclient-project.astro
+import Layout from '../layouts/Layout.astro';
+const title = "Prysm Mail";
+const publishDate = "August 4, 2025";
+---
+<Layout title={`${title} - Project`}>
+  <!-- Main content container -->
+  <main class="container mx-auto px-4 py-8">
+    <!-- Enhanced Header with badges and metadata -->
+    <header class="text-center mb-16 pt-16">
+      <div class="glass p-12 rounded-3xl max-w-5xl mx-auto border border-white/10">
+        <div class="flex justify-center gap-2 mb-6 flex-wrap">
+          <span class="glass px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-400/30">
+            🤖 Embodied AI
+          </span>
+          <span class="glass px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30">
+            🔒 Privacy-First
+          </span>
+          <span class="glass px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-400/30">
+            📱 Local LLMs
+          </span>
+        </div>
+        <h1 class="text-6xl md:text-7xl font-bold mb-6 text-gradient leading-tight">
+          {title}
+        </h1>
+        <p class="text-xl text-gray-300 mb-4 max-w-2xl mx-auto">
+          A revolutionary email client that brings on-device AI intelligence to your inbox while maintaining complete privacy
+        </p>
+        <div class="flex items-center justify-center gap-4 text-gray-400">
+          <time class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+            </svg>
+            {publishDate}
+          </time>
+          <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+          <span class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            15 min read
+          </span>
+        </div>
+      </div>
+    </header>
+
+      <!-- Main Content with improved structure -->
+      <div class="max-w-5xl mx-auto">
+        <!-- Introduction Card -->
+        <div class="glass p-8 rounded-3xl mb-12 border border-white/10">
+          <section class="prose max-w-none text-gray-200">
+          <div class="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <p class="text-lg leading-relaxed mb-6">
+                Email remains one of our most essential digital tools, yet the experience often feels stuck in the past. Prysm Mail represents a bold reimagining of what email interfaces could be when powered by on-device intelligence and thoughtful design.
+              </p>
+              <p class="text-gray-300 leading-relaxed">
+                Developed solely by myself (Vittorio), this Swift-based project combines local large language models with innovative UI concepts to transform how we interact with our inboxes.
+              </p>
+            </div>
+            <div class="relative">
+              <div class="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl blur-xl"></div>
+              <img src="/PrysmMail Icon.png" alt="Prysm Mail App Icon Image" class="relative rounded-2xl shadow-2xl w-full border border-white/10" />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Key Features Highlight -->
+      <div class="grid md:grid-cols-3 gap-6 mb-16">
+        <div class="glass p-6 rounded-2xl border border-purple-400/30 bg-gradient-to-br from-purple-500/10 to-transparent">
+          <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4">
+            🧠
+          </div>
+          <h3 class="text-xl font-bold mb-2">Local AI Processing</h3>
+          <p class="text-gray-300 text-sm">All AI features run entirely on-device using Apple's MLX framework</p>
+        </div>
+        <div class="glass p-6 rounded-2xl border border-green-400/30 bg-gradient-to-br from-green-500/10 to-transparent">
+          <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
+            🔒
+          </div>
+          <h3 class="text-xl font-bold mb-2">Complete Privacy</h3>
+          <p class="text-gray-300 text-sm">Your emails never leave your device. Zero cloud processing!</p>
+        </div>
+        <div class="glass p-6 rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500/10 to-transparent">
+          <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
+            ✨
+          </div>
+          <h3 class="text-xl font-bold mb-2">Liquid Glass UI</h3>
+          <p class="text-gray-300 text-sm">Innovative SwiftUI design with fluid, responsive interactions</p>
+        </div>
+      </div>
+
+      <!-- Genesis Section -->
+      <div class="glass p-10 rounded-3xl mb-12 border border-white/10">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+            🚀
+          </div>
+          <h2 class="text-4xl font-bold">Genesis: Why Build Another Mail Client?</h2>
+        </div>
+        <p class="text-lg leading-relaxed mb-6 text-gray-200">
+          The Prysm Mail project emerged from frustration with existing options that either compromise privacy by scanning emails in the cloud or offer clunky interfaces that haven't evolved with modern UI paradigms.
+        </p>
+        <div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-400/30 rounded-2xl p-6">
+          <p class="text-gray-200 leading-relaxed">
+            <strong class="text-blue-400">The goal was ambitious yet focused:</strong> create an email client that leverages local AI processing for intelligent features that legitimately improve user experience, while maintaining complete privacy and security.
+          </p>
+        </div>
+      </div>
+
+      <!-- Core Philosophy Section -->
+      <div class="glass p-10 rounded-3xl mb-12 border border-white/10">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+            💭
+          </div>
+          <h2 class="text-4xl font-bold">The Three-Action Philosophy</h2>
+        </div>
+        <p class="text-lg leading-relaxed mb-8 text-gray-200">
+          Every email that lands in your inbox represents a decision point. Most email clients overwhelm you with dozens of possible actions, but Prysm Mail's revolutionary approach recognizes a fundamental truth: <strong class="text-indigo-400">there are only three meaningful responses to any email</strong>. This elegant simplicity drives every pixel, every gesture, and every AI decision in the application.
+        </p>
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-red-500/10 to-transparent border border-red-400/30 rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div class="w-12 h-12 bg-red-500/30 rounded-xl flex items-center justify-center mb-4">
+            🗑️
+            </div>
+            <h3 class="font-bold text-red-400 mb-3 text-xl">Delete</h3>
+            <p class="text-gray-300 leading-relaxed">
+            Some emails don’t need to stick around. Prysm Mail makes it easy to delete them instantly—clear the clutter and move on.
+            </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-400/30 rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div class="w-12 h-12 bg-blue-500/30 rounded-xl flex items-center justify-center mb-4">
+            📦
+            </div>
+            <h3 class="font-bold text-blue-400 mb-3 text-xl">Archive</h3>
+            <p class="text-gray-300 leading-relaxed">
+            Not everything needs a reply. Archive emails you might need later without clogging your inbox.
+            </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-500/10 to-transparent border border-green-400/30 rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div class="w-12 h-12 bg-green-500/30 rounded-xl flex items-center justify-center mb-4">
+            ✅
+            </div>
+            <h3 class="font-bold text-green-400 mb-3 text-xl">Add to To‑Do</h3>
+            <p class="text-gray-300 leading-relaxed">
+            Turn actionable emails into tasks. Keep your inbox focused and your priorities clear.
+            </p>
+        </div>
+        </div>
+
+
+        <div class="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-2xl p-6 mb-8">
+          <h4 class="font-bold text-green-400 mb-3 text-lg">Breaking the Inbox Paradox</h4>
+          <p class="text-gray-200 leading-relaxed mb-4">
+            We've all been there: emails lingering in our inbox not because they're unread, but because they represent something we need to do. This creates the notorious "inbox anxiety," a constant reminder of unfinished business that transforms our communication hub into a stress-inducing todo list.
+          </p>
+          <p class="text-gray-200 leading-relaxed">
+            Prysm Mail's <strong class="text-green-400">Task View</strong> revolutionizes this dynamic. With a single gesture, emails that require action are elegantly transformed into structured tasks, complete with AI-suggested priorities and deadlines. Your inbox remains a place for communication, while your tasks get the dedicated attention they deserve.
+          </p>
+        </div>
+
+        <!-- Task View Screenshot -->
+        <div class="relative">
+          <div class="glass p-6 rounded-2xl border border-white/10">
+            <figure class="space-y-4">
+              <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl blur-xl"></div>
+                <img src="/todoView.png" alt="Prysm Mail Task View interface showing email-based tasks organized in a dedicated workspace" class="relative rounded-2xl shadow-2xl w-1/2 mx-auto border border-white/10" />
+              </div>
+              <figcaption class="text-center text-gray-400 italic">
+                The innovative Task View that transforms email-based todos into a proper task management system
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Interface Screenshot -->
+      <div class="relative mb-16">
+        <div class="glass p-8 rounded-3xl border border-white/10">
+          <figure class="space-y-4">
+            <div class="relative">
+              <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-2xl"></div>
+              <img src="/mailclient-overview.png" alt="Prysm Mail interface overview showing the main inbox view with the Liquid Glass UI effect" class="relative rounded-2xl shadow-2xl w-2/5 mx-auto border border-white/10" />
+            </div>
+            <figcaption class="text-center text-gray-400 italic">
+              The main interface showcasing the distinctive UI effect that has become Prysm Mail's signature design element
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+      <!-- Technical Architecture Section -->
+      <div class="space-y-12 mb-16">
+        <div class="glass p-10 rounded-3xl border border-white/10">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
+              ⚙️
+            </div>
+            <h2 class="text-4xl font-bold">Technical Architecture: Swift Meets On-Device Intelligence</h2>
+          </div>
+          <p class="text-lg leading-relaxed text-gray-200 mb-8">
+            At its core, Prysm Mail is built with a clean app architecture that separates email protocol handling, local cache management, and the UI layer. What makes this project stand out is its integration of Apple's MLX framework to run lightweight LLMs directly on device, enabling intelligent features without sending email content to external servers.
+          </p>
+
+          <!-- Architecture Diagram -->
+          <div class="relative mb-8">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur-xl"></div>
+            <img src="/mailclient-architecture.png" alt="Prysm Mail Architecture Diagram" class="relative rounded-2xl shadow-2xl w-full border border-white/10" />
+          </div>
+
+          <!-- Local LLM Integration Subsection -->
+          <div class="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-400/30 rounded-2xl p-8 mb-8">
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+              <span class="w-8 h-8 bg-blue-500/30 rounded-lg flex items-center justify-center text-sm">🧠</span>
+              Local LLM Integration
+            </h3>
+            <p class="text-gray-200 leading-relaxed mb-6">
+                The repository hosts a novel implementation of local language models, with the project evolving from initially using the open-weight 600MB Llama-2-7B-Chat quantized model to now transitioning to a custom, fine-tuned, efficient, and capable MLX-based model under 1GB. This allows Prysm Mail to run sophisticated language processing even on iPhones with limited RAM.
+            </p>
+
+            <!-- Feature Grid -->
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div class="flex items-start gap-3 p-4 bg-white/5 rounded-xl">
+                  <div class="w-8 h-8 bg-green-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    💬
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-green-400 mb-1">Smart Reply Generation</h4>
+                    <p class="text-sm text-gray-300">Contextual reply suggestions based on email content</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3 p-4 bg-white/5 rounded-xl">
+                  <div class="w-8 h-8 bg-purple-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    🔍
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-purple-400 mb-1">Semantic Search</h4>
+                    <p class="text-sm text-gray-300">Natural language search that understands intent rather than just keywords</p>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-4">
+                <div class="flex items-start gap-3 p-4 bg-white/5 rounded-xl">
+                  <div class="w-8 h-8 bg-orange-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    📝
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-orange-400 mb-1">Content Summarization</h4>
+                    <p class="text-sm text-gray-300">Automatic extraction of key points from lengthy emails</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3 p-4 bg-white/5 rounded-xl">
+                  <div class="w-8 h-8 bg-red-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    🎯
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-red-400 mb-1">Intent Recognition</h4>
+                    <p class="text-sm text-gray-300">Identifying action items, questions, and scheduling requests</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Semantic Search Demo -->
+          <div class="relative">
+            <div class="glass p-6 rounded-2xl border border-white/10">
+              <figure class="space-y-4">
+                <div class="relative flex justify-center">
+                  <div class="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur-xl"></div>
+                  <img src="/semantic-search-demo.png" alt="Semantic search interface showing natural language query results" class="relative rounded-xl shadow-xl border border-white/10 w-72 md:w-96" />
+                </div>
+                <figcaption class="text-center text-gray-400 italic">
+                  The semantic search feature understanding natural language queries like "emails about the conference next month"
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Powered Search Section -->
+        <div class="glass p-10 rounded-3xl border border-white/10">
+          <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+            <span class="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center text-sm">🔍</span>
+            AI Powered Search Using Custom Email Search Tooling
+          </h3>
+          <p class="text-gray-200 leading-relaxed mb-6">
+            One of the most innovative aspects of Prysm Mail is its sophisticated AI powered search. There are so many times where users struggle to find specific emails or information within their inboxes, and this is where Prysm Mail's AI capabilities shine.
+          </p>
+
+          <!-- Tiered Approach Visualization -->
+          <div class="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-400/30 rounded-2xl p-6">
+            <h4 class="font-bold text-yellow-400 mb-4">The AI powered search system uses a tiered approach:</h4>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                <span class="w-6 h-6 bg-yellow-500/30 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                <span class="text-gray-200">User asks the AI-powered search engine a question in natural language</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                <span class="w-6 h-6 bg-orange-500/30 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                <span class="text-gray-200">The LLM identifies keywords from user query. Then a classic search is performed using these keywords through all inboxes.</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                <span class="w-6 h-6 bg-red-500/30 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                <span class="text-gray-200">The top 15 emails based on relevance are retreived from the user's inbox and included in the LLM's context window</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                <span class="w-6 h-6 bg-purple-500/30 rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                <span class="text-gray-200">The LLM chat session is initiated using the emails as an extended context window. This allows the user to directly interface with these emails</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- User Interface Innovations Section -->
+      <div class="glass p-10 rounded-3xl border border-white/10 mb-12">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl flex items-center justify-center">
+            🎨
+          </div>
+          <h2 class="text-4xl font-bold">User Interface Innovations</h2>
+        </div>
+        <p class="text-lg leading-relaxed text-gray-200 mb-8">
+          The SwiftUI implementation showcases several advanced techniques that elevate the user experience:
+        </p>
+
+        <!-- UI Innovation Cards -->
+        <div class="space-y-8">
+        
+          <!-- Gestural Interface -->
+          <div class="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-2xl p-8">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="w-8 h-8 bg-blue-500/30 rounded-lg flex items-center justify-center text-sm">👆</span>
+              Gestural Interface
+            </h3>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <p class="text-gray-200 leading-relaxed mb-4">
+                  The commit history shows significant effort invested in creating intuitive gesture controls that extend beyond standard swipe actions.
+                </p>
+                <p class="text-gray-300 leading-relaxed">
+                  The "momentum actions" feature allows users to continue a swipe gesture to trigger progressively more powerful actions - from archiving to batch processing similar emails.
+                </p>
+              </div>
+              <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl blur-xl"></div>
+                <img src="/swipeGestures.gif" alt="Animation showing the gesture control system for email management" class="relative rounded-xl shadow-xl w-full border border-white/10" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Contextual UI Adaptation -->
+          <div class="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-2xl p-8">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+              <span class="w-8 h-8 bg-green-500/30 rounded-lg flex items-center justify-center text-sm">🧠</span>
+              Contextual UI Adaptation
+            </h3>
+            <p class="text-gray-200 leading-relaxed">
+              Perhaps the most subtle yet powerful UI innovation is how the interface adapts to email content and user behavior patterns. The repository shows implementation of a behavioral analysis module that tracks how users interact with different types of emails and gradually customizes the interface accordingly.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technical Challenges Section -->
+      <div class="space-y-8 mb-16">
+        <!-- IMAP/SMTP Implementation -->
+        <div class="glass p-10 rounded-3xl border border-white/10">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center">
+              📧
+            </div>
+            <h2 class="text-4xl font-bold">IMAP/SMTP Implementation Challenges</h2>
+          </div>
+          <p class="text-lg leading-relaxed text-gray-200 mb-8">
+            Building a robust email client means dealing with decades-old protocols and their quirks. The commit history reveals several interesting challenges and solutions:
+          </p>
+
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="bg-gradient-to-br from-red-500/10 to-transparent border border-red-400/30 rounded-2xl p-6">
+              <h4 class="font-bold text-red-400 mb-3">Asynchronous Protocol Handling</h4>
+              <p class="text-gray-300 text-sm leading-relaxed">
+                The initial implementation struggled with responsiveness during IMAP operations. This was solved through a custom asynchronous wrapper around the core protocol handlers.
+              </p>
+            </div>
+            <div class="bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-400/30 rounded-2xl p-6">
+              <h4 class="font-bold text-orange-400 mb-3">MIME Parsing Intelligence</h4>
+              <p class="text-gray-300 text-sm leading-relaxed">
+                Prysm Mail implemented a smart MIME parser that uses the local LLM to make intelligent decisions about displaying complex multipart messages.
+              </p>
+            </div>
+            <div class="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-400/30 rounded-2xl p-6">
+              <h4 class="font-bold text-purple-400 mb-3">Background Sync Optimization</h4>
+              <p class="text-gray-300 text-sm leading-relaxed">
+                A sophisticated background sync system that adapts polling frequency based on user behavior patterns and message importance.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance & Privacy Section -->
+        <div class="glass p-10 rounded-3xl border border-white/10">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+              ⚡
+            </div>
+            <h2 class="text-4xl font-bold">Performance & Privacy Solutions</h2>
+          </div>
+
+          <div class="space-y-8">
+            <!-- Memory Management -->
+            <div class="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-400/30 rounded-2xl p-8">
+              <h3 class="text-2xl font-bold mb-4 text-emerald-400">Memory Management for LLMs</h3>
+              <p class="text-gray-200 leading-relaxed mb-4">
+                Running language models locally presents significant memory constraints. The repository shows a clever implementation of model swapping and context management that allows Prysm Mail to use different-sized models based on the device's capabilities and the specific task at hand.
+              </p>
+              <div class="bg-white/5 rounded-xl p-4">
+                <p class="text-gray-300 text-sm leading-relaxed">
+                  For older devices, the code implements a "progressive intelligence" approach where simpler tasks use rule-based systems while more complex tasks leverage the LLM only when needed.
+                </p>
+              </div>
+            </div>
+
+            <!-- Battery Impact -->
+            <div class="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-400/30 rounded-2xl p-8">
+              <h3 class="text-2xl font-bold mb-4 text-yellow-400">Battery Impact Mitigation</h3>
+              <p class="text-gray-200 leading-relaxed mb-4">
+                AI processing can be power-hungry. The commit history shows several iterations of optimization focused on minimizing battery impact:
+              </p>
+              <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-white/5 rounded-xl p-4">
+                  <h4 class="font-bold text-yellow-300 mb-2">Batched Inference</h4>
+                  <p class="text-gray-300 text-xs">Process multiple emails in a single model pass</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-4">
+                  <h4 class="font-bold text-orange-300 mb-2">Smart Scheduling</h4>
+                  <p class="text-gray-300 text-xs">LLM tasks during device charging periods</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-4">
+                  <h4 class="font-bold text-red-300 mb-2">Intelligent Caching</h4>
+                  <p class="text-gray-300 text-xs">Cache common inferences to avoid redundant processing</p>
+                </div>
+              </div>
+            </div>
+
+        </div>
+      </div>
+      <!-- Future Directions Section -->
+      <div class="glass p-10 rounded-3xl border border-white/10 mb-12">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center">
+            🚀
+          </div>
+          <h2 class="text-4xl font-bold">Future Directions</h2>
+        </div>
+        <p class="text-lg leading-relaxed text-gray-200 mb-8">
+          The repository's latest developments point to several exciting future directions:
+        </p>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="bg-gradient-to-br from-cyan-500/10 to-transparent border border-cyan-400/30 rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div class="w-10 h-10 bg-cyan-500/30 rounded-xl flex items-center justify-center mb-4">
+              🔄
+            </div>
+            <h3 class="font-bold text-cyan-400 mb-3">Background Sync</h3>
+            <p class="text-gray-300 text-sm leading-relaxed">
+              Privacy-preserving synchronization to the IMAP server even when the app is not in the foreground
+            </p>
+          </div>
+          <div class="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-400/30 rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div class="w-10 h-10 bg-purple-500/30 rounded-xl flex items-center justify-center mb-4">
+              🎯
+            </div>
+            <h3 class="font-bold text-purple-400 mb-3">Custom Model Fine-Tuning</h3>
+            <p class="text-gray-300 text-sm leading-relaxed">
+              Allowing users to fine-tune the local model on their communication style
+            </p>
+          </div>
+          <div class="bg-gradient-to-br from-green-500/10 to-transparent border border-green-400/30 rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div class="w-10 h-10 bg-green-500/30 rounded-xl flex items-center justify-center mb-4">
+              📅
+            </div>
+            <h3 class="font-bold text-green-400 mb-3">Expanded Protocol Support</h3>
+            <p class="text-gray-300 text-sm leading-relaxed">
+              Adding Calendar integration and contacts management to create a full productivity suite
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conclusion Section -->
+      <div class="glass p-12 rounded-3xl border border-white/10 mb-12">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            ✨
+          </div>
+          <h2 class="text-4xl font-bold mb-6">Reimagining Email for the AI Era</h2>
+        </div>
+        
+        <div class="max-w-4xl mx-auto space-y-6 text-lg leading-relaxed text-gray-200">
+          <p>
+            Prysm Mail represents a significant step forward in how we might interact with email in the age of on-device intelligence. By bringing sophisticated language models directly to the inbox while maintaining a strict commitment to privacy, the project demonstrates how AI can enhance rather than compromise our digital communication tools.
+          </p>
+          
+          <p>
+            The elegant SwiftUI implementation and thoughtful design choices show that technical sophistication and user experience can evolve hand-in-hand. As local language models continue to improve in efficiency and capability, projects like Prysm Mail point the way toward a future where our software becomes not just more intelligent, but more respectful of both our attention and our privacy.
+          </p>
+        </div>
+      </div>
+
+      <!-- Call to Action -->
+      <div class="relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl"></div>
+        <div class="relative glass p-12 rounded-3xl border border-white/20 text-center">
+          <h3 class="text-3xl font-bold mb-6 text-gradient">Try Prysm Mail</h3>
+          <p class="text-lg text-gray-200 mb-8 max-w-2xl mx-auto">
+            Prysm Mail will be available as an open-source project. Explore the innovative approach to email management powered by local AI.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="https://github.com/VittorioPastore/MailClient" 
+               class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl font-bold text-white hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-blue-500/25 js-release-btn">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            View on GitHub
+          </a>
+          <a href="#" 
+             class="inline-flex items-center gap-3 px-8 py-4 glass border border-white/20 rounded-2xl font-bold text-white hover:scale-105 transition-all duration-300 js-release-btn">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Download Release
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* Enhanced animations and effects */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .prose h2, .prose h3, .prose h4 {
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .glass:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = document.querySelectorAll('.js-release-btn');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert("I'm glad you're excited about this release. I am still working on a public release.");
+      });
+    });
+  });
+</script>
