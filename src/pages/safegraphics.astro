@@ -1,0 +1,386 @@
+---
+// src/pages/safegraphics.astro — Minimalistic safe graphics version of the homepage
+const skills = [
+  { name: 'Python', projects: ['neural-trader', 'squeaky-greyhound'] },
+  { name: 'PyTorch', projects: ['neural-trader'] },
+  { name: 'TensorFlow', projects: ['neural-trader'] },
+  { name: 'ROS', projects: ['squeaky-greyhound'] },
+  { name: 'Raisim', projects: ['squeaky-greyhound'] },
+  { name: 'Controls Theory', projects: ['controls-ios-application', 'nawcad'] },
+  { name: 'C++', projects: ['squeaky-greyhound'] },
+  { name: 'Embodied AI', projects: ['mailclient'] }
+];
+
+const projects = {
+  'mailclient': {
+    title: 'Prysm Mail',
+    description: 'A new type of email client leveraging local LLMs for enhanced privacy and user experience.',
+    skills: ['Swift', 'CoreML', 'Embodied AI', 'Natural Language Processing'],
+    href: '/mailclient'
+  },
+  'squeaky-greyhound': {
+    title: 'Squeaky and Greyhound',
+    description: 'A 3D printed quadruped robot project featuring advanced inverse kinematics and a sleek mechanical design for enhanced mobility.',
+    skills: ['Python', 'ROS', 'Raisim', 'C++'],
+    href: '/squeaky-greyhound'
+  },
+  'nawcad': {
+    title: 'Senior Design: NAWCAD',
+    description: 'Integrated test stand system design connecting mechanical engineering with a drone\'s flight stack using a custom Matlab GUI.',
+    skills: ['Controls Theory', 'Matlab'],
+    href: '/nawcad'
+  },
+  'controls-ios-application': {
+    title: 'Controls IOS Application',
+    description: 'A personal project experimenting with PID control, Apple\'s Swift language, and custom UI design for simulating control systems.',
+    skills: ['Controls Theory', 'Swift'],
+    href: '/controls-ios-application'
+  },
+  'neural-trader': {
+    title: 'Neural Trader (AI Project)',
+    description: 'A neural network based financial advisor built with Matlab\'s Neural Network Toolbox and Python for data scraping and analysis.',
+    skills: ['Python', 'PyTorch', 'TensorFlow'],
+    href: '/neural-trader'
+  },
+  'website': {
+    title: 'This Website',
+    description: 'Yes, I made this website from scratch! No online website builders here. Check out the source code on GitHub.',
+    skills: ['Web Development', 'JavaScript', 'Astro'],
+    href: '/website'
+  }
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Vittorio Pastore - Portfolio (Safe Graphics)</title>
+    <meta name="description" content="Vittorio Pastore's personal website — safe graphics mode" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <span class="logo">vittorio@portfolio:~$</span>
+        <div class="nav-links">
+          <a href="#skills">Skills</a>
+          <a href="#projects">Projects</a>
+          <a href="#contact">Contact</a>
+          <a href="/" class="switch-mode">[ Switch to full graphics ]</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Hero -->
+      <section class="hero">
+        <pre class="ascii-box">
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│   Hi, I'm Vittorio                              │
+│                                                 │
+│   Robotics Researcher at Virginia Tech.         │
+│   Passionate about Reinforcement Learning,      │
+│   Music, and Photography.                       │
+│                                                 │
+└─────────────────────────────────────────────────┘</pre>
+        <div class="hero-links">
+          <a href="#projects" class="btn">[View Projects]</a>
+          <a href="#contact" class="btn">[Contact Me]</a>
+        </div>
+        <p class="safe-notice">⚠ Running in safe graphics mode — nomodeset</p>
+      </section>
+
+      <!-- Skills -->
+      <section id="skills">
+        <h2>## Skills & Technologies</h2>
+        <div class="skill-grid">
+          {skills.map(skill => (
+            <span class="skill-tag" data-skill={skill.name}>[{skill.name}]</span>
+          ))}
+        </div>
+      </section>
+
+      <!-- Projects -->
+      <section id="projects">
+        <h2>## Featured Projects</h2>
+        <div class="project-list">
+          {Object.entries(projects).map(([id, project]) => (
+            <div class="project-card" id={`project-${id}`} data-skills={project.skills.join(',')}>
+              <h3>
+                <a href={project.href}>→ {project.title}</a>
+              </h3>
+              <p class="project-desc">{project.description}</p>
+              <div class="project-skills">
+                {project.skills.map(skill => (
+                  <span class="tag">{skill}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section id="contact">
+        <h2>## Get In Touch</h2>
+        <div class="contact-links">
+          <a href="https://www.linkedin.com/in/vittorio-pastore-6474691b1/" class="btn">[LinkedIn]</a>
+          <a href="https://github.com/VittorioPastore" class="btn">[GitHub]</a>
+          <a href="mailto:vitto@vt.edu" class="btn">[Email]</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Vittorio Pastore — safe graphics mode | <a href="/">Switch to full graphics</a></p>
+    </footer>
+
+    <style>
+      /* Reset & base */
+      *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        background: #0a0a0a;
+        color: #d4d4d4;
+        font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;
+        font-size: 15px;
+        line-height: 1.6;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        /* max-width: 1200px; */
+        margin: 0 auto;
+        padding: 1rem 3rem;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      a {
+        color: #6aafff;
+        text-decoration: none;
+      }
+      a:hover {
+        color: #fff;
+        text-decoration: underline;
+      }
+
+      /* Nav */
+      header {
+        border-bottom: 1px solid #333;
+        padding-bottom: 0.75rem;
+        margin-bottom: 2rem;
+      }
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+      .logo {
+        color: #00cc00;
+        font-weight: bold;
+        font-size: 1rem;
+      }
+      .nav-links {
+        display: flex;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+      }
+      .nav-links a {
+        color: #888;
+        font-size: 0.9rem;
+      }
+      .nav-links a:hover {
+        color: #fff;
+      }
+      .switch-mode {
+        color: #e8a735 !important;
+      }
+
+      /* Hero */
+      .hero {
+        margin-bottom: 3rem;
+        text-align: center;
+      }
+      .ascii-box {
+        color: #d4d4d4;
+        font-size: clamp(10px, 2.2vw, 15px);
+        line-height: 1.4;
+        display: inline-block;
+        text-align: left;
+        margin-bottom: 1.5rem;
+      }
+      .hero-links {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        margin-bottom: 1rem;
+      }
+      .safe-notice {
+        color: #e8a735;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+      }
+
+      /* Buttons */
+      .btn {
+        color: #6aafff;
+        border: 1px solid #333;
+        padding: 0.4rem 0.85rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+        background: transparent;
+        display: inline-block;
+      }
+      .btn:hover {
+        background: #1a1a2e;
+        color: #fff;
+        border-color: #555;
+        text-decoration: none;
+      }
+
+      /* Section headings */
+      section {
+        margin-bottom: 3rem;
+      }
+      h2 {
+        color: #00cc00;
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px dashed #333;
+        padding-bottom: 0.4rem;
+      }
+
+      /* Skills */
+      .skill-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .skill-tag {
+        color: #b0b0b0;
+        border: 1px solid #2a2a2a;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+      .skill-tag:hover {
+        color: #fff;
+        border-color: #555;
+        background: #1a1a2e;
+      }
+
+      /* Projects */
+      .project-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      .project-card {
+        border: 1px solid #222;
+        padding: 1rem 1.25rem;
+        transition: border-color 0.2s;
+      }
+      .project-card:hover {
+        border-color: #444;
+      }
+      .project-card.highlight {
+        border-color: #6aafff;
+      }
+      .project-card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.4rem;
+      }
+      .project-card h3 a {
+        color: #6aafff;
+      }
+      .project-desc {
+        color: #999;
+        font-size: 0.85rem;
+        margin-bottom: 0.6rem;
+      }
+      .project-skills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+      .tag {
+        color: #777;
+        font-size: 0.75rem;
+        background: #161616;
+        padding: 0.15rem 0.5rem;
+        border: 1px solid #1f1f1f;
+      }
+
+      /* Contact */
+      .contact-links {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      /* Footer */
+      footer {
+        margin-top: auto;
+        padding-top: 2rem;
+        border-top: 1px solid #222;
+        text-align: center;
+        color: #555;
+        font-size: 0.8rem;
+      }
+      footer a {
+        color: #e8a735;
+      }
+
+      /* Mobile */
+      @media (max-width: 600px) {
+        .ascii-box {
+          font-size: 9px;
+        }
+        nav {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+
+    <script>
+      // Skill-click highlight projects (same logic, adapted for this page)
+      document.querySelectorAll('.skill-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          const skillName = tag.getAttribute('data-skill');
+          document.querySelectorAll('.project-card').forEach(card => {
+            card.classList.remove('highlight');
+          });
+          const matches = document.querySelectorAll(`[data-skills*="${skillName}"]`);
+          if (matches.length > 0) {
+            matches[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            matches.forEach(card => {
+              card.classList.add('highlight');
+              setTimeout(() => card.classList.remove('highlight'), 2500);
+            });
+          }
+        });
+      });
+
+      // Clear safe graphics session flag when switching back to full mode
+      document.querySelectorAll('a[href="/"]').forEach(link => {
+        link.addEventListener('click', () => {
+          sessionStorage.removeItem('safeGraphics');
+          sessionStorage.removeItem('hasBooted');
+        });
+      });
+    </script>
+  </body>
+</html>
