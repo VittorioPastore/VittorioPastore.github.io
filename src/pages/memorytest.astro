@@ -86,7 +86,7 @@
         margin: 0; padding: 0; box-sizing: border-box;
       }
       html {
-        background: #000d1a;
+        background: #000000;
         color: #c0c0c0;
         font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;
         font-size: 14px;
@@ -115,16 +115,17 @@
         align-items: center;
         flex-wrap: wrap;
         gap: 0.5rem;
-        background: #0044aa;
+        background: #111111;
         color: #fff;
         padding: 0.4rem 0.75rem;
         font-weight: bold;
         font-size: 0.85rem;
+        border-bottom: 2px solid #333;
       }
       .header-left, .header-right {
         display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
       }
-      .sep { color: #6699cc; }
+      .sep { color: #555; }
       .brand { color: #ffcc00; }
 
       /* Stats bar */
@@ -132,21 +133,21 @@
         display: flex;
         flex-wrap: wrap;
         gap: 0.75rem 1.5rem;
-        background: #001833;
-        border: 1px solid #003366;
+        background: #000;
+        border: 1px solid #222;
         padding: 0.4rem 0.75rem;
         font-size: 0.8rem;
         margin-bottom: 0.5rem;
       }
       .stat { display: flex; align-items: center; gap: 0.35rem; }
-      .stat-label { color: #5599ff; }
+      .stat-label { color: #888; }
       .stat-val { color: #ffcc00; }
       .progress-stat { flex: 1; min-width: 180px; }
       .progress-bar {
         width: 100px;
         height: 10px;
-        background: #001122;
-        border: 1px solid #003366;
+        background: #000;
+        border: 1px solid #333;
         overflow: hidden;
       }
       .progress-fill {
@@ -164,21 +165,22 @@
         margin-bottom: 0.75rem;
         font-size: 0.85rem;
       }
-      .diff-label { color: #5599ff; }
+      .diff-label { color: #888; }
       .diff-btn {
-        background: #001833;
+        background: #111;
         color: #c0c0c0;
-        border: 1px solid #003366;
+        border: 1px solid #333;
         padding: 0.25rem 0.65rem;
         font-family: inherit;
         font-size: 0.8rem;
         cursor: pointer;
       }
-      .diff-btn:hover { background: #002244; color: #fff; }
+      .diff-btn:hover { background: #222; color: #fff; }
       .diff-btn.active {
-        background: #0044aa;
-        color: #ffcc00;
-        border-color: #5599ff;
+        background: #ffcc00;
+        color: #000;
+        border-color: #ffcc00;
+        font-weight: bold;
       }
 
       /* Game Grid */
@@ -198,8 +200,8 @@
       /* Cards */
       .card {
         aspect-ratio: 1;
-        border: 1px solid #003366;
-        background: #001833;
+        border: 1px solid #333;
+        background: #111;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -212,13 +214,13 @@
       }
       .card::before {
         content: '?';
-        color: #335577;
+        color: #444;
         font-size: clamp(1.2rem, 3.5vw, 1.8rem);
         font-weight: bold;
       }
       .card.flipped, .card.matched {
-        background: #002244;
-        border-color: #5599ff;
+        background: #1a1a1a;
+        border-color: #00cc00;
       }
       .card.flipped::before, .card.matched::before {
         display: none;
@@ -232,18 +234,18 @@
       }
       .card.matched {
         border-color: #00cc00;
-        background: #002211;
+        background: #001100;
       }
       .card.matched .card-face {
         opacity: 0.7;
       }
       .card.wrong {
         border-color: #cc3333;
-        background: #220011;
+        background: #110000;
       }
       .card:hover:not(.flipped):not(.matched) {
-        border-color: #336699;
-        background: #002244;
+        border-color: #666;
+        background: #111;
       }
 
       /* Win screen */
@@ -298,13 +300,13 @@
         gap: 0.75rem;
         flex-wrap: wrap;
         justify-content: center;
-        color: #335577;
+        color: #555;
         font-size: 0.75rem;
         padding: 0.75rem 0;
-        border-top: 1px solid #002244;
+        border-top: 1px solid #222;
         margin-top: auto;
       }
-      footer a { color: #5599ff; }
+      footer a { color: #888; }
 
       @media (max-width: 480px) {
         #app { padding: 0.25rem 0.5rem; }
