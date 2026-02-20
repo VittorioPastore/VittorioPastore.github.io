@@ -30,6 +30,15 @@ const { title } = Astro.props;
     <!-- Boot sequence overlay (GRUB + Linux boot) -->
     <BootSequence />
     
+    <!-- Shutdown Overlay -->
+    <div id="shutdown-overlay" class="fixed inset-0 bg-black z-[99999] flex-col items-center justify-center p-4 md:p-8 font-mono hidden opacity-0 transition-opacity duration-500" style="font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;">
+      <pre id="shutdown-log" class="whitespace-pre font-bold text-center m-0 p-0 leading-tight text-xs md:text-sm"></pre>
+      <div id="shutdown-text" class="mt-8 text-center text-gray-400 text-sm md:text-base h-12 flex flex-col items-center justify-center">
+        <div id="shutdown-status" class="font-bold text-white mb-2"></div>
+        <div id="shutdown-subtext" class="text-xs opacity-70"></div>
+      </div>
+    </div>
+
     <!-- Fixed background container for smooth transitioning -->
     <div class="fixed-background"></div>
     <div class="stars"></div>
@@ -129,7 +138,92 @@ const { title } = Astro.props;
 
       // Reboot handling
       const rebootButton = document.getElementById('reboot-button');
-      rebootButton?.addEventListener('click', () => {
+      rebootButton?.addEventListener('click', async () => {
+        const shutdownOverlay = document.getElementById('shutdown-overlay');
+        const shutdownLog = document.getElementById('shutdown-log');
+        const shutdownStatus = document.getElementById('shutdown-status');
+        const shutdownSubtext = document.getElementById('shutdown-subtext');
+        
+        if (shutdownOverlay && shutdownLog && shutdownStatus && shutdownSubtext) {
+          // Show overlay
+          shutdownOverlay.classList.remove('hidden');
+          shutdownOverlay.classList.add('flex');
+          
+          // Trigger fade in
+          requestAnimationFrame(() => {
+            shutdownOverlay.classList.remove('opacity-0');
+            shutdownOverlay.classList.add('opacity-100');
+          });
+
+          document.documentElement.style.overflow = 'hidden';
+          document.body.style.overflow = 'hidden';
+          
+          // Wait for fade in to complete
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          const asciiArt = [
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+            "⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣶⡆⠀⢸⣿⣿⡇⠀⢰⣶⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀",
+            "⠀⠀⠀⠀⠀⠀⣤⣾⣿⣿⡿⠇⠀⢸⣿⣿⡇⠀⠸⢿⣿⣿⣷⣤⠀⠀⠀⠀⠀⠀",
+            "⠀⠀⠀⠀⣠⣾⣿⣿⠟⠁⠀⠀⠀⢸⣿⣿⡇⠀⠀⠀⠈⠻⣿⣿⣷⣄⠀⠀⠀⠀",
+            "⠀⠀⠀⢠⣿⣿⡟⠁⠀⠀⠀⠀⠀⢸⣿⣿⡇⠀⠀⠀⠀⠀⠈⢻⣿⣿⡄⠀⠀⠀",
+            "⠀⠀⠀⣿⣿⡟⠀⠀⠀⠀⠀⠀⠀⠸⠿⠿⠇⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⠀⠀⠀",
+            "⠀⠀⢸⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⡇⠀⠀",
+            "⠀⠀⢸⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⡇⠀⠀",
+            "⠀⠀⠘⣿⣿⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⣿⠃⠀⠀",
+            "⠀⠀⠀⢹⣿⣿⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⣿⡏⠀⠀⠀",
+            "⠀⠀⠀⠀⢻⣿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⡟⠀⠀⠀⠀",
+            "⠀⠀⠀⠀⠀⠙⢿⣿⣿⣶⣤⣀⠀⠀⠀⠀⠀⠀⣀⣤⣶⣿⣿⡿⠋⠀⠀⠀⠀⠀",
+            "⠀⠀⠀⠀⠀⠀⠀⠈⠛⢿⣿⣿⣿⣿⣶⣶⣿⣿⣿⣿⡿⠛⠁⠀⠀⠀⠀⠀⠀⠀",
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠛⠛⠛⠛⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+          ];
+
+          const colors = new Array(asciiArt.length).fill('#4b5563'); // grey
+
+          const render = () => {
+            shutdownLog.innerHTML = asciiArt.map((row, i) => 
+              `<span style="color: ${colors[i]}; text-shadow: 0 0 10px ${colors[i]}80; transition: color 0.1s ease-in-out; display: block;">${row}</span>`
+            ).join('');
+          };
+
+          shutdownStatus.innerText = "Initiating Reboot Sequence...";
+          shutdownSubtext.innerText = "Stopping services...";
+
+          render();
+          await new Promise(resolve => setTimeout(resolve, 600));
+
+          shutdownStatus.innerText = "Powering Down...";
+          shutdownSubtext.innerText = "Unmounting filesystems...";
+
+          // Fade to red top to bottom (total ~400ms)
+          for (let i = 0; i < asciiArt.length; i++) {
+            colors[i] = '#ef4444'; // red
+            render();
+            await new Promise(resolve => setTimeout(resolve, 56));
+          }
+
+          shutdownStatus.innerText = "System Halted.";
+          shutdownSubtext.innerText = "Preparing for restart...";
+
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          shutdownStatus.innerText = "Rebooting...";
+          shutdownSubtext.innerText = "Starting kernel...";
+
+          // Turn green bottom to top (total ~400ms)
+          for (let i = asciiArt.length - 1; i >= 0; i--) {
+            colors[i] = '#22c55e'; // green
+            render();
+            await new Promise(resolve => setTimeout(resolve, 26));
+          }
+
+          shutdownStatus.innerText = "System Online.";
+          shutdownSubtext.innerText = "Welcome back.";
+
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
         sessionStorage.removeItem('hasBooted');
         sessionStorage.removeItem('safeGraphics');
         window.location.href = '/';
