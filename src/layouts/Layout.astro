@@ -34,8 +34,8 @@ const { title } = Astro.props;
     <div id="shutdown-overlay" class="fixed inset-0 bg-black z-[99999] flex-col items-center justify-center p-4 md:p-8 font-mono hidden opacity-0 transition-opacity duration-500" style="font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;">
       <pre id="shutdown-log" class="whitespace-pre font-bold text-center m-0 p-0 leading-tight text-xs md:text-sm"></pre>
       <div id="shutdown-text" class="mt-8 text-center text-gray-400 text-sm md:text-base h-12 flex flex-col items-center justify-center">
-        <div id="shutdown-status" class="font-bold text-white mb-2"></div>
-        <div id="shutdown-subtext" class="text-xs opacity-70"></div>
+        <div id="shutdown-status" class="font-bold text-white mb-2 !text-white"></div>
+        <div id="shutdown-subtext" class="text-xs opacity-70 !text-gray-400"></div>
       </div>
     </div>
 
@@ -325,10 +325,10 @@ const { title } = Astro.props;
 
   /* Glass/translucent styling */
   .glass {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 
   .light-mode .glass {
@@ -477,7 +477,7 @@ const { title } = Astro.props;
   html.light-mode p,
   html.light-mode a,
   html.light-mode li,
-  html.light-mode span:not(.boot-ok):not(.boot-white):not(.boot-fail):not(.boot-blue) {
+  html.light-mode span:not(.boot-ok):not(.boot-white):not(.boot-fail):not(.boot-blue):not(#shutdown-log span) {
     color: black !important;
   }
 
