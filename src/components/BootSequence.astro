@@ -22,10 +22,14 @@
       </div>
     </div>
     <div class="grub-footer">
-      <p>Use the ↑ and ↓ keys to select which entry is highlighted.</p>
-      <p>Press enter to boot the selected OS, 'e' to edit the commands</p>
-      <p>before booting, or 'c' for a command-line.</p>
-      <p class="grub-touch-hint">Tap an entry to select it, then tap Boot ↵ to start.</p>
+      <div class="grub-desktop-instructions">
+        <p>Use the ↑ and ↓ keys to select which entry is highlighted.</p>
+        <p>Press enter to boot the selected OS.</p>
+      </div>
+      <div class="grub-mobile-instructions">
+        <p>Tap an entry to select it, then tap the Boot button below.</p>
+        <p>Swipe up or down to navigate the menu.</p>
+      </div>
     </div>
     <button id="grub-boot-btn" class="grub-boot-btn">Boot ↵</button>
     <div class="grub-timer" id="grub-timer">
@@ -141,10 +145,10 @@
 
   .grub-footer p {
     margin: 0;
-    color: #aaa !important;
+    color: #e8a735 !important;
   }
 
-  .grub-touch-hint {
+  .grub-mobile-instructions {
     display: none;
   }
 
@@ -167,9 +171,11 @@
   }
 
   @media (hover: none) and (pointer: coarse) {
-    .grub-touch-hint {
+    .grub-desktop-instructions {
+      display: none;
+    }
+    .grub-mobile-instructions {
       display: block;
-      color: #e8a735 !important;
       margin-top: 0.5rem;
     }
     .grub-boot-btn {
