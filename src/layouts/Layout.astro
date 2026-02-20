@@ -1,6 +1,7 @@
 ---
 // Astro front matter remains the same
 import '@fontsource/poppins';
+import BootSequence from '../components/BootSequence.astro';
 
 interface Props {
   title: string;
@@ -26,6 +27,9 @@ const { title } = Astro.props;
   </head>
 
   <body>
+    <!-- Boot sequence overlay (GRUB + Linux boot) -->
+    <BootSequence />
+    
     <!-- Fixed background container for smooth transitioning -->
     <div class="fixed-background"></div>
     <div class="stars"></div>
@@ -359,7 +363,7 @@ const { title } = Astro.props;
   html.light-mode p,
   html.light-mode a,
   html.light-mode li,
-  html.light-mode span {
+  html.light-mode span:not(.boot-ok):not(.boot-white):not(.boot-fail):not(.boot-blue) {
     color: black !important;
   }
 

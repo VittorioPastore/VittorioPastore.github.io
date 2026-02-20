@@ -1,0 +1,471 @@
+---
+// BootSequence.astro — GRUB boot menu + Linux boot screen overlay
+---
+
+<!-- GRUB Boot Menu Overlay -->
+<div id="grub-overlay" class="boot-overlay">
+  <div id="grub-screen" class="grub-screen">
+    <div class="grub-header">
+      GNU GRUB  version 2.12
+    </div>
+    <div class="grub-menu-box">
+      <div class="grub-menu-inner">
+        <div class="grub-item grub-selected" data-index="0">
+          *Vittorio's Portfolio (kernel 6.8.0-generic)
+        </div>
+        <div class="grub-item" data-index="1">
+          Vittorio's Portfolio (kernel 6.8.0-generic, recovery mode)
+        </div>
+        <div class="grub-item" data-index="2">
+          Advanced options for Vittorio's Portfolio
+        </div>
+        <div class="grub-item" data-index="3">
+          Memory test (memtest86+x64.efi)
+        </div>
+        <div class="grub-item" data-index="4">
+          Memory test (memtest86+x64.efi, serial console)
+        </div>
+      </div>
+    </div>
+    <div class="grub-footer">
+      <p>Use the ↑ and ↓ keys to select which entry is highlighted.</p>
+      <p>Press enter to boot the selected OS, 'e' to edit the commands</p>
+      <p>before booting, or 'c' for a command-line.</p>
+    </div>
+    <div class="grub-timer" id="grub-timer">
+      The highlighted entry will be executed automatically in <span id="grub-countdown">10</span>s.
+    </div>
+  </div>
+</div>
+
+<!-- Linux Boot Screen Overlay -->
+<div id="boot-overlay" class="boot-overlay" style="display: none;">
+  <div id="boot-screen" class="boot-screen">
+    <pre id="boot-log"></pre>
+    <div id="boot-cursor" class="boot-cursor">█</div>
+  </div>
+</div>
+
+<style is:global>
+  /* Hide scrollbar and prevent scroll during boot */
+  html.booting {
+    overflow: hidden !important;
+  }
+  html.booting body {
+    overflow: hidden !important;
+  }
+
+  /* Boot log colors — must be global since these spans are inserted dynamically */
+  .boot-ok {
+    color: #00cc00 !important;
+    font-weight: bold;
+  }
+  .boot-fail {
+    color: #e74c3c !important;
+  }
+  .boot-white {
+    color: #fff !important;
+  }
+  .boot-blue {
+    color: #5599ff !important;
+  }
+</style>
+
+<style>
+  .boot-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;
+  }
+
+  /* ===== GRUB SCREEN ===== */
+  .grub-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    box-sizing: border-box;
+    background: #000;
+    color: #aaa;
+    font-size: clamp(12px, 1.4vw, 18px);
+    line-height: 1.5;
+  }
+
+  .grub-header {
+    color: #aaa;
+    margin-bottom: 1.5rem;
+    font-size: clamp(12px, 1.4vw, 18px);
+  }
+
+  .grub-menu-box {
+    border: 1px solid #555;
+    padding: 0.5rem 0;
+    flex-shrink: 0;
+    max-width: 700px;
+    width: 100%;
+    align-self: center;
+    margin: 0 auto;
+  }
+
+  .grub-menu-inner {
+    padding: 0;
+  }
+
+  .grub-item {
+    padding: 0.15rem 1rem;
+    color: #aaa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: default;
+  }
+
+  .grub-item.grub-selected {
+    background: #aaa;
+    color: #000;
+  }
+
+  .grub-footer {
+    margin-top: 2rem;
+    color: #aaa;
+    font-size: clamp(10px, 1.2vw, 15px);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .grub-footer p {
+    margin: 0;
+    color: #aaa !important;
+  }
+
+  .grub-timer {
+    margin-top: 1.5rem;
+    color: #aaa;
+    font-size: clamp(10px, 1.2vw, 15px);
+    text-align: center;
+  }
+
+  /* ===== BOOT SCREEN ===== */
+  .boot-screen {
+    width: 100%;
+    height: 100%;
+    padding: 1rem 2rem;
+    box-sizing: border-box;
+    background: #000;
+    color: #ccc;
+    font-size: clamp(11px, 1.2vw, 15px);
+    line-height: 1.35;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #boot-log {
+    margin: 0;
+    padding: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  .boot-cursor {
+    display: inline;
+    animation: blink 0.7s step-end infinite;
+    color: #ccc;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* Fade out transition */
+  .boot-overlay.fade-out {
+    animation: bootFadeOut 0.6s ease-out forwards;
+  }
+
+  @keyframes bootFadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+</style>
+
+<script>
+  // Only run boot sequence on the home page
+  const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+  
+  // Skip boot if session already booted or not home page
+  const hasBooted = sessionStorage.getItem('hasBooted');
+  
+  if (!isHomePage || hasBooted) {
+    // Remove overlays immediately
+    document.getElementById('grub-overlay')?.remove();
+    document.getElementById('boot-overlay')?.remove();
+  } else {
+    document.documentElement.classList.add('booting');
+    initBootSequence();
+  }
+
+  function initBootSequence() {
+    const grubOverlay = document.getElementById('grub-overlay')!;
+    const bootOverlay = document.getElementById('boot-overlay')!;
+    const bootLog = document.getElementById('boot-log')!;
+    const countdownEl = document.getElementById('grub-countdown')!;
+    const items = document.querySelectorAll('.grub-item');
+    let selectedIndex = 0;
+    let countdown = 10;
+    let countdownTimer: ReturnType<typeof setInterval> | null = null;
+    let grubActive = true;
+
+    // --- GRUB MENU LOGIC ---
+    function updateSelection(newIndex: number) {
+      items[selectedIndex].classList.remove('grub-selected');
+      selectedIndex = Math.max(0, Math.min(newIndex, items.length - 1));
+      items[selectedIndex].classList.add('grub-selected');
+      // Reset countdown on interaction
+      resetCountdown();
+    }
+
+    function resetCountdown() {
+      countdown = 10;
+      countdownEl.textContent = String(countdown);
+    }
+
+    // Start countdown
+    countdownTimer = setInterval(() => {
+      countdown--;
+      countdownEl.textContent = String(countdown);
+      if (countdown <= 0) {
+        bootSelected();
+      }
+    }, 1000);
+
+    function bootSelected() {
+      if (!grubActive) return;
+      grubActive = false;
+      if (countdownTimer) clearInterval(countdownTimer);
+      
+      if (selectedIndex === 0) {
+        // Normal boot
+        grubOverlay.style.display = 'none';
+        bootOverlay.style.display = 'flex';
+        startBootSequence();
+      } else if (selectedIndex === 1) {
+        // Recovery mode — still boots but with different messages
+        grubOverlay.style.display = 'none';
+        bootOverlay.style.display = 'flex';
+        startBootSequence(true);
+      } else {
+        // Any other option just boots normally
+        grubOverlay.style.display = 'none';
+        bootOverlay.style.display = 'flex';
+        startBootSequence();
+      }
+    }
+
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (!grubActive) return;
+
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          updateSelection(selectedIndex - 1);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          updateSelection(selectedIndex + 1);
+          break;
+        case 'Enter':
+          e.preventDefault();
+          bootSelected();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          // Quick skip
+          grubActive = false;
+          if (countdownTimer) clearInterval(countdownTimer);
+          finishBoot();
+          break;
+      }
+    });
+
+    // Also allow clicking/tapping the GRUB overlay to boot
+    grubOverlay.addEventListener('click', () => {
+      if (grubActive) bootSelected();
+    });
+
+    // Mobile touch hint
+    let touchStartY: number | null = null;
+    grubOverlay.addEventListener('touchstart', (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    });
+    grubOverlay.addEventListener('touchend', (e: TouchEvent) => {
+      if (touchStartY === null || !grubActive) return;
+      const diff = touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(diff) > 30) {
+        updateSelection(selectedIndex + (diff > 0 ? 1 : -1));
+      }
+      touchStartY = null;
+    });
+
+    // --- BOOT SEQUENCE LOGIC ---
+    const bootMessages = [
+      { text: '[    0.000000] Linux version 6.8.0-vittodev (gcc 13.2.0) #1 SMP PREEMPT_DYNAMIC', delay: 50 },
+      { text: '[    0.000000] Command line: BOOT_IMAGE=/vmlinuz-6.8.0-vittodev root=/dev/sda1 ro quiet splash', delay: 50 },
+      { text: '[    0.004213] BIOS-provided physical RAM map:', delay: 35 },
+      { text: '[    0.004215]  BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable', delay: 25 },
+      { text: '[    0.006841] NX (Execute Disable) protection: active', delay: 25 },
+      { text: '[    0.012488] DMI: Vittorio Systems VPortfolio/PORTFOLIO-X1, BIOS 1.0.0 02/19/2026', delay: 500 },
+      { text: '[    0.030291] tsc: Detected 3600.000 MHz processor', delay: 35 },
+      { text: '[    0.052102] Memory: 16384000K/16777216K available (12288K kernel code)', delay: 40 },
+      { text: '[    0.081924] CPU: AMD Ryzen 9 Portfolio Edition (family: 0x19, model: 0x61)', delay: 50 },
+      { text: '[    0.120481] pid_max: default: 32768 minimum: 301', delay: 25 },
+      { text: '[    0.155010] Mount-cache hash table entries: 8192', delay: 25 },
+      { text: '[    0.201842] Last level iTLB entries: 4KB 1024, 2MB 1024, 4MB 512', delay: 25 },
+      { text: '[    0.284019] Freeing SMP alternatives memory: 44K', delay: 25 },
+      { text: '[    0.340200] smpboot: CPU0: AMD Ryzen 9 Portfolio Edition', delay: 40 },
+      { text: '[    0.410500] Performance Events: AMD PMU driver.', delay: 250 },
+      { text: '[    0.510823] Dentry cache hash table entries: 262144', delay: 25 },
+      { text: '[    0.612000] Mount-cache hash table entries: 16384', delay: 20 },
+      { text: '', delay: 10 },
+      { text: 'systemd[1]: systemd 255 (255.4-vittoportfolio) running in system mode (+PAM +AUDIT +SELINUX)', delay: 60 },
+      { text: 'systemd[1]: Hostname set to <vittorio-portfolio>.', delay: 50 },
+      { text: '', delay: 20 },
+    ];
+
+    const systemdMessages = [
+      { text: '         Starting systemd-journald.service - Journal Service...', ok: true, delay: 20 },
+      { text: '         Starting systemd-udevd.service - Rule-based Manager for Device Events...', ok: true, delay: 55 },
+      { text: '         Starting keyboard-setup.service - Set the console keyboard layout...', ok: true, delay: 40 },
+      { text: '         Mounting sys-kernel-config.mount...', ok: true, delay: 35 },
+      { text: '         Starting NetworkManager.service - Network Manager...', ok: true, delay: 400 },
+      { text: '         Starting systemd-resolved.service - Network Name Resolution...', ok: true, delay: 25 },
+      { text: '         Starting thermald.service - Thermal Daemon Service...', ok: true, delay: 35 },
+      { text: '         Starting accounts-daemon.service - Accounts Service...', ok: true, delay: 40 },
+      { text: '         Starting avahi-daemon.service - Avahi mDNS/DNS-SD Stack...', ok: true, delay: 35 },
+      { text: '         Starting bluetooth.service - Bluetooth service...', ok: true, delay: 20 },
+      { text: '         Starting portfolio-engine.service - Portfolio Rendering Engine...', ok: true, delay: 30 },
+      { text: '         Starting creative-daemon.service - Creative Projects Loader...', ok: true, delay: 25 },
+      { text: '         Starting ssh.service - OpenBSD Secure Shell server...', ok: true, delay: 40 },
+      { text: '         Starting vittodev-compositor.service - VittoDev Wayland Compositor...', ok: true, delay: 60 },
+      { text: '         Reached target graphical.target - Graphical Interface.', ok: true, delay: 50 },
+      { text: '         Starting gdm.service - GNOME Display Manager...', ok: true, delay: 550 },
+      { text: '', ok: false, delay: 20 },
+      { text: 'vittorio-portfolio login: vittorio (automatic login)', ok: false, delay: 80 },
+      { text: '', ok: false, delay: 20 },
+      { text: 'Welcome to Vittorio\'s Portfolio! Loading desktop environment...', ok: false, delay: 1200 },
+    ];
+
+    const recoveryExtra = [
+      { text: '         Starting sulogin - Single-User Login...', ok: true, delay: 60 },
+      { text: '         Starting systemd-fsck - File System Check...', ok: true, delay: 80 },
+      { text: '[    1.201424] EXT4-fs (sda1): recovery complete', delay: 50 },
+      { text: '         recovery: All filesystems clean. Resuming normal boot...', ok: true, delay: 90 },
+    ];
+
+    function formatSystemdLine(msg: typeof systemdMessages[0]): string {
+      if (!msg.ok || msg.text === '') return msg.text;
+      // Replace "Starting" with "[  OK  ] Started" or keep "Reached" etc.
+      let line = msg.text;
+      if (line.includes('Starting ')) {
+        line = line.replace(/^\s*Starting /, '[  OK  ] Started ');
+        // Remove trailing "..."
+        line = line.replace(/\.\.\.$/, '.');
+      } else if (line.includes('Mounting ')) {
+        line = line.replace(/^\s*Mounting /, '[  OK  ] Mounted ');
+        line = line.replace(/\.\.\.$/, '.');
+      } else if (line.includes('Reached ')) {
+        line = '[  OK  ] ' + line.trim();
+      }
+      return line;
+    }
+
+    async function typeBootLine(text: string, delay: number) {
+      return new Promise<void>((resolve) => {
+        // Check if it contains [  OK  ]
+        if (text.startsWith('[  OK  ]')) {
+          const okPart = '<span class="boot-ok">[  OK  ]</span>';
+          const rest = text.substring(8);
+          bootLog.innerHTML += okPart + escapeHtml(rest) + '\n';
+        } else if (text.startsWith('[')) {
+          // Kernel message — show in lighter color
+          bootLog.innerHTML += '<span class="boot-white">' + escapeHtml(text) + '</span>\n';
+        } else if (text === '') {
+          bootLog.innerHTML += '\n';
+        } else {
+          bootLog.innerHTML += escapeHtml(text) + '\n';
+        }
+        
+        // Auto-scroll to bottom
+        const bootScreen = document.getElementById('boot-screen');
+        if (bootScreen) bootScreen.scrollTop = bootScreen.scrollHeight;
+        
+        setTimeout(resolve, delay);
+      });
+    }
+
+    function escapeHtml(text: string): string {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(text));
+      return div.innerHTML;
+    }
+
+    async function startBootSequence(isRecovery = false) {
+      // Kernel messages
+      for (const msg of bootMessages) {
+        await typeBootLine(msg.text, msg.delay);
+      }
+
+      // Recovery extras
+      if (isRecovery) {
+        for (const msg of recoveryExtra) {
+          const line = msg.ok !== undefined && msg.ok
+            ? formatSystemdLine(msg as any)
+            : msg.text;
+          await typeBootLine(line, msg.delay);
+        }
+      }
+
+      // Systemd messages
+      for (const msg of systemdMessages) {
+        const line = formatSystemdLine(msg);
+        await typeBootLine(line, msg.delay);
+      }
+
+      // Small pause then transition
+      await new Promise(resolve => setTimeout(resolve, 300));
+      finishBoot();
+    }
+
+    function finishBoot() {
+      sessionStorage.setItem('hasBooted', 'true');
+      document.documentElement.classList.remove('booting');
+      
+      // Fade out whatever overlay is visible
+      const grub = document.getElementById('grub-overlay');
+      const boot = document.getElementById('boot-overlay');
+      
+      const visibleOverlay = boot?.style.display !== 'none' ? boot : grub;
+      
+      if (visibleOverlay) {
+        visibleOverlay.classList.add('fade-out');
+        visibleOverlay.addEventListener('animationend', () => {
+          grub?.remove();
+          boot?.remove();
+        });
+      } else {
+        grub?.remove();
+        boot?.remove();
+      }
+    }
+  }
+</script>
