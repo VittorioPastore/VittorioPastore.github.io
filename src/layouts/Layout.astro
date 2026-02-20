@@ -34,18 +34,30 @@ const { title } = Astro.props;
     <div class="fixed-background"></div>
     <div class="stars"></div>
     <div class="glow-orb"></div>
-    <!-- Subtle Centered Toggle Button -->
-    <button
-      type="button"
-      id="theme-toggle"
-      class="absolute top-4 left-1/2 -translate-x-1/2 toggle-button glass px-3 py-1.5 rounded-full transition-all duration-300 z-50 opacity-70 hover:opacity-90 flex items-center gap-1 text-sm">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 theme-toggle-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-      </svg>
-      <span class="text-sm font-medium">Toggle Theme</span>
-    </button>
+    <!-- Subtle Centered Toggle Buttons -->
+    <div class="absolute top-4 left-1/2 -translate-x-1/2 flex gap-3 z-50">
+      <button
+        type="button"
+        id="theme-toggle"
+        class="toggle-button glass px-4 py-2 rounded-full transition-all duration-300 opacity-70 hover:opacity-100 flex items-center gap-2 text-xs md:text-sm text-white"
+        title="Toggle Theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 theme-toggle-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <span class="font-medium whitespace-nowrap">Theme</span>
+      </button>
+
+      <button
+        type="button"
+        id="reboot-button"
+        class="reboot-button glass px-4 py-2 rounded-full transition-all duration-300 opacity-70 hover:opacity-100 hover:bg-red-500/20 flex items-center gap-2 text-xs md:text-sm text-white"
+        title="Reboot System"
+      >
+        <span class="text-lg leading-none">⏻</span>
+        <span class="font-medium whitespace-nowrap">Reboot</span>
+      </button>
+    </div>
 
     <!-- Page Content -->
     <slot />
@@ -113,6 +125,14 @@ const { title } = Astro.props;
       themeToggle?.addEventListener('click', () => {
         const currentDark = !(html.classList.contains('light-mode'));
         setTheme(!currentDark);
+      });
+
+      // Reboot handling
+      const rebootButton = document.getElementById('reboot-button');
+      rebootButton?.addEventListener('click', () => {
+        sessionStorage.removeItem('hasBooted');
+        sessionStorage.removeItem('safeGraphics');
+        window.location.href = '/';
       });
 
       // Listen for system theme changes

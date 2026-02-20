@@ -302,7 +302,7 @@
       } else if (selectedIndex === 2 || selectedIndex === 3) {
         // Memory test
         memoryTestMode = true;
-        startBootSequence(false);
+        startMemtestSequence();
       } else {
         // Normal boot (index 0)
         startBootSequence(false);
@@ -516,6 +516,45 @@
 
       // Small pause then transition
       await new Promise(resolve => setTimeout(resolve, 300));
+      finishBoot();
+    }
+
+    async function startMemtestSequence() {
+      // Hide the cursor for this animation
+      const cursor = document.getElementById('boot-cursor');
+      if (cursor) cursor.style.display = 'none';
+
+      // Center the content vertically and horizontally
+      const bootScreen = document.getElementById('boot-screen');
+      if (bootScreen) {
+        bootScreen.style.display = 'flex';
+        bootScreen.style.flexDirection = 'column';
+        bootScreen.style.alignItems = 'center';
+        bootScreen.style.justifyContent = 'center';
+      }
+
+      const totalWidth = 50; // Width of the progress bar in characters
+      const steps = 25; // Number of animation steps
+      const delayPerStep = 60; // ms per step (total ~1 second)
+
+      for (let i = 0; i <= steps; i++) {
+        const progress = i / steps;
+        const filledCount = Math.round(progress * totalWidth);
+        const emptyCount = totalWidth - filledCount;
+        
+        const filled = '█'.repeat(filledCount);
+        const empty = '░'.repeat(emptyCount);
+        const percent = Math.round(progress * 100).toString().padStart(3, ' ');
+
+        bootLog.innerHTML = `
+<div style="color: #5599ff; margin-bottom: 1rem; font-weight: bold; font-size: 1.2rem;">Loading memtest86+ v7.0...</div>
+<div style="color: #00cc00;">[${filled}${empty}] ${percent}%</div>
+`;
+        await new Promise(resolve => setTimeout(resolve, delayPerStep));
+      }
+      
+      // Brief pause at 100%
+      await new Promise(resolve => setTimeout(resolve, 200));
       finishBoot();
     }
 
