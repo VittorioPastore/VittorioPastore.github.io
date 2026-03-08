@@ -241,20 +241,10 @@
 </style>
 
 <script>
-  // Only run boot sequence on the home page
-  const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
-  
-  // Skip boot if session already booted or not home page
-  const hasBooted = sessionStorage.getItem('hasBooted');
-
-  if (!isHomePage || hasBooted) {
-    // Remove overlays immediately
-    document.getElementById('grub-overlay')?.remove();
-    document.getElementById('boot-overlay')?.remove();
-  } else {
-    document.documentElement.classList.add('booting');
-    initBootSequence();
-  }
+  // Always run the boot sequence (this component is only rendered on /boot)
+  // Re-show the boot menu even if previously booted (coming from Reboot button)
+  document.documentElement.classList.add('booting');
+  initBootSequence();
 
   function initBootSequence() {
     const grubOverlay = document.getElementById('grub-overlay')!;
@@ -579,21 +569,19 @@
         return;
       }
       
-      // Fade out whatever overlay is visible
+      // Normal boot: fade out overlay then navigate to the home page
       const grub = document.getElementById('grub-overlay');
       const boot = document.getElementById('boot-overlay');
       
       const visibleOverlay = boot?.style.display !== 'none' ? boot : grub;
       
+      const navigateHome = () => { window.location.href = '/'; };
+
       if (visibleOverlay) {
         visibleOverlay.classList.add('fade-out');
-        visibleOverlay.addEventListener('animationend', () => {
-          grub?.remove();
-          boot?.remove();
-        });
+        visibleOverlay.addEventListener('animationend', navigateHome);
       } else {
-        grub?.remove();
-        boot?.remove();
+        navigateHome();
       }
     }
   }
