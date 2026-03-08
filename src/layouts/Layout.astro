@@ -24,8 +24,27 @@ const { title } = Astro.props;
     <meta name="keywords" content="software engineer, full stack developer, AI, Reinforcement Learning, software development, portfolio" />
     <meta name="author" content="Vittorio Pastore" />
 
-    <!-- Prevent flash: body starts invisible, JS fades it in after paint -->
-    <style>body { opacity: 0; }</style>
+    <!-- Preload default (dark) background image at highest priority -->
+    <link rel="preload" as="image" href="/back3.webp" fetchpriority="high" />
+
+    <!-- Apply theme class + preload correct bg before first paint -->
+    <script>
+      (function() {
+        var saved = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var isLight = saved === 'light' || (!saved && !prefersDark);
+        if (isLight) {
+          document.documentElement.classList.add('light-mode');
+          // Also preload the light background
+          var link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = '/back5.webp';
+          link.setAttribute('fetchpriority', 'high');
+          document.head.appendChild(link);
+        }
+      })();
+    </script>
   </head>
 
   <body>
@@ -98,12 +117,20 @@ const { title } = Astro.props;
 
     <!-- Scroll & Link Scripts -->
     <script>
-      // Fade the page in smoothly — body starts at opacity:0 (set in <head> before paint)
-      // Two rAFs ensure the browser has painted at least one frame before we begin the fade
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        document.body.style.transition = 'opacity 0.45s ease';
-        document.body.style.opacity = '1';
-      }));
+      // Fade background in once the image has loaded
+      (function() {
+        var isLight = document.documentElement.classList.contains('light-mode');
+        var bgUrl = isLight ? '/back5.webp' : '/back3.webp';
+        var bgEl = document.querySelector('.fixed-background');
+        var img = new Image();
+        img.onload = function() {
+          if (bgEl) bgEl.style.opacity = '1';
+        };
+        img.onerror = function() {
+          if (bgEl) bgEl.style.opacity = '1';
+        };
+        img.src = bgUrl;
+      })();
 
       // Theme handling
       const html = document.documentElement;
@@ -353,6 +380,8 @@ const { title } = Astro.props;
     z-index: -1;
     pointer-events: none;
     background: none;
+    opacity: 0;
+    transition: opacity 1.0s ease-in;
   }
 
   .fixed-background::before,
