@@ -326,13 +326,35 @@ const { title } = Astro.props;
 </html>
 
 <style is:global>
-  /* Base styles for html and body */
+  /* ── Color tokens ── */
+  :root {
+    --bg-base: #111111;
+    --bg-surface: #1a1a1a;
+    --bg-elevated: #262626;
+    --border-subtle: #2a2a2a;
+    --border-hover: #404040;
+    --color-text: #e5e5e5;
+    --color-muted: #737373;
+    --color-accent: #F59E0B;
+  }
+
+  html.light-mode {
+    --bg-base: #f5f5f5;
+    --bg-surface: #ffffff;
+    --bg-elevated: #e5e5e5;
+    --border-subtle: #d4d4d4;
+    --border-hover: #a3a3a3;
+    --color-text: #171717;
+    --color-muted: #737373;
+    --color-accent: #d97706;
+  }
+
+  /* ── Base ── */
   html {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #000;
-    /* iOS Safari full-screen */
+    background-color: var(--bg-base);
     height: -webkit-fill-available;
   }
 
@@ -341,186 +363,80 @@ const { title } = Astro.props;
     flex-direction: column;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 0;
+    padding-top: 44px;
     padding-bottom: env(safe-area-inset-bottom);
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
-    color: white;
+    color: var(--color-text);
     background-color: transparent;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, background-color 0.3s ease;
     height: 100vh;
     height: -webkit-fill-available;
   }
 
-  .light-mode body {
-    color: black;
+  /* ── Card: solid surface replacing glass ── */
+  .card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    transition: border-color 0.2s ease, transform 0.2s ease;
   }
 
-  /* Glass/translucent styling */
-  .glass {
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  .card-hover:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
   }
 
-  .light-mode .glass {
-    background: rgba(255, 255, 255, 0.3);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+  /* ── Text helpers ── */
+  .text-muted {
+    color: var(--color-muted);
   }
 
-  /* Fixed background container using pseudo-elements for smooth cross-fade */
-  .fixed-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    /* Ensure the background is behind content */
-    z-index: -1;
-    pointer-events: none;
-    background: none;
-    opacity: 0;
-    transition: opacity 1.0s ease-in;
+  .text-accent {
+    color: var(--color-accent);
   }
 
-  .fixed-background::before,
-  .fixed-background::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-size: cover;
-    background-position: center;
-    transition: opacity 0.5s ease-in-out;
+  /* ── Section label: monospace terminal callback ── */
+  .section-label {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    letter-spacing: 0.05em;
   }
 
-  /* Dark theme background (default) */
-  .fixed-background::before {
-    background-image: url('/back3.webp');
-    opacity: 1;
+  /* ── Nav bar ── */
+  .site-nav {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
   }
 
-  /* Light theme background */
-  .fixed-background::after {
-    background-image: url('/back5.webp');
-    opacity: 0;
+  .nav-button {
+    color: var(--color-muted);
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-radius: 6px;
   }
 
-  /* When light mode is active, swap opacities */
-  html.light-mode .fixed-background::before {
-    opacity: 0;
-  }
-  html.light-mode .fixed-background::after {
-    opacity: 1;
+  .nav-button:hover {
+    color: var(--color-text);
+    background-color: var(--bg-elevated);
   }
 
-  /*
-    iOS Safari fallback: change background-attachment if needed.
-  */
+  /* ── Home button ── */
+  .home-button {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--color-text);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .home-button:hover {
+    border-color: var(--border-hover);
+    background-color: var(--bg-elevated);
+  }
+
+  /* ── .float is intentionally a no-op (animation removed) ── */
+  .float { }
+
   @supports (-webkit-touch-callout: none) {
-    .fixed-background {
-      background-attachment: scroll;
-    }
-  }
-
-  /* Star layer (decorative) */
-  .stars {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background: 
-      radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
-      radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-      radial-gradient(2px 2px at 50px 160px, #fff, rgba(0,0,0,0)),
-      radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
-      radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0));
-    background-size: 200px 200px;
-    animation: twinkle 5s ease-in-out infinite;
-  }
-
-  .light-mode .stars {
-    opacity: 0;
-  }
-
-  /* Glow orb layer (decorative) */
-  .glow-orb {
-    position: fixed;
-    top: 15%;
-    left: 85%;
-    transform: translate(-50%, -50%);
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(255,182,255,0.4) 0%, rgba(255,182,255,0) 70%);
-    pointer-events: none;
-    z-index: 0;
-    animation: float 20s ease-in-out infinite;
-    filter: blur(30px);
-  }
-
-  .light-mode .glow-orb {
-    background: radial-gradient(circle at center, rgba(100,149,237,0.4) 0%, rgba(100,149,237,0) 70%);
-  }
-
-  /* Twinkling animation for stars */
-  @keyframes twinkle {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
-  }
-
-  /* Floating animation for the glow orb */
-  @keyframes float {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    50% { transform: translate(-30%, -30%) rotate(180deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-  }
-
-  /* Floating effect for any elements with this class */
-  .float {
-    animation: contentFloat 6s ease-in-out infinite;
-  }
-
-  @keyframes contentFloat {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
-  }
-
-  /* Gradient text helper class */
-  .text-gradient {
-    background: linear-gradient(to right, #B388FF, #7FDBFF, #FFB6C1);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Override text colors when in light mode */
-  html.light-mode body,
-  html.light-mode h1,
-  html.light-mode h2,
-  html.light-mode h3,
-  html.light-mode h4,
-  html.light-mode h5,
-  html.light-mode h6,
-  html.light-mode p,
-  html.light-mode a,
-  html.light-mode li,
-  html.light-mode span:not(.boot-ok):not(.boot-white):not(.boot-fail):not(.boot-blue):not(#shutdown-log span) {
-    color: black !important;
-  }
-
-  /* Optionally override common Tailwind text classes if needed */
-  html.light-mode .text-gray-200 {
-    color: #222 !important;
-  }
-  html.light-mode .text-white {
-    color: #000 !important;
+    html { background-attachment: scroll; }
   }
 </style>
