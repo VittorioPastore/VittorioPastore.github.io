@@ -24,25 +24,13 @@ const { title } = Astro.props;
     <meta name="keywords" content="software engineer, full stack developer, AI, Reinforcement Learning, software development, portfolio" />
     <meta name="author" content="Vittorio Pastore" />
 
-    <!-- Preload default (dark) background image at highest priority -->
-    <link rel="preload" as="image" href="/back3.webp" fetchpriority="high" />
-
-    <!-- Apply theme class + preload correct bg before first paint -->
+    <!-- Apply theme class before first paint -->
     <script>
       (function() {
         var saved = localStorage.getItem('theme');
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         var isLight = saved === 'light' || (!saved && !prefersDark);
-        if (isLight) {
-          document.documentElement.classList.add('light-mode');
-          // Also preload the light background
-          var link = document.createElement('link');
-          link.rel = 'preload';
-          link.as = 'image';
-          link.href = '/back5.webp';
-          link.setAttribute('fetchpriority', 'high');
-          document.head.appendChild(link);
-        }
+        if (isLight) document.documentElement.classList.add('light-mode');
       })();
     </script>
   </head>
@@ -57,34 +45,30 @@ const { title } = Astro.props;
       </div>
     </div>
 
-    <!-- Fixed background container for smooth transitioning -->
-    <div class="fixed-background"></div>
-    <div class="stars"></div>
-    <div class="glow-orb"></div>
-    <!-- Subtle Centered Toggle Buttons -->
-    <div class="absolute top-4 left-1/2 -translate-x-1/2 flex gap-3 z-50">
+    <!-- Site navigation bar -->
+    <nav class="site-nav fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-1 px-4 h-11">
       <button
         type="button"
         id="theme-toggle"
-        class="toggle-button glass px-4 py-2 rounded-full transition-all duration-300 opacity-70 hover:opacity-100 flex items-center gap-2 text-xs md:text-sm text-white"
+        class="nav-button px-3 py-1.5 flex items-center gap-2 text-xs font-medium"
         title="Toggle Theme"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 theme-toggle-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
-        <span class="font-medium whitespace-nowrap">Theme</span>
+        <span class="whitespace-nowrap">Theme</span>
       </button>
 
       <button
         type="button"
         id="reboot-button"
-        class="reboot-button glass px-4 py-2 rounded-full transition-all duration-300 opacity-70 hover:opacity-100 hover:bg-red-500/20 flex items-center gap-2 text-xs md:text-sm text-white"
+        class="nav-button px-3 py-1.5 flex items-center gap-2 text-xs font-medium"
         title="Reboot System"
       >
-        <span class="text-lg leading-none">⏻</span>
-        <span class="font-medium whitespace-nowrap">Reboot</span>
+        <span class="text-base leading-none">⏻</span>
+        <span class="whitespace-nowrap">Reboot</span>
       </button>
-    </div>
+    </nav>
 
     <!-- Page Content -->
     <slot />
@@ -93,8 +77,8 @@ const { title } = Astro.props;
     <a
       href="/"
       id="home-button"
-      class="fixed bottom-8 left-1/2 -translate-x-1/2 glass px-6 py-3 rounded-full text-white font-medium 
-             hover:bg-white/20 transition-all duration-300 flex items-center gap-2 z-50 translate-y-0"
+      class="home-button fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full font-medium
+             flex items-center gap-2 z-50 translate-y-0"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -117,21 +101,6 @@ const { title } = Astro.props;
 
     <!-- Scroll & Link Scripts -->
     <script>
-      // Fade background in once the image has loaded
-      (function() {
-        var isLight = document.documentElement.classList.contains('light-mode');
-        var bgUrl = isLight ? '/back5.webp' : '/back3.webp';
-        var bgEl = document.querySelector('.fixed-background');
-        var img = new Image();
-        img.onload = function() {
-          if (bgEl) bgEl.style.opacity = '1';
-        };
-        img.onerror = function() {
-          if (bgEl) bgEl.style.opacity = '1';
-        };
-        img.src = bgUrl;
-      })();
-
       // Theme handling
       const html = document.documentElement;
       const themeToggle = document.getElementById('theme-toggle');
