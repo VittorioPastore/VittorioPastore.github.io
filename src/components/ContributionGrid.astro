@@ -1,0 +1,195 @@
+---
+interface Contribution {
+  date: string;
+  count: number;
+  level: 0 | 1 | 2 | 3 | 4;
+}
+
+const COLORS: Record<number, string> = {
+  0: '#2a2a2a',
+  1: '#92400e',
+  2: '#b45309',
+  3: '#d97706',
+  4: '#F59E0B',
+};
+
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+
+let contributions: Contribution[] = [];
+try {
+  const res = await fetch('https://github-contributions-api.jogruber.de/v4/VittorioPastore?y=last');
+  const data = await res.json();
+  contributions = (data.contributions as Contribution[]).sort((a, b) =>
+    a.date.localeCompare(b.date)
+  );
+} catch {
+  // graceful fallback: grid renders as empty (all level-0 squares)
+}
+
+// Build a date → contribution map
+const contribMap = new Map(contributions.map(c => [c.date, c]));
+
+// Build 53 × 7 grid (column = week, row = day of week, Sunday = 0)
+type Cell = { date: string; count: number; level: number } | null;
+const weeks: Cell[][] = [];
+const monthLabels: string[] = [];
+
+if (contributions.length > 0) {
+  const firstDate = new Date(contributions[0].date + 'T12:00:00Z');
+  const startDate = new Date(firstDate);
+  startDate.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay()); // rewind to Sunday
+
+  const lastDate = new Date(contributions[contributions.length - 1].date + 'T12:00:00Z');
+  let current = new Date(startDate);
+  let week: Cell[] = [];
+  let weekStartDate: Date | null = null;
+
+  while (current <= lastDate) {
+    if (week.length === 0) weekStartDate = new Date(current);
+    const dateStr = current.toISOString().split('T')[0];
+    const contrib = contribMap.get(dateStr);
+    week.push(contrib ? { date: contrib.date, count: contrib.count, level: contrib.level } : null);
+
+    if (week.length === 7) {
+      weeks.push(week);
+      // Show month label only on the first week of a new month
+      const label =
+        weekStartDate && weekStartDate.getUTCDate() <= 7
+          ? MONTH_NAMES[weekStartDate.getUTCMonth()]
+          : '';
+      monthLabels.push(label);
+      week = [];
+      weekStartDate = null;
+    }
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+  // Pad final partial week
+  if (week.length > 0) {
+    while (week.length < 7) week.push(null);
+    weeks.push(week);
+    monthLabels.push('');
+  }
+}
+---
+
+<div class="contrib-wrapper card rounded-xl p-6">
+  <p class="section-label mb-4">// contributions</p>
+
+  <div class="contrib-scroll">
+    <div class="contrib-inner">
+      <!-- Month labels row -->
+      <div class="contrib-month-row">
+        <div class="contrib-day-spacer"></div>
+        {monthLabels.map(label => (
+          <span class="contrib-month-cell">{label}</span>
+        ))}
+      </div>
+
+      <!-- Grid body: day labels + week columns -->
+      <div class="contrib-body">
+        <!-- Day-of-week labels -->
+        <div class="contrib-day-col">
+          {DAY_LABELS.map(label => (
+            <span class="contrib-day-label">{label}</span>
+          ))}
+        </div>
+
+        <!-- Week columns -->
+        <div class="contrib-weeks">
+          {weeks.map(week => (
+            <div class="contrib-week">
+              {week.map(cell => (
+                <div
+                  class="contrib-cell"
+                  style={`background:${cell ? COLORS[cell.level] : COLORS[0]}`}
+                  title={cell ? `${cell.date}: ${cell.count} contribution${cell.count !== 1 ? 's' : ''}` : ''}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .contrib-wrapper {
+    width: 100%;
+  }
+
+  .contrib-scroll {
+    overflow-x: auto;
+  }
+
+  .contrib-inner {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: max-content;
+  }
+
+  .contrib-month-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 16px;
+  }
+
+  .contrib-day-spacer {
+    width: 28px;
+    flex-shrink: 0;
+  }
+
+  .contrib-month-cell {
+    width: 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10px;
+    color: var(--color-muted);
+    overflow: visible;
+    white-space: nowrap;
+  }
+
+  .contrib-body {
+    display: flex;
+    gap: 4px;
+  }
+
+  .contrib-day-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 28px;
+    flex-shrink: 0;
+  }
+
+  .contrib-day-label {
+    display: block;
+    height: 14px;
+    line-height: 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10px;
+    color: var(--color-muted);
+    text-align: right;
+    padding-right: 4px;
+  }
+
+  .contrib-weeks {
+    display: flex;
+    gap: 2px;
+  }
+
+  .contrib-week {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .contrib-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+</style>
