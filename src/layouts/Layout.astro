@@ -93,7 +93,7 @@ if (title.includes(' - Project')) {
         </div>
         <div class="term-path-wrapper">
           <span id="scroll-spinner" class="scroll-spinner">⠿</span>
-          <span id="scroll-path" class="scroll-path-text" data-current={terminalPath}>{terminalPath}</span><span class="cursor">▋</span>
+          <span id="scroll-path" class="scroll-path-text" data-current={terminalPath}><span class="path-prefix">{terminalPath}</span></span><span class="cursor">▋</span>
         </div>
       </a>
     </nav>
@@ -419,6 +419,14 @@ if (title.includes(' - Project')) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  
+  .path-prefix {
+    color: var(--color-text); /* Brighter color */
+  }
+  
+  .path-command {
+    color: var(--color-muted); /* Darker/dimmer color */
   }
   
   html.light-mode .term-path-wrapper {

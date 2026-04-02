@@ -227,16 +227,16 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
       if (timeouts.has(element)) clearTimeout(timeouts.get(element));
       
       let index = 0;
-      element.textContent = prefix;
+      element.innerHTML = `<span class="path-prefix">${prefix}</span>`;
       
       const interval = setInterval(() => {
         if (index <= command.length) {
-          element.textContent = prefix + command.substring(0, index);
+          element.innerHTML = `<span class="path-prefix">${prefix}</span><span class="path-command">${command.substring(0, index)}</span>`;
           index++;
         } else {
           clearInterval(interval);
           const tid = setTimeout(() => {
-            element.textContent = finalPath;
+            element.innerHTML = `<span class="path-prefix">${finalPath}</span>`;
           }, 350);
           timeouts.set(element, tid);
         }
