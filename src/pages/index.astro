@@ -208,7 +208,6 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     // Remove any existing highlights
     document.querySelectorAll('[id^="project-"]').forEach(project => {
       project.classList.remove('highlight');
-      project.style.transform = 'scale(1)';
     });
 
     // Find projects with matching skills
@@ -221,12 +220,10 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
       // Highlight matching projects
       projectElements.forEach(project => {
         project.classList.add('highlight');
-        project.style.transform = 'scale(1.05)';
 
         // Remove highlight after a few seconds
         setTimeout(() => {
           project.classList.remove('highlight');
-          project.style.transform = 'scale(1)';
         }, 2000); // 2 seconds
       });
     }
@@ -238,11 +235,15 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 2rem 8rem;
+    min-width: 0;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   /* ── Hero ── */
   .hero {
     width: 100%;
+    max-width: 100%;
     min-height: 100vh;
     position: relative;
     overflow: hidden;
@@ -255,6 +256,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     position: relative;
     z-index: 2;
     max-width: 500px;
+    width: 100%;
     padding: 8rem 3rem 8rem 2rem;
   }
 
@@ -306,11 +308,20 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
 
   @media (max-width: 768px) {
     .hero-inner {
-      padding: 6rem 2rem;
+      max-width: 100%;
+      padding: 6rem 1rem 4rem;
+    }
+
+    .hero-name {
+      font-size: clamp(2.2rem, 13vw, 4.5rem);
+    }
+
+    .hero-bio {
+      max-width: 100%;
+      font-size: 1rem;
     }
     .hero-photo-wrap {
-      left: 0;
-      opacity: 0.1;
+      display: none;
     }
   }
 
@@ -359,11 +370,13 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+    width: 100%;
   }
 
   /* ── Section rules ── */
   .editorial-section {
     margin-bottom: 6rem;
+    min-width: 0;
   }
 
   .section-rule {
@@ -401,6 +414,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     padding: 2.5rem;
     border-radius: 12px;
     margin-bottom: 1.5rem;
+    max-width: 100%;
   }
 
   .featured-inner {
@@ -408,6 +422,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     grid-template-columns: 1fr 2fr;
     gap: 3rem;
     align-items: start;
+    min-width: 0;
   }
 
   @media (max-width: 640px) {
@@ -421,6 +436,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    min-width: 0;
   }
 
   .featured-title {
@@ -428,18 +444,21 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     font-weight: 700;
     line-height: 1.2;
     color: var(--color-text);
+    overflow-wrap: anywhere;
   }
 
   .featured-body {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    min-width: 0;
   }
 
   .featured-description {
     color: var(--color-muted);
     line-height: 1.7;
     font-size: 1rem;
+    overflow-wrap: anywhere;
   }
 
   /* ── Rest of projects grid ── */
@@ -447,9 +466,30 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
   }
 
   @media (max-width: 640px) {
+    .editorial-main {
+      padding: 0 0.875rem 6rem;
+    }
+
+    .featured-project {
+      padding: 1rem;
+    }
+
+    .project-card {
+      padding: 1rem;
+    }
+
+    .section-rule {
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
     .projects-grid {
       grid-template-columns: 1fr;
     }
@@ -461,6 +501,8 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    min-width: 0;
+    width: 100%;
   }
 
   .project-title {
@@ -468,6 +510,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     font-weight: 600;
     color: var(--color-text);
     line-height: 1.3;
+    overflow-wrap: anywhere;
   }
 
   .project-description {
@@ -475,6 +518,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     font-size: 0.875rem;
     line-height: 1.65;
     flex: 1;
+    overflow-wrap: anywhere;
   }
 
   /* ── Skill tags ── */
@@ -499,6 +543,9 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
   }
 
   .skill-chip {
@@ -520,6 +567,9 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
   /* ── Activity ── */
   .activity-bottom {
     margin-top: 1.25rem;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
   }
 
   /* ── Contact ── */
@@ -528,6 +578,8 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     flex-direction: column;
     gap: 1.25rem;
     max-width: 480px;
+    min-width: 0;
+    width: 100%;
   }
 
   .contact-heading {
@@ -536,6 +588,14 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     line-height: 1.1;
     letter-spacing: -0.02em;
     color: var(--color-text);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 640px) {
+    .skill-chip {
+      white-space: normal;
+      max-width: 100%;
+    }
   }
 
   .contact-links {
@@ -554,34 +614,56 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
   .ai-gradient-border {
     position: relative;
     border: 2px solid transparent;
-    background-clip: padding-box;
-  }
-
-  .ai-gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 14px;
-    padding: 2px;
-    background: linear-gradient(
-      45deg,
-      rgba(255, 0, 150, 0.4),
-      rgba(0, 204, 255, 0.4),
-      rgba(128, 0, 255, 0.4),
-      rgba(255, 204, 0, 0.4),
-      rgba(255, 0, 150, 0.4)
-    );
-    background-size: 300% 300%;
+    border-radius: 12px;
+    background:
+      linear-gradient(var(--bg-surface), var(--bg-surface)) padding-box,
+      linear-gradient(
+        45deg,
+        rgba(255, 0, 150, 0.4),
+        rgba(0, 204, 255, 0.4),
+        rgba(128, 0, 255, 0.4),
+        rgba(255, 204, 0, 0.4),
+        rgba(255, 0, 150, 0.4)
+      ) border-box;
+    background-size: 100% 100%, 300% 300%;
+    background-position: 0 0, 0% 0%;
     animation: aiGradientShift 8s ease-in-out infinite;
-    z-index: -1;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
   }
 
-  .ai-gradient-border:hover::before {
+  .ai-gradient-border:hover {
     animation-duration: 4s;
+  }
+
+  /* Final mobile overrides placed late so they are not overridden by base rules above */
+  @media (max-width: 768px) {
+    .hero-inner {
+      max-width: 100%;
+      padding: 6rem 1rem 4rem;
+    }
+
+    .hero-name {
+      font-size: clamp(2.2rem, 13vw, 4.5rem);
+    }
+
+    .hero-bio {
+      max-width: 100%;
+      font-size: 1rem;
+    }
+
+    .hero-photo-wrap {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .project-card {
+      padding: 1rem;
+    }
+
+    .skill-chip {
+      white-space: normal;
+      max-width: 100%;
+    }
   }
 
   @keyframes aiGradientShift {

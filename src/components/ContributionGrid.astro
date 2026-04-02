@@ -6,11 +6,11 @@ interface Contribution {
 }
 
 const COLORS: Record<number, string> = {
-  0: '#2a2a2a',
-  1: '#92400e',
-  2: '#b45309',
-  3: '#d97706',
-  4: '#F59E0B',
+  0: 'var(--contrib-level-0, #2a2a2a)',
+  1: 'var(--contrib-level-1, #92400e)',
+  2: 'var(--contrib-level-2, #b45309)',
+  3: 'var(--contrib-level-3, #d97706)',
+  4: 'var(--contrib-level-4, #F59E0B)',
 };
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -94,8 +94,8 @@ const buildGrid = (contribs: Contribution[]) => {
 const { weeks, monthLabels } = buildGrid(contributions);
 ---
 
-<div class="contrib-wrapper card rounded-xl p-6">
-  <p class="section-label mb-4">// contributions</p>
+<div class="contrib-wrapper card rounded-xl p-4 sm:p-6">
+  <p class="section-label mb-4">// github </p>
 
   <div class="contrib-scroll">
     <div class="contrib-inner">
@@ -138,10 +138,14 @@ const { weeks, monthLabels } = buildGrid(contributions);
 <style>
   .contrib-wrapper {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .contrib-scroll {
     overflow-x: auto;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .contrib-inner {
@@ -175,6 +179,7 @@ const { weeks, monthLabels } = buildGrid(contributions);
   .contrib-body {
     display: flex;
     gap: 4px;
+    min-width: 0;
   }
 
   .contrib-day-col {

@@ -305,6 +305,11 @@ const { title } = Astro.props;
     --color-text: #e5e5e5;
     --color-muted: #737373;
     --color-accent: #F59E0B;
+    --contrib-level-0: #2a2a2a;
+    --contrib-level-1: #92400e;
+    --contrib-level-2: #b45309;
+    --contrib-level-3: #d97706;
+    --contrib-level-4: #F59E0B;
   }
 
   html.light-mode {
@@ -316,20 +321,37 @@ const { title } = Astro.props;
     --color-text: #171717;
     --color-muted: #737373;
     --color-accent: #d97706;
+    --contrib-level-0: #e8e8e8;
+    --contrib-level-1: #fed7aa;
+    --contrib-level-2: #fdba74;
+    --contrib-level-3: #fb923c;
+    --contrib-level-4: #ea580c;
   }
 
   /* ── Base ── */
   html {
-    height: 100%;
+    min-height: 100%;
     margin: 0;
     padding: 0;
     background-color: var(--bg-base);
-    height: -webkit-fill-available;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  img, svg, video, canvas {
+    max-width: 100%;
   }
 
   body {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
     max-width: 1440px;
     margin: 0 auto;
     padding-top: 2.75rem; /* matches nav h-11 */
@@ -339,8 +361,8 @@ const { title } = Astro.props;
     color: var(--color-text);
     background-color: transparent;
     transition: color 0.3s ease, background-color 0.3s ease;
-    height: 100vh;
-    height: -webkit-fill-available;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   /* ── Card: solid surface replacing glass ── */

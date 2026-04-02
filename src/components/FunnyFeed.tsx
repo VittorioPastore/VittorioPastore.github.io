@@ -50,7 +50,7 @@ const JokeFeed = () => {
 
   return (
     <div
-      className="rounded-xl p-6 h-full"
+      className="rounded-xl p-4 sm:p-6 h-full"
       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
     >
       <p className="section-label mb-4">// recent laughs</p>
