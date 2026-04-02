@@ -1,5 +1,5 @@
 ---
-// Astro front matter remains the same
+// src/layouts/Layout.astro
 import '@fontsource/poppins';
 
 interface Props {
@@ -7,6 +7,12 @@ interface Props {
 }
 
 const { title } = Astro.props;
+
+let terminalPath = '~/vittorio:';
+if (title.includes(' - Project')) {
+  const projName = title.split(' - Project')[0];
+  terminalPath = `~/projects/${projName}$`;
+}
 ---
 
 <!doctype html>
@@ -46,58 +52,54 @@ const { title } = Astro.props;
     </div>
 
     <!-- Site navigation bar -->
-    <nav class="site-nav fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-1 px-4 h-11">
-      <button
-        type="button"
-        id="theme-toggle"
-        class="nav-button px-3 py-1.5 flex items-center gap-2 text-xs font-medium"
-        title="Toggle Theme"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 theme-toggle-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-        <span class="whitespace-nowrap">Theme</span>
-      </button>
+    <nav id="top-nav" class="site-nav fixed top-0 left-0 right-0 z-50 h-11 border-b border-transparent transition-colors duration-300">
+      <!-- Original Nav Items (Theme, Reboot) -->
+      <div id="nav-actions" class="absolute inset-0 flex items-center justify-center gap-1 px-4 transition-opacity duration-300 pointer-events-auto">
+        <button
+          type="button"
+          id="theme-toggle"
+          class="nav-button px-3 py-1.5 flex items-center gap-2 text-xs font-medium"
+          title="Toggle Theme"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 theme-toggle-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <span class="whitespace-nowrap">Theme</span>
+        </button>
 
-      <button
-        type="button"
-        id="reboot-button"
-        class="nav-button px-3 py-1.5 flex items-center gap-2 text-xs font-medium"
-        title="Reboot System"
+        <button
+          type="button"
+          id="reboot-button"
+          class="nav-button px-3 py-1.5 flex items-center gap-2 text-xs font-medium"
+          title="Reboot System"
+        >
+          <span class="text-base leading-none">⏻</span>
+          <span class="whitespace-nowrap">Reboot</span>
+        </button>
+      </div>
+
+      <!-- Terminal Status Bar -->
+      <a
+        href="/"
+        id="scroll-status-bar"
+        class="absolute inset-0 flex items-center transition-opacity duration-300 opacity-0 pointer-events-none"
+        aria-label="Return to Home"
+        style="text-decoration: none;"
       >
-        <span class="text-base leading-none">⏻</span>
-        <span class="whitespace-nowrap">Reboot</span>
-      </button>
+        <div class="term-dots">
+          <span class="term-dot close"></span>
+          <span class="term-dot minimize"></span>
+          <span class="term-dot maximize"></span>
+        </div>
+        <div class="term-path-wrapper">
+          <span id="scroll-spinner" class="scroll-spinner">⠿</span>
+          <span id="scroll-path" class="scroll-path-text" data-current={terminalPath}>{terminalPath}</span><span class="cursor">▋</span>
+        </div>
+      </a>
     </nav>
 
     <!-- Page Content -->
     <slot />
-
-    <!-- Home Button -->
-    <a
-      href="/"
-      id="home-button"
-      class="home-button fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full font-medium
-             flex items-center gap-2 z-50 translate-y-0"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="2"
-        stroke="currentColor"
-        class="w-5 h-5"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 
-             .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 
-             1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-        />
-      </svg>
-      Home
-    </a>
 
     <!-- Scroll & Link Scripts -->
     <script>
@@ -236,37 +238,55 @@ const { title } = Astro.props;
         setTheme(e.matches);
       });
 
-      let lastScrollY = window.scrollY;
-      let ticking = false;
+      // Global Scroll Spinner Animation
+      const scrollSpinner = document.getElementById('scroll-spinner');
+      const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+      const stopFrames = ['⠤', '⠶', '⠷', '⠿'];
 
-      const homeButton = document.getElementById('home-button');
-      
-      const updateHomeButton = () => {
-        if (!homeButton) return;
+      let currentSpinnerFrame = 0;
+      let spinnerVelocity = 0;
+      let lastScrollYForSpinner = window.scrollY;
+      let isStopped = true;
+      let stopProgress = 4; // Start in terminal state
+
+      const animateSpinner = () => {
+        if (!scrollSpinner) return;
+        const currentScroll = window.scrollY;
+        const scrollDiff = currentScroll - lastScrollYForSpinner;
+        lastScrollYForSpinner = currentScroll;
         
-        const currentScrollY = window.scrollY;
+        if (Math.abs(scrollDiff) > 0) {
+          spinnerVelocity += scrollDiff * 0.004;
+          isStopped = false;
+          stopProgress = 0;
+        }
         
-        if (currentScrollY > lastScrollY) {
-          // Scrolling down
-          homeButton.style.transform = 'translate(-50%, 150%)';
+        spinnerVelocity *= 0.92;
+        currentSpinnerFrame += spinnerVelocity;
+
+        if (Math.abs(spinnerVelocity) > 0.05) {
+          let frameIndex = Math.floor(currentSpinnerFrame) % frames.length;
+          if (frameIndex < 0) frameIndex += frames.length;
+          scrollSpinner.textContent = frames[frameIndex];
         } else {
-          // Scrolling up
-          homeButton.style.transform = 'translate(-50%, 0)';
+          if (!isStopped) {
+            isStopped = true;
+            stopProgress = 0;
+          }
+          if (stopProgress < stopFrames.length - 1) {
+            stopProgress += 0.15;
+            scrollSpinner.textContent = stopFrames[Math.floor(stopProgress)];
+          } else {
+            scrollSpinner.textContent = '⠿';
+          }
         }
         
-        lastScrollY = currentScrollY;
-        ticking = false;
+        requestAnimationFrame(animateSpinner);
       };
 
-      const onScroll = () => {
-        if (!ticking) {
-          window.requestAnimationFrame(updateHomeButton);
-          ticking = true;
-        }
-      };
-
-      // Add scroll event listener
-      window.addEventListener('scroll', onScroll, { passive: true });
+      if (scrollSpinner) {
+        requestAnimationFrame(animateSpinner);
+      }
 
       // Smooth scroll handler for internal links
       const smoothScroll = (e) => {
@@ -289,12 +309,162 @@ const { title } = Astro.props;
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
           anchor.addEventListener('click', smoothScroll);
         });
+
+        const topNav = document.getElementById('top-nav');
+        const navActions = document.getElementById('nav-actions');
+        const statusBar = document.getElementById('scroll-status-bar');
+
+        const handleUniversalScroll = () => {
+          const scrollY = window.scrollY;
+          // When scrolled past header (60px), fade out menu and fade in terminal inside same bar
+          if (scrollY > 60) {
+            topNav?.classList.add('is-scrolled');
+            if (navActions) navActions.style.opacity = '0';
+            if (navActions) navActions.style.pointerEvents = 'none';
+            if (statusBar) statusBar.style.opacity = '1';
+            if (statusBar) statusBar.style.pointerEvents = 'auto';
+          } else {
+            topNav?.classList.remove('is-scrolled');
+            if (navActions) navActions.style.opacity = '1';
+            if (navActions) navActions.style.pointerEvents = 'auto';
+            if (statusBar) statusBar.style.opacity = '0';
+            if (statusBar) statusBar.style.pointerEvents = 'none';
+          }
+        };
+
+        window.addEventListener('scroll', () => {
+          requestAnimationFrame(handleUniversalScroll);
+        }, { passive: true });
+        
+        requestAnimationFrame(handleUniversalScroll);
       });
     </script>
   </body>
 </html>
 
 <style is:global>
+  /* ── Minimal Scroll Effects (global home link) ── */
+  .site-nav {
+    background: transparent;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .site-nav.is-scrolled {
+    background: var(--bg-surface);
+    border-bottom-color: var(--border-subtle);
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.2);
+  }
+  
+  html.light-mode .site-nav.is-scrolled {
+    background: #e2e2e2; /* Mac OS light gray title bar feel */
+    border-bottom-color: #c4c4c4;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Make sure the text pops slightly differently on light mode for terminal */
+  html.light-mode .scroll-status-bar {
+    color: #4b5563;
+  }
+
+  .scroll-status-bar {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+  }
+
+  .term-dots {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: absolute;
+    left: 1.25rem;
+  }
+
+  .term-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1); /* Subtle inner shadow like Mac OS */
+  }
+
+  .term-dot.close { background-color: #ff5f56; opacity: 1; }
+  .term-dot.minimize { background-color: #ffbd2e; opacity: 1; }
+  .term-dot.maximize { background-color: #27c93f; opacity: 1; }
+
+  .term-path-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: flex-start; /* left-align inner text */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    width: 44ch; /* fixed width large enough for full paths */
+    background: var(--bg-base); /* Slightly darker input look */
+    padding: 0.2rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .scroll-path-text {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  html.light-mode .term-path-wrapper {
+    background: #ffffff; /* White input bubble on grayish bar */
+    color: #374151;
+    border-color: #d1d5db;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  @media (max-width: 640px) {
+    .scroll-status-bar {
+      font-size: 0.8rem;
+      padding: 0 1rem;
+      justify-content: flex-start;
+    }
+    .term-path-wrapper {
+      position: relative;
+      left: auto;
+      right: auto;
+      transform: none;
+      width: calc(100vw - 8rem); /* Adjust width */
+      margin-left: 6rem; /* Extra padding from icons */
+    }
+    .term-dots {
+      left: 1.5rem;
+    }
+  }
+
+  .scroll-spinner {
+    color: var(--color-accent);
+    display: inline-block;
+    width: 1ch;
+    text-align: center;
+  }
+
+  .cursor {
+    color: var(--color-accent);
+    flex-shrink: 0;
+    animation: blink 1.1s step-start infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
   /* ── Color tokens ── */
   :root {
     --bg-base: #111111;
