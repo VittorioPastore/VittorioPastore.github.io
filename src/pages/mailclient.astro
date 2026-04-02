@@ -7,14 +7,18 @@ const publishDate = "August 4, 2025";
 <Layout title={`${title} - Project`}>
   <!-- Main content container -->
   <main class="container mx-auto px-4 py-8">
+    <p class="section-label mb-6">
+      <a href="/" style="color: var(--color-muted);">~/projects</a>
+      <span class="mx-1">/</span>mailclient
+    </p>
     <!-- Enhanced Header with badges and metadata -->
     <header class="text-center mb-8 pt-8">
       <div class="max-w-5xl mx-auto">
-        <div class="glass p-6 sm:p-8 rounded-3xl border border-white/10">
+        <div class="card p-6 sm:p-8 rounded-xl">
           <div class="flex justify-center gap-2 mb-4 flex-wrap">
             <!-- Badges can be added here if needed -->
           </div>
-          <h1 class="text-3xl sm:text-5xl font-bold mb-4 text-gradient leading-tight">
+          <h1 class="text-3xl sm:text-5xl font-bold mb-4 leading-tight">
             {title}
           </h1>
           <p class="text-base sm:text-lg text-gray-300 mb-4 max-w-xl mx-auto">
@@ -42,7 +46,7 @@ const publishDate = "August 4, 2025";
       <!-- Main Content with improved structure -->
       <div class="max-w-5xl mx-auto">
         <!-- Introduction Card -->
-        <div class="glass p-8 rounded-3xl mb-12 border border-white/10">
+        <div class="card p-8 rounded-xl mb-12">
           <section class="prose max-w-none text-gray-200">
           <div class="grid md:grid-cols-2 gap-8 items-center">
             <div>
@@ -54,8 +58,7 @@ const publishDate = "August 4, 2025";
               </p>
             </div>
             <div class="relative">
-              <div class="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl blur-xl"></div>
-              <img src="/PrysmMail Icon.png" alt="Prysm Mail App Icon Image" class="relative rounded-2xl shadow-2xl w-full border border-white/10" />
+              <img src="/PrysmMail Icon.png" alt="Prysm Mail App Icon Image" class="relative rounded-2xl shadow-2xl w-full" />
             </div>
           </div>
         </section>
@@ -63,21 +66,21 @@ const publishDate = "August 4, 2025";
 
       <!-- Key Features Highlight -->
       <div class="grid md:grid-cols-3 gap-6 mb-16">
-        <div class="glass p-6 rounded-2xl border border-purple-400/30 bg-gradient-to-br from-purple-500/10 to-transparent">
+        <div class="card p-6 rounded-2xl border border-purple-400/30 bg-gradient-to-br from-purple-500/10 to-transparent">
           <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 flex-shrink-0">
             🧠
           </div>
           <h3 class="text-xl font-bold mb-2">Local AI Processing</h3>
           <p class="text-gray-300 text-sm">All AI features run entirely on-device using Apple's MLX framework</p>
         </div>
-        <div class="glass p-6 rounded-2xl border border-green-400/30 bg-gradient-to-br from-green-500/10 to-transparent">
+        <div class="card p-6 rounded-2xl border border-green-400/30 bg-gradient-to-br from-green-500/10 to-transparent">
           <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4 flex-shrink-0">
             🔒
           </div>
           <h3 class="text-xl font-bold mb-2">Complete Privacy</h3>
           <p class="text-gray-300 text-sm">Your emails never leave your device. Zero cloud processing!</p>
         </div>
-        <div class="glass p-6 rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500/10 to-transparent">
+        <div class="card p-6 rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500/10 to-transparent">
           <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4 flex-shrink-0">
             ✨
           </div>
@@ -87,7 +90,7 @@ const publishDate = "August 4, 2025";
       </div>
 
       <!-- Genesis Section -->
-      <div class="glass p-10 rounded-3xl mb-12 border border-white/10">
+      <div class="card p-10 rounded-xl mb-12">
         <div class="flex items-center gap-4 mb-8">
           <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center flex-shrink-0">
             🚀
@@ -105,7 +108,7 @@ const publishDate = "August 4, 2025";
       </div>
 
       <!-- Core Philosophy Section -->
-      <div class="glass p-10 rounded-3xl mb-12 border border-white/10">
+      <div class="card p-10 rounded-xl mb-12">
         <div class="flex items-center gap-4 mb-8">
           <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
             💭
@@ -159,11 +162,10 @@ const publishDate = "August 4, 2025";
 
         <!-- Task View Screenshot -->
         <div class="relative">
-          <div class="glass p-6 rounded-2xl border border-white/10">
+          <div class="card p-6 rounded-2xl">
             <figure class="space-y-4">
               <div class="relative">
-                <div class="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl blur-xl"></div>
-                <img src="/todoView.png" alt="Prysm Mail Task View interface showing email-based tasks organized in a dedicated workspace" class="relative rounded-2xl shadow-2xl w-1/2 mx-auto border border-white/10" />
+                <img src="/todoView.png" alt="Prysm Mail Task View interface showing email-based tasks organized in a dedicated workspace" class="relative rounded-2xl shadow-2xl w-1/2 mx-auto" />
               </div>
               <figcaption class="text-center text-gray-400 italic">
                 The innovative Task View that transforms email-based todos into a proper task management system
@@ -175,11 +177,10 @@ const publishDate = "August 4, 2025";
 
       <!-- Main Interface Screenshot -->
       <div class="relative mb-16">
-        <div class="glass p-8 rounded-3xl border border-white/10">
+        <div class="card p-8 rounded-xl">
           <figure class="space-y-4">
             <div class="relative">
-              <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-2xl"></div>
-              <img src="/mailclient-overview.png" alt="Prysm Mail interface overview showing the main inbox view with the Liquid Glass UI effect" class="relative rounded-2xl shadow-2xl w-1/2 mx-auto border border-white/10" />
+              <img src="/mailclient-overview.png" alt="Prysm Mail interface overview showing the main inbox view with the Liquid Glass UI effect" class="relative rounded-2xl shadow-2xl w-1/2 mx-auto" />
             </div>
             <figcaption class="text-center text-gray-400 italic">
               The main interface showcasing the distinctive UI effect that has become Prysm Mail's signature design element
@@ -189,7 +190,7 @@ const publishDate = "August 4, 2025";
       </div>
       <!-- Technical Architecture Section -->
       <div class="space-y-12 mb-16">
-        <div class="glass p-10 rounded-3xl border border-white/10">
+        <div class="card p-10 rounded-xl">
           <div class="flex items-center gap-4 mb-8">
             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center flex-shrink-0">
               ⚙️
@@ -202,8 +203,7 @@ const publishDate = "August 4, 2025";
 
           <!-- Architecture Diagram -->
           <div class="relative mb-8">
-            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur-xl"></div>
-            <img src="/mailclient-architecture.png" alt="Prysm Mail Architecture Diagram" class="relative rounded-2xl shadow-2xl w-full border border-white/10" />
+            <img src="/mailclient-architecture.png" alt="Prysm Mail Architecture Diagram" class="relative rounded-2xl shadow-2xl w-full" />
           </div>
 
           <!-- Local LLM Integration Subsection -->
@@ -263,11 +263,10 @@ const publishDate = "August 4, 2025";
 
           <!-- Semantic Search Demo -->
           <div class="relative">
-            <div class="glass p-6 rounded-2xl border border-white/10">
+            <div class="card p-6 rounded-2xl">
               <figure class="space-y-4">
                 <div class="relative flex justify-center">
-                  <div class="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur-xl"></div>
-                  <img src="/semantic-search-demo.png" alt="Semantic search interface showing natural language query results" class="relative rounded-xl shadow-xl border border-white/10 w-72 md:w-96" />
+                  <img src="/semantic-search-demo.png" alt="Semantic search interface showing natural language query results" class="relative rounded-xl shadow-xl w-72 md:w-96" />
                 </div>
                 <figcaption class="text-center text-gray-400 italic">
                   The semantic search feature understanding natural language queries like "emails about the conference next month"
@@ -278,7 +277,7 @@ const publishDate = "August 4, 2025";
         </div>
 
         <!-- AI Powered Search Section -->
-        <div class="glass p-10 rounded-3xl border border-white/10">
+        <div class="card p-10 rounded-xl">
           <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
             <span class="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center text-sm flex-shrink-0">🔍</span>
             AI Powered Search Using Custom Email Search Tooling
@@ -312,7 +311,7 @@ const publishDate = "August 4, 2025";
         </div>
       </div>
       <!-- User Interface Innovations Section -->
-      <div class="glass p-10 rounded-3xl border border-white/10 mb-12">
+      <div class="card p-10 rounded-xl mb-12">
         <div class="flex items-center gap-4 mb-8">
           <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl flex items-center justify-center flex-shrink-0">
             🎨
@@ -342,8 +341,7 @@ const publishDate = "August 4, 2025";
                 </p>
               </div>
               <div class="relative">
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl blur-xl"></div>
-                <img src="/swipeGestures.gif" alt="Animation showing the gesture control system for email management" class="relative rounded-xl shadow-xl w-full border border-white/10" />
+                <img src="/swipeGestures.gif" alt="Animation showing the gesture control system for email management" class="relative rounded-xl shadow-xl w-full" />
               </div>
             </div>
           </div>
@@ -364,7 +362,7 @@ const publishDate = "August 4, 2025";
       <!-- Technical Challenges Section -->
       <div class="space-y-8 mb-16">
         <!-- IMAP/SMTP Implementation -->
-        <div class="glass p-10 rounded-3xl border border-white/10">
+        <div class="card p-10 rounded-xl">
           <div class="flex items-center gap-4 mb-8">
             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
               📧
@@ -398,7 +396,7 @@ const publishDate = "August 4, 2025";
         </div>
 
         <!-- Performance & Privacy Section -->
-        <div class="glass p-10 rounded-3xl border border-white/10">
+        <div class="card p-10 rounded-xl">
           <div class="flex items-center gap-4 mb-8">
             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
               ⚡
@@ -445,7 +443,7 @@ const publishDate = "August 4, 2025";
         </div>
       </div>
       <!-- Future Directions Section -->
-      <div class="glass p-10 rounded-3xl border border-white/10 mb-12">
+      <div class="card p-10 rounded-xl mb-12">
         <div class="flex items-center gap-4 mb-8">
           <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
             🚀
@@ -488,7 +486,7 @@ const publishDate = "August 4, 2025";
       </div>
 
       <!-- Conclusion Section -->
-      <div class="glass p-12 rounded-3xl border border-white/10 mb-12">
+      <div class="card p-12 rounded-xl mb-12">
         <div class="text-center mb-8">
           <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
             ✨
@@ -509,9 +507,8 @@ const publishDate = "August 4, 2025";
 
       <!-- Call to Action -->
       <div class="relative">
-        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl"></div>
-        <div class="relative glass p-12 rounded-3xl border border-white/20 text-center">
-          <h3 class="text-3xl font-bold mb-6 text-gradient">Try Prysm Mail</h3>
+        <div class="relative card p-12 rounded-xl text-center">
+          <h3 class="text-3xl font-bold mb-6">Try Prysm Mail</h3>
           <p class="text-lg text-gray-200 mb-8 max-w-2xl mx-auto">
             Prysm Mail will be available as an open-source project. Explore the innovative approach to email management powered by local AI.
           </p>
@@ -524,7 +521,7 @@ const publishDate = "August 4, 2025";
             View on GitHub
           </a>
           <a href="#" 
-             class="inline-flex items-center gap-3 px-8 py-4 glass border border-white/20 rounded-2xl font-bold text-white hover:scale-105 transition-all duration-300 js-release-btn">
+             class="inline-flex items-center gap-3 px-8 py-4 card rounded-2xl font-bold text-white hover:scale-105 transition-all duration-300 js-release-btn">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
@@ -553,7 +550,7 @@ const publishDate = "August 4, 2025";
     animation: fadeInUp 0.8s ease-out;
   }
 
-  .glass:hover {
+  .card:hover {
     transform: translateY(-2px);
     transition: all 0.3s ease;
   }

@@ -6,7 +6,11 @@ const publishDate = "April 11, 2025";
 ---
 <Layout title={`${title} - Project`}>
   <main class="container mx-auto px-4 py-16">
-    <article class="glass p-12 rounded-3xl max-w-3xl mx-auto">
+    <p class="section-label mb-6">
+      <a href="/" style="color: var(--color-muted);">~/projects</a>
+      <span class="mx-1">/</span>website
+    </p>
+    <article class="card p-12 rounded-xl max-w-3xl mx-auto">
       <!-- Project Header -->
       <header class="mb-8">
         <h1 class="text-5xl font-bold mb-2">{title}</h1>
@@ -29,7 +33,7 @@ const publishDate = "April 11, 2025";
                 height="500"
                 width="500"
                 loading="lazy"
-                class="rounded-3xl"
+                class="rounded-xl"
                 ></iframe>
                 </div>
         
