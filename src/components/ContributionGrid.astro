@@ -19,6 +19,7 @@ const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 let contributions: Contribution[] = [];
 try {
   const res = await fetch('https://github-contributions-api.jogruber.de/v4/VittorioPastore?y=last');
+  if (!res.ok) throw new Error(res.statusText);
   const data = await res.json();
   contributions = (data.contributions as Contribution[]).sort((a, b) =>
     a.date.localeCompare(b.date)
