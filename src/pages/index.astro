@@ -78,6 +78,13 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
           <AnimatedButton text="Contact Me" href="#contact" client:load />
         </div>
       </div>
+      <div class="hero-photo-wrap">
+        <img
+          src="/vittoTransparent.png"
+          alt="Vittorio Pastore with robots"
+          class="hero-photo"
+        />
+      </div>
     </section>
 
     <!-- Projects Section -->
@@ -235,13 +242,43 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
   /* ── Hero ── */
   .hero {
     min-height: 100vh;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto;
     align-items: center;
+    gap: 4rem;
     padding: 4rem 0 6rem;
   }
 
   .hero-inner {
-    max-width: 720px;
+    max-width: 600px;
+  }
+
+  .hero-photo-wrap {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    align-self: stretch;
+  }
+
+  .hero-photo {
+    height: min(70vh, 600px);
+    width: auto;
+    object-fit: contain;
+    object-position: bottom;
+    filter:
+      drop-shadow(0 0 40px rgba(245, 158, 11, 0.12))
+      drop-shadow(0 24px 48px rgba(0, 0, 0, 0.6))
+      drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      grid-template-columns: 1fr;
+      padding-top: 2rem;
+    }
+    .hero-photo-wrap {
+      display: none;
+    }
   }
 
   .hero-path {
