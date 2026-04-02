@@ -405,6 +405,18 @@ const { title } = Astro.props;
   /* ── .float is intentionally a no-op (animation removed) ── */
   .float { }
 
+  /* ── Light mode: fix hardcoded Tailwind gray text classes ── */
+  html.light-mode .text-gray-100,
+  html.light-mode .text-gray-200,
+  html.light-mode .text-gray-300 {
+    color: var(--color-text) !important;
+  }
+
+  html.light-mode .text-gray-400,
+  html.light-mode .text-gray-500 {
+    color: var(--color-muted) !important;
+  }
+
   @supports (-webkit-touch-callout: none) {
     html { background-attachment: scroll; }
   }
