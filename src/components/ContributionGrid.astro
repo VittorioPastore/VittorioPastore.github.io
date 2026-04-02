@@ -28,13 +28,8 @@ try {
   // graceful fallback: grid renders as empty (all level-0 squares)
 }
 
-// Build a date → contribution map
-const contribMap = new Map(contributions.map(c => [c.date, c]));
-
 // Build 53 × 7 grid (column = week, row = day of week, Sunday = 0)
 type Cell = { date: string; count: number; level: number } | null;
-const weeks: Cell[][] = [];
-const monthLabels: string[] = [];
 
 // Build grid from real data, or generate a 52-week placeholder if API failed
 const buildGrid = (contribs: Contribution[]) => {
