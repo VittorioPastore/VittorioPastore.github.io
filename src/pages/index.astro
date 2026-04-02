@@ -437,27 +437,6 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
 
   /* Fade from dark on left edge — removed: colour overlay caused banding on transparent PNG */
 
-  /* Amber bloom behind photo */
-  .hero-photo-wrap::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(245, 158, 11, 0.04) 0%, transparent 60%);
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  /* Bottom vignette */
-  .hero::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 6rem;
-    background: linear-gradient(to bottom, transparent, var(--bg-base));
-    z-index: 3;
-    pointer-events: none;
-  }
-
   /* Photo contained within the right half — no overflow */
   /* Mask fades the left edge of the image itself — no colour overlay, no banding */
   .hero-photo {
