@@ -61,31 +61,32 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
 ---
 
 <Layout title="Vittorio Pastore - Portfolio">
-  <main class="editorial-main">
 
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-inner">
-        <p class="section-label hero-path">~/vittorio<span class="cursor">▋</span></p>
-        <h1 class="hero-name">Vittorio<br/>Pastore</h1>
-        <div class="hero-accent-line"></div>
-        <p class="hero-bio">
-          Robotics Researcher at Virginia Tech.<br/>
-          Passionate about Reinforcement Learning, Music, and Photography.
-        </p>
-        <div class="hero-cta">
-          <AnimatedButton text="View Projects" href="#projects" client:load />
-          <AnimatedButton text="Contact Me" href="#contact" client:load />
-        </div>
+  <!-- Hero: full-viewport, outside editorial-main -->
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="section-label hero-path">~/vittorio<span class="cursor">▋</span></p>
+      <h1 class="hero-name">Vittorio<br/>Pastore</h1>
+      <div class="hero-accent-line"></div>
+      <p class="hero-bio">
+        Robotics Researcher at Virginia Tech.<br/>
+        Passionate about Reinforcement Learning, Music, and Photography.
+      </p>
+      <div class="hero-cta">
+        <AnimatedButton text="View Projects" href="#projects" client:load />
+        <AnimatedButton text="Contact Me" href="#contact" client:load />
       </div>
-      <div class="hero-photo-wrap">
-        <img
-          src="/vittoTransparent.png"
-          alt="Vittorio Pastore with robots"
-          class="hero-photo"
-        />
-      </div>
-    </section>
+    </div>
+    <div class="hero-photo-wrap">
+      <img
+        src="/vittoTransparent.png"
+        alt="Vittorio Pastore with robots"
+        class="hero-photo"
+      />
+    </div>
+  </section>
+
+  <main class="editorial-main">
 
     <!-- Projects Section -->
     <section id="projects" class="editorial-section">
@@ -165,8 +166,8 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
         <span class="rule-line"></span>
         <span class="section-title-label">activity</span>
       </div>
-      <div class="activity-grid">
-        <ContributionGrid />
+      <ContributionGrid />
+      <div class="activity-bottom">
         <FunnyFeed client:load />
       </div>
     </section>
@@ -241,43 +242,81 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
 
   /* ── Hero ── */
   .hero {
+    width: 100%;
     min-height: 100vh;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 4rem;
-    padding: 4rem 0 6rem;
-  }
-
-  .hero-inner {
-    max-width: 600px;
-  }
-
-  .hero-photo-wrap {
+    position: relative;
+    overflow: hidden;
     display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    align-self: stretch;
+    align-items: center;
   }
 
+  /* Text: anchored to left edge */
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 500px;
+    padding: 8rem 3rem 8rem 2rem;
+  }
+
+  /* Photo: right half — starts at 48% so it's generous */
+  .hero-photo-wrap {
+    position: absolute;
+    left: 48%;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Fade from dark on left edge */
+  .hero-photo-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 20%;
+    background: linear-gradient(to right, var(--bg-base), transparent);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Amber bloom behind photo */
+  .hero-photo-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background: radial-gradient(ellipse 70% 80% at 50% 60%, rgba(245, 158, 11, 0.04) 0%, transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Bottom vignette */
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 6rem;
+    background: linear-gradient(to bottom, transparent, var(--bg-base));
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  /* Photo contained within the right half — no overflow */
   .hero-photo {
-    height: min(70vh, 600px);
-    width: auto;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    object-position: bottom;
-    filter:
-      drop-shadow(0 0 40px rgba(245, 158, 11, 0.12))
-      drop-shadow(0 24px 48px rgba(0, 0, 0, 0.6))
-      drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    object-position: bottom right;
+    z-index: 1;
   }
 
   @media (max-width: 768px) {
-    .hero {
-      grid-template-columns: 1fr;
-      padding-top: 2rem;
+    .hero-inner {
+      padding: 6rem 2rem;
     }
     .hero-photo-wrap {
-      display: none;
+      left: 0;
+      opacity: 0.1;
     }
   }
 
@@ -485,16 +524,8 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
   }
 
   /* ── Activity ── */
-  .activity-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-  }
-
-  @media (max-width: 640px) {
-    .activity-grid {
-      grid-template-columns: 1fr;
-    }
+  .activity-bottom {
+    margin-top: 1.25rem;
   }
 
   /* ── Contact ── */
