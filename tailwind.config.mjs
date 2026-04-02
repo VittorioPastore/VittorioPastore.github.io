@@ -8,7 +8,7 @@ export default {
       },
       colors: {
         accent: '#F59E0B',
-        'accent-light': '#d97706',
+        'accent-muted': '#d97706',
         surface: '#1a1a1a',
         elevated: '#262626',
         'border-subtle': '#2a2a2a',
