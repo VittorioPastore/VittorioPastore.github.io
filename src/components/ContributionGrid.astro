@@ -36,42 +36,67 @@ type Cell = { date: string; count: number; level: number } | null;
 const weeks: Cell[][] = [];
 const monthLabels: string[] = [];
 
-if (contributions.length > 0) {
-  const firstDate = new Date(contributions[0].date + 'T12:00:00Z');
-  const startDate = new Date(firstDate);
-  startDate.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay()); // rewind to Sunday
+// Build grid from real data, or generate a 52-week placeholder if API failed
+const buildGrid = (contribs: Contribution[]) => {
+  const result: Cell[][] = [];
+  const labels: string[] = [];
 
-  const lastDate = new Date(contributions[contributions.length - 1].date + 'T12:00:00Z');
-  let current = new Date(startDate);
-  let week: Cell[] = [];
-  let weekStartDate: Date | null = null;
+  if (contribs.length > 0) {
+    const map = new Map(contribs.map(c => [c.date, c]));
+    const firstDate = new Date(contribs[0].date + 'T12:00:00Z');
+    const startDate = new Date(firstDate);
+    startDate.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay());
+    const lastDate = new Date(contribs[contribs.length - 1].date + 'T12:00:00Z');
+    let current = new Date(startDate);
+    let week: Cell[] = [];
+    let weekStart: Date | null = null;
 
-  while (current <= lastDate) {
-    if (week.length === 0) weekStartDate = new Date(current);
-    const dateStr = current.toISOString().split('T')[0];
-    const contrib = contribMap.get(dateStr);
-    week.push(contrib ? { date: contrib.date, count: contrib.count, level: contrib.level } : null);
-
-    if (week.length === 7) {
-      weeks.push(week);
-      // Show month label only on the first week of a new month
-      const label =
-        weekStartDate && weekStartDate.getUTCDate() <= 7
-          ? MONTH_NAMES[weekStartDate.getUTCMonth()]
-          : '';
-      monthLabels.push(label);
-      week = [];
-      weekStartDate = null;
+    while (current <= lastDate) {
+      if (week.length === 0) weekStart = new Date(current);
+      const dateStr = current.toISOString().split('T')[0];
+      const c = map.get(dateStr);
+      week.push(c ? { date: c.date, count: c.count, level: c.level } : null);
+      if (week.length === 7) {
+        result.push(week);
+        labels.push(weekStart && weekStart.getUTCDate() <= 7 ? MONTH_NAMES[weekStart.getUTCMonth()] : '');
+        week = []; weekStart = null;
+      }
+      current.setUTCDate(current.getUTCDate() + 1);
     }
-    current.setUTCDate(current.getUTCDate() + 1);
+    if (week.length > 0) {
+      while (week.length < 7) week.push(null);
+      result.push(week); labels.push('');
+    }
+  } else {
+    // Placeholder: 52 empty weeks ending today
+    const today = new Date();
+    const endDate = new Date(today);
+    endDate.setUTCDate(endDate.getUTCDate() - endDate.getUTCDay() + 6); // end of current week
+    const startDate = new Date(endDate);
+    startDate.setUTCDate(startDate.getUTCDate() - 52 * 7 + 1);
+    startDate.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay()); // rewind to Sunday
+
+    let current = new Date(startDate);
+    let week: Cell[] = [];
+    let weekStart: Date | null = null;
+    let weekCount = 0;
+
+    while (weekCount < 52) {
+      if (week.length === 0) weekStart = new Date(current);
+      week.push(null);
+      if (week.length === 7) {
+        result.push(week);
+        labels.push(weekStart && weekStart.getUTCDate() <= 7 ? MONTH_NAMES[weekStart.getUTCMonth()] : '');
+        week = []; weekStart = null; weekCount++;
+      }
+      current.setUTCDate(current.getUTCDate() + 1);
+    }
   }
-  // Pad final partial week
-  if (week.length > 0) {
-    while (week.length < 7) week.push(null);
-    weeks.push(week);
-    monthLabels.push('');
-  }
-}
+
+  return { weeks: result, monthLabels: labels };
+};
+
+const { weeks, monthLabels } = buildGrid(contributions);
 ---
 
 <div class="contrib-wrapper card rounded-xl p-6">
