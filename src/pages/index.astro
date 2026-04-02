@@ -258,10 +258,10 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     padding: 8rem 3rem 8rem 2rem;
   }
 
-  /* Photo: right half — starts at 48% so it's generous */
+  /* Photo: right half — starts at 42% for more breathing room */
   .hero-photo-wrap {
     position: absolute;
-    left: 48%;
+    left: 42%;
     right: 0;
     top: 0;
     bottom: 0;
@@ -269,23 +269,14 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     pointer-events: none;
   }
 
-  /* Fade from dark on left edge */
-  .hero-photo-wrap::before {
-    content: '';
-    position: absolute;
-    top: 0; bottom: 0; left: 0;
-    width: 20%;
-    background: linear-gradient(to right, var(--bg-base), transparent);
-    z-index: 2;
-    pointer-events: none;
-  }
+  /* Fade from dark on left edge — removed: colour overlay caused banding on transparent PNG */
 
   /* Amber bloom behind photo */
   .hero-photo-wrap::after {
     content: '';
     position: absolute;
-    inset: -20%;
-    background: radial-gradient(ellipse 70% 80% at 50% 60%, rgba(245, 158, 11, 0.04) 0%, transparent 60%);
+    inset: 0;
+    background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(245, 158, 11, 0.04) 0%, transparent 60%);
     z-index: 0;
     pointer-events: none;
   }
@@ -302,12 +293,15 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
   }
 
   /* Photo contained within the right half — no overflow */
+  /* Mask fades the left edge of the image itself — no colour overlay, no banding */
   .hero-photo {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    object-position: bottom right;
+    object-position: center;
     z-index: 1;
+    mask-image: linear-gradient(to right, transparent 0%, black 25%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 25%);
   }
 
   @media (max-width: 768px) {
