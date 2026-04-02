@@ -7,21 +7,20 @@ export default {
         poppins: ['Poppins', 'sans-serif'],
       },
       colors: {
-        'glass': 'rgba(255, 255, 255, 0.1)',
+        accent: '#F59E0B',
+        'accent-light': '#d97706',
+        surface: '#1a1a1a',
+        elevated: '#262626',
+        'border-subtle': '#2a2a2a',
+        'border-hover': '#404040',
       },
       animation: {
         'gradient': 'gradient 8s linear infinite',
       },
       keyframes: {
         gradient: {
-          '0%, 100%': {
-            'background-size': '200% 200%',
-            'background-position': 'left center',
-          },
-          '50%': {
-            'background-size': '200% 200%',
-            'background-position': 'right center',
-          },
+          '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+          '50%': { 'background-size': '200% 200%', 'background-position': 'right center' },
         },
       },
     },
