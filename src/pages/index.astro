@@ -2,7 +2,7 @@
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
 import AnimatedButton from '../components/AnimatedButton';
-import GitHubFeed from '../components/GitHubFeed';
+import ContributionGrid from '../components/ContributionGrid.astro';
 import FunnyFeed from '../components/FunnyFeed';
 
 const skills = [
@@ -60,32 +60,33 @@ const projects = {
   <main class="container mx-auto px-4 py-16 relative z-10">
     <!-- Hero Section -->
     <section class="flex flex-col items-center justify-center min-h-[80vh] text-center relative">
-      <div class="glass p-12 rounded-3xl max-w-3xl mx-auto relative overflow-hidden float">
-        <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 pointer-events-none"></div>
-        <h1 class="text-5xl md:text-7xl font-bold mb-8">
-          Hi, I'm <span class="text-gradient">Vittorio</span>
+      <div class="card rounded-2xl p-10 md:p-14 max-w-3xl mx-auto">
+        <p class="section-label mb-3">~/vittorio</p>
+        <h1 class="text-5xl md:text-7xl font-bold mb-6">
+          Hi, I'm Vittorio
         </h1>
-        <p class="text-xl md:text-2xl mb-10 text-gray-200">
+        <p class="text-lg md:text-xl mb-10 text-muted">
           Robotics Researcher at Virginia Tech. <br/>
           Passionate about Reinforcement Learning, Music, and Photography
         </p>
-        <div class="flex gap-6 justify-center">
-          <AnimatedButton text="View Projects" href="#projects" client:load class="w-40"/>
-          <AnimatedButton text="Contact Me" href="#contact" client:load class="w-40"/>
+        <div class="flex gap-4 justify-center flex-wrap">
+          <AnimatedButton text="View Projects" href="#projects" client:load />
+          <AnimatedButton text="Contact Me" href="#contact" client:load />
         </div>
       </div>
     </section>
 
     <!-- Skills Section -->
-    <section class="my-32">
-      <h2 class="text-4xl font-bold text-center mb-16">Skills & Technologies</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <section class="my-24">
+      <p class="section-label text-center mb-2">// skills</p>
+      <h2 class="text-3xl font-bold text-center mb-12">Skills & Technologies</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         {skills.map(skill => (
           <button
-            class="glass p-6 rounded-2xl text-center hover:bg-white/20 transition-all duration-500 transform hover:-translate-y-2 h-20 flex items-center justify-center cursor-pointer"
+            class="card card-hover p-5 rounded-xl text-center h-16 flex items-center justify-center cursor-pointer"
             data-skill={skill.name}
           >
-            <span class="text-lg font-medium">{skill.name}</span>
+            <span class="text-sm font-medium">{skill.name}</span>
           </button>
         ))}
       </div>
@@ -122,7 +123,7 @@ const projects = {
     <section class="my-16 md:my-32">
       <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Recent Activity</h2>
       <div class="grid md:grid-cols-2 gap-8">
-        <GitHubFeed client:load />
+        <ContributionGrid />
         <FunnyFeed client:load />
       </div>
     </section>    
@@ -185,7 +186,7 @@ const projects = {
 </script>
 <style>
   .highlight {
-    box-shadow: 0 0 20px rgb(138, 142, 255, 0.3);
+    border-color: #F59E0B !important;
     transition: all 0.5s ease;
   }
 
