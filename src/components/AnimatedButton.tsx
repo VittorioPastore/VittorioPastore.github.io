@@ -9,20 +9,20 @@ export default function AnimatedButton({ text, href }: ButtonProps) {
   return (
     <motion.a
       href={href}
-      className="relative glass px-4 md:px-8 py-3 md:py-4 rounded-full text-white text-sm md:text-base font-medium 
-                 hover:bg-white/20 transition-all duration-300 inline-block
-                 overflow-hidden group whitespace-nowrap"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      className="relative inline-block px-6 py-3 rounded-lg text-sm font-medium whitespace-nowrap"
+      style={{
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border-subtle)',
+        color: 'var(--color-text)',
+      }}
+      whileHover={{
+        scale: 1.02,
+        y: -1,
+      }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.15 }}
     >
-      <span className="relative z-10">{text}</span>
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 opacity-0 group-hover:opacity-20 
-                   transition-opacity duration-300"
-        initial={false}
-        whileHover={{ scale: 1.2, rotate: 5 }}
-      />
-      <div className="absolute inset-0 border border-white/20 rounded-full" />
+      {text}
     </motion.a>
   );
 }
