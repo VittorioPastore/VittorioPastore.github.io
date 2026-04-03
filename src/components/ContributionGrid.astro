@@ -1,8 +1,8 @@
 ---
-interface Contribution {
+interface Cell {
   date: string;
   count: number;
-  level: 0 | 1 | 2 | 3 | 4;
+  level: number;
 }
 
 const COLORS: Record<number, string> = {
@@ -16,24 +16,12 @@ const COLORS: Record<number, string> = {
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
-let contributions: Contribution[] = [];
-try {
-  const res = await fetch('https://github-contributions-api.jogruber.de/v4/VittorioPastore?y=last');
-  if (!res.ok) throw new Error(res.statusText);
-  const data = await res.json();
-  contributions = (data.contributions as Contribution[]).sort((a, b) =>
-    a.date.localeCompare(b.date)
-  );
-} catch {
-  // graceful fallback: grid renders as empty (all level-0 squares)
-}
+type GridCell = Cell | null;
 
-// Build 53 × 7 grid (column = week, row = day of week, Sunday = 0)
-type Cell = { date: string; count: number; level: number } | null;
+const toIsoDate = (value: Date) => value.toISOString().split('T')[0];
 
-// Build grid from real data, or generate a 52-week placeholder if API failed
-const buildGrid = (contribs: Contribution[]) => {
-  const result: Cell[][] = [];
+const buildGrid = (contribs: Cell[]) => {
+  const result: GridCell[][] = [];
   const labels: string[] = [];
 
   if (contribs.length > 0) {
@@ -43,12 +31,12 @@ const buildGrid = (contribs: Contribution[]) => {
     startDate.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay());
     const lastDate = new Date(contribs[contribs.length - 1].date + 'T12:00:00Z');
     let current = new Date(startDate);
-    let week: Cell[] = [];
+    let week: GridCell[] = [];
     let weekStart: Date | null = null;
 
     while (current <= lastDate) {
       if (week.length === 0) weekStart = new Date(current);
-      const dateStr = current.toISOString().split('T')[0];
+      const dateStr = toIsoDate(current);
       const c = map.get(dateStr);
       week.push(c ? { date: c.date, count: c.count, level: c.level } : null);
       if (week.length === 7) {
@@ -64,21 +52,20 @@ const buildGrid = (contribs: Contribution[]) => {
     }
   } else {
     // Placeholder: 52 empty weeks ending today
-    const today = new Date();
-    const endDate = new Date(today);
+    const endDate = new Date();
     endDate.setUTCDate(endDate.getUTCDate() - endDate.getUTCDay() + 6); // end of current week
     const startDate = new Date(endDate);
     startDate.setUTCDate(startDate.getUTCDate() - 52 * 7 + 1);
     startDate.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay()); // rewind to Sunday
 
     let current = new Date(startDate);
-    let week: Cell[] = [];
+    let week: GridCell[] = [];
     let weekStart: Date | null = null;
     let weekCount = 0;
 
     while (weekCount < 52) {
       if (week.length === 0) weekStart = new Date(current);
-      week.push(null);
+      week.push({ date: toIsoDate(current), count: 0, level: 0 });
       if (week.length === 7) {
         result.push(week);
         labels.push(weekStart && weekStart.getUTCDate() <= 7 ? MONTH_NAMES[weekStart.getUTCMonth()] : '');
@@ -91,16 +78,16 @@ const buildGrid = (contribs: Contribution[]) => {
   return { weeks: result, monthLabels: labels };
 };
 
-const { weeks, monthLabels } = buildGrid(contributions);
+const { weeks, monthLabels } = buildGrid([]);
 ---
 
-<div class="contrib-wrapper card rounded-xl p-4 sm:p-6">
+<div class="contrib-wrapper card rounded-xl p-4 sm:p-6" data-contrib-grid data-username="VittorioPastore">
   <p class="section-label mb-4">// github </p>
 
   <div class="contrib-scroll">
     <div class="contrib-inner">
       <!-- Month labels row -->
-      <div class="contrib-month-row">
+      <div class="contrib-month-row" data-contrib-months>
         <div class="contrib-day-spacer"></div>
         {monthLabels.map(label => (
           <span class="contrib-month-cell">{label}</span>
@@ -117,13 +104,14 @@ const { weeks, monthLabels } = buildGrid(contributions);
         </div>
 
         <!-- Week columns -->
-        <div class="contrib-weeks">
-          {weeks.map(week => (
+        <div class="contrib-weeks" data-contrib-weeks>
+          {weeks.map((week) => (
             <div class="contrib-week">
               {week.map(cell => (
                 <div
                   class="contrib-cell"
-                  style={`background:${cell ? COLORS[cell.level] : COLORS[0]}`}
+                  data-level={cell ? cell.level : 0}
+                  style={cell ? `--color-target: ${COLORS[cell.level]};` : ''}
                   title={cell ? `${cell.date}: ${cell.count} contribution${cell.count !== 1 ? 's' : ''}` : ''}
                 />
               ))}
@@ -135,7 +123,220 @@ const { weeks, monthLabels } = buildGrid(contributions);
   </div>
 </div>
 
-<style>
+<script>
+  type ClientContribution = { date: string; count: number; level: number };
+  type DenoContribution = { date: string; contributionCount?: number; contributionLevel?: string };
+  type DenoPayload = { contributions?: DenoContribution[][] };
+  type JogruberPayload = { contributions?: ClientContribution[] };
+
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const levelColors: Record<number, string> = {
+    0: 'var(--contrib-level-0, #2a2a2a)',
+    1: 'var(--contrib-level-1, #92400e)',
+    2: 'var(--contrib-level-2, #b45309)',
+    3: 'var(--contrib-level-3, #d97706)',
+    4: 'var(--contrib-level-4, #F59E0B)',
+  };
+  const denoLevelToNumber: Record<string, number> = {
+    NONE: 0,
+    FIRST_QUARTILE: 1,
+    SECOND_QUARTILE: 2,
+    THIRD_QUARTILE: 3,
+    FOURTH_QUARTILE: 4,
+  };
+
+  // Animation timing constants
+  const CELL_STEP = 3; // ms between each randomly-addressed cell
+
+  const toIsoDate = (value: Date) => value.toISOString().split('T')[0];
+
+  const buildGrid = (contribs: ClientContribution[]) => {
+    const result: ClientContribution[][] = [];
+    const labels: string[] = [];
+
+    if (contribs.length > 0) {
+      const map = new Map(contribs.map((cell: ClientContribution) => [cell.date, cell]));
+      const firstDate = new Date(`${contribs[0].date}T12:00:00Z`);
+      const startDate = new Date(firstDate);
+      startDate.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay());
+      const lastDate = new Date(`${contribs[contribs.length - 1].date}T12:00:00Z`);
+      let current = new Date(startDate);
+      let week: ClientContribution[] = [];
+      let weekStart: Date | null = null;
+
+      while (current <= lastDate) {
+        if (week.length === 0) weekStart = new Date(current);
+        const dateStr = toIsoDate(current);
+        week.push(map.get(dateStr) || { date: dateStr, count: 0, level: 0 });
+        if (week.length === 7) {
+          result.push(week);
+          labels.push(weekStart && weekStart.getUTCDate() <= 7 ? monthNames[weekStart.getUTCMonth()] : '');
+          week = [];
+          weekStart = null;
+        }
+        current.setUTCDate(current.getUTCDate() + 1);
+      }
+
+      if (week.length > 0) {
+        while (week.length < 7) {
+          week.push({ date: toIsoDate(current), count: 0, level: 0 });
+          current.setUTCDate(current.getUTCDate() + 1);
+        }
+        result.push(week);
+        labels.push('');
+      }
+    }
+
+    return { weeks: result, monthLabels: labels };
+  };
+
+  const normalizeContributions = (payload: DenoPayload | JogruberPayload | null): ClientContribution[] => {
+    if (!payload || !Array.isArray(payload.contributions)) return [];
+
+    const contributions = payload.contributions;
+
+    if (contributions.length > 0 && Array.isArray(contributions[0])) {
+      const denoContributions = contributions as DenoContribution[][];
+      return denoContributions
+        .flat()
+        .map((item: DenoContribution) => ({
+          date: item.date,
+          count: Number(item.contributionCount || 0),
+          level: item.contributionLevel ? (denoLevelToNumber[item.contributionLevel] ?? 0) : 0,
+        }))
+        .sort((a: ClientContribution, b: ClientContribution) => a.date.localeCompare(b.date));
+    }
+
+    const jogruberContributions = contributions as ClientContribution[];
+    return jogruberContributions
+      .map((item: ClientContribution) => ({
+        date: item.date,
+        count: Number(item.count || 0),
+        level: Number(item.level || 0),
+      }))
+      .sort((a: ClientContribution, b: ClientContribution) => a.date.localeCompare(b.date));
+  };
+
+  const renderGrid = (gridRoot: Element, monthLabels: string[], weeks: ClientContribution[][]) => {
+    const monthsRow = gridRoot.querySelector('[data-contrib-months]');
+    const weeksRoot = gridRoot.querySelector('[data-contrib-weeks]');
+    if (!monthsRow || !weeksRoot) return;
+
+    const monthMarkup = monthLabels.map((label: string) => `<span class="contrib-month-cell">${label}</span>`).join('');
+    monthsRow.innerHTML = `<div class="contrib-day-spacer"></div>${monthMarkup}`;
+
+    // Build a shuffled delay map — pseudo-random but seeded so the pattern is
+    // consistent across replays (simulates non-sequential memory addressing).
+    const mulberry32 = (seed: number) => {
+      let s = seed;
+      return () => {
+        s = (s + 0x6D2B79F5) | 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    };
+    const rand = mulberry32(0xDEADBEEF);
+    const coords: [number, number][] = [];
+    weeks.forEach((week, wIdx) => week.forEach((_, dIdx) => coords.push([wIdx, dIdx])));
+    // Fisher-Yates shuffle
+    for (let i = coords.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [coords[i], coords[j]] = [coords[j], coords[i]];
+    }
+    const delayMap: number[][] = weeks.map(w => new Array(w.length).fill(0));
+    coords.forEach(([wIdx, dIdx], pos) => { delayMap[wIdx][dIdx] = pos * CELL_STEP; });
+
+    const weeksMarkup = weeks.map((week: ClientContribution[], wIdx: number) => {
+      const dayMarkup = week.map((cell: ClientContribution, dIdx: number) => {
+        const count = Number(cell.count || 0);
+        const level = Math.max(0, Math.min(4, Number(cell.level || 0)));
+        const plural = count === 1 ? '' : 's';
+        const title = `${cell.date}: ${count} contribution${plural}`;
+        const delay = delayMap[wIdx][dIdx];
+        return `<div class="contrib-cell" data-level="${level}" style="--color-target:${levelColors[level]}; animation-delay:${delay}ms" title="${title}"></div>`;
+      }).join('');
+      return `<div class="contrib-week">${dayMarkup}</div>`;
+    }).join('');
+
+    weeksRoot.innerHTML = weeksMarkup;
+  };
+
+const fetchContributions = async (username: string): Promise<ClientContribution[]> => {
+    const nonce = Date.now();
+    const endpoints = [
+      `https://github-contributions-api.jogruber.de/v4/${username}?y=last&t=${nonce}`,
+      `https://github-contributions-api.deno.dev/${username}.json?t=${nonce}`,
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, { cache: 'no-store' });
+        if (!response.ok) continue;
+        const payload = await response.json() as DenoPayload | JogruberPayload;
+        const normalized = normalizeContributions(payload);
+        if (normalized.length > 0) return normalized;
+      } catch {
+        // Try next endpoint.
+      }
+    }
+
+    return [];
+  };
+
+  const initContributionGrid = async () => {
+    const gridRoot = document.querySelector('[data-contrib-grid]');
+    const wrapper = document.querySelector('.contrib-wrapper');
+    if (!gridRoot || !wrapper) return;
+
+    const username = gridRoot.getAttribute('data-username') || 'VittorioPastore';
+    const contributions = await fetchContributions(username);
+    if (contributions.length === 0) return;
+
+    const { weeks, monthLabels } = buildGrid(contributions);
+    if (weeks.length === 0) return;
+
+    renderGrid(gridRoot, monthLabels, weeks);
+
+    const triggerAnimation = () => {
+      wrapper.classList.remove('no-animation');
+      wrapper.classList.remove('is-animated');
+      void (wrapper as HTMLElement).offsetWidth; // force reflow so animation restarts
+      wrapper.classList.add('is-animated');
+    };
+
+    const triggerLeaveAnimation = () => {
+      // Keep colors visible; swap to no-animation so cells stay amber.
+      // The section's own opacity:0.55 (when not is-active) handles visual dimming.
+      wrapper.classList.remove('is-animated');
+      wrapper.classList.add('no-animation');
+    };
+
+    // Mirror the same trigger as the section title glitch: watch for is-active
+    // being added to #activity by the scroll handler in index.astro.
+    const section = document.querySelector('#activity');
+    if (!section) return;
+
+    if (section.classList.contains('is-active')) {
+      // Already active when data arrived (e.g. page loaded scrolled here)
+      wrapper.classList.add('no-animation');
+    } else {
+      const mutObserver = new MutationObserver(() => {
+        if (section.classList.contains('is-active')) {
+          wrapper.classList.remove('no-animation');
+          triggerAnimation();
+        } else {
+          triggerLeaveAnimation();
+        }
+      });
+      mutObserver.observe(section, { attributes: true, attributeFilter: ['class'] });
+    }
+  };
+
+  initContributionGrid();
+</script>
+
+<style is:global>
   .contrib-wrapper {
     width: 100%;
     max-width: 100%;
@@ -187,15 +388,16 @@ const { weeks, monthLabels } = buildGrid(contributions);
   .contrib-day-col {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
     width: 28px;
     flex-shrink: 0;
+    margin-top: 1px;
   }
 
   .contrib-day-label {
     display: block;
-    height: 14px;
-    line-height: 14px;
+    height: 12px;
+    line-height: 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 10px;
     color: var(--color-muted);
@@ -205,19 +407,119 @@ const { weeks, monthLabels } = buildGrid(contributions);
 
   .contrib-weeks {
     display: flex;
-    gap: 2px;
+    gap: 3px;
   }
 
   .contrib-week {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
   }
 
   .contrib-cell {
-    width: 14px;
-    height: 14px;
-    border-radius: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
     flex-shrink: 0;
+    background: var(--contrib-level-0);
+    border: 1px solid var(--contrib-cell-outline, rgba(255, 255, 255, 0.08));
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), inset 0 -1px 2px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                box-shadow 0.2s ease,
+                border-color 0.2s ease,
+                filter 0.2s ease;
+    cursor: default;
+    position: relative;
+    will-change: transform, background, filter;
+  }
+
+  /* Flash color tokens — white-hot in dark mode, vivid orange in light mode */
+  :root {
+    --contrib-flash-bg: #fff8e1;
+    --contrib-flash-border: rgba(255, 248, 225, 0.95);
+    --contrib-flash-glow: rgba(245, 158, 11, 0.6);
+    --contrib-flash-glow-wide: rgba(245, 158, 11, 0.3);
+  }
+  html.light-mode {
+    --contrib-flash-bg: #c2410c;
+    --contrib-flash-border: rgba(194, 65, 12, 0.9);
+    --contrib-flash-glow: rgba(194, 65, 12, 0.55);
+    --contrib-flash-glow-wide: rgba(194, 65, 12, 0.25);
+  }
+
+  /* ── Terminal boot: active cells (level > 0) ──
+     Flash white-hot (dark) / burnt-orange (light) → settle to contrib color */
+  @keyframes terminalBoot {
+    0% {
+      background: var(--contrib-level-0);
+      transform: scale(0.85);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
+      border-color: var(--contrib-cell-outline, rgba(255,255,255,0.08));
+      filter: brightness(1);
+    }
+    /* phosphor flash — subtle pop */
+    10% {
+      background: var(--contrib-flash-bg);
+      transform: scale(1.15);
+      box-shadow:
+        0 0 4px var(--color-accent),
+        0 0 8px var(--contrib-flash-glow);
+      border-color: var(--contrib-flash-border);
+      filter: brightness(1.3);
+    }
+    /* cross-fade to amber */
+    32% {
+      background: var(--color-target);
+      transform: scale(1.05);
+      box-shadow: 0 0 4px var(--contrib-flash-glow-wide);
+      border-color: rgba(245, 158, 11, 0.35);
+      filter: brightness(1.1);
+    }
+    /* settle */
+    100% {
+      background: var(--color-target);
+      transform: scale(1);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.05), inset 0 -1px 2px rgba(0,0,0,0.15);
+      border-color: var(--contrib-cell-outline, rgba(255,255,255,0.08));
+      filter: brightness(1);
+    }
+  }
+
+  /* ── Ghost scan: empty cells get a faint accent whisper ── */
+  @keyframes terminalScanEmpty {
+    0%   { background: var(--contrib-level-0); }
+    10%  {
+      background: var(--contrib-flash-glow-wide);
+      box-shadow: 0 0 4px var(--contrib-flash-glow);
+      border-color: var(--contrib-flash-glow);
+    }
+    100% {
+      background: var(--contrib-level-0);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.05), inset 0 -1px 2px rgba(0,0,0,0.15);
+      border-color: var(--contrib-cell-outline, rgba(255,255,255,0.08));
+    }
+  }
+
+  /* Trigger boot animation when section scrolls into view */
+  .contrib-wrapper.is-animated .contrib-cell:not([data-level="0"]) {
+    animation: terminalBoot 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .contrib-wrapper.is-animated .contrib-cell[data-level="0"] {
+    animation: terminalScanEmpty 250ms ease-out both;
+  }
+
+  /* Already visible on load — skip animation, just show colors */
+  .contrib-wrapper.no-animation .contrib-cell:not([data-level="0"]) {
+    background: var(--color-target);
+  }
+
+  /* Hover */
+  .contrib-cell:hover {
+    transform: scale(1.4) !important;
+    z-index: 10;
+    border-color: rgba(255, 255, 255, 0.3);
+    filter: brightness(1.15);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }
 </style>
