@@ -53,7 +53,7 @@ const JokeFeed = () => {
       className="rounded-xl p-4 sm:p-6 h-full"
       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
     >
-      <p className="section-label mb-4">// recent laughs</p>
+      <p className="section-label mb-4">// laughs</p>
       {loading ? (
         <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Loading...</p>
       ) : error ? (

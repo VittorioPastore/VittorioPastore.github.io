@@ -6,14 +6,16 @@ import ContributionGrid from '../components/ContributionGrid.astro';
 import FunnyFeed from '../components/FunnyFeed';
 
 const skills = [
-  { name: 'Python', projects: ['neural-trader', 'squeaky-greyhound'] },
-  { name: 'PyTorch', projects: ['neural-trader'] },
-  { name: 'TensorFlow', projects: ['neural-trader'] },
-  { name: 'ROS', projects: ['squeaky-greyhound'] },
-  { name: 'Raisim', projects: ['squeaky-greyhound'] },
-  { name: 'Controls Theory', projects: ['controls-ios-application', 'nawcad'] },
-  { name: 'C++', projects: ['squeaky-greyhound'] },
-  { name: 'Embodied AI', projects: ['mailclient'] }
+  { name: 'Python & C++', projects: ['squeaky-greyhound', 'neural-trader'] },
+  { name: 'PyTorch & TensorFlow', projects: ['neural-trader'] },
+  { name: 'ROS 2', projects: ['squeaky-greyhound'] },
+  { name: 'Isaac Lab, MuJoCo & Raisim', projects: ['squeaky-greyhound'] },
+  { name: 'Distributed NMPC', projects: ['controls-ios-application', 'nawcad'] },
+  { name: 'Multi-Agent RL', projects: ['neural-trader'] },
+  { name: 'Embodied AI', projects: ['mailclient'] },
+  { name: 'MATLAB & Simulink', projects: ['nawcad', 'neural-trader'] },
+  { name: 'Swift & Core ML', projects: ['mailclient', 'controls-ios-application'] },
+  { name: 'Linux, Git & Docker', projects: [] }
 ];
 
 const projects = {
@@ -89,10 +91,106 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
   </section>
 
   <main class="editorial-main">
+    <!-- Publications Section -->
+    <section id="publications" class="editorial-section" data-scroll-section="publications">
+      <div class="section-rule">
+        <span class="section-number">01</span>
+        <span class="rule-line"></span>
+        <span class="section-title-label">publications</span>
+      </div>
+
+      <div class="publications-list flex flex-col pl-3 md:pl-4">
+        <!-- Paper 1 -->
+        <article class="publication-item group relative pl-8 pb-12 border-l-[2px] border-[var(--border-subtle)] hover:border-[var(--color-accent)] transition-colors duration-500">
+          <!-- Terminal block cursor instead of a ball -->
+          <div class="absolute -left-[5px] top-1 w-[8px] h-[18px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] group-hover:bg-[var(--color-accent)] group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_12px_var(--color-accent)] transition-all duration-300 z-10"></div>
+          
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-6 mb-3">
+            <h3 class="text-xl font-bold text-[var(--color-text)] leading-tight group-hover:text-[var(--color-accent)] transition-colors pr-2">A Nonlinear MPC Framework for Loco-Manipulation of Quadrupedal Robots with Non-Negligible Manipulator Dynamics</h3>
+            <div class="inline-flex flex-shrink-0 mt-1 md:mt-0">
+              <span class="font-mono text-xs px-2.5 py-1.5 bg-[var(--bg-elevated)] text-[var(--color-muted)] rounded border border-[var(--border-subtle)] whitespace-nowrap">IEEE RA-L</span>
+            </div>
+          </div>
+          
+          <p class="text-[var(--color-muted)] text-sm md:text-base leading-relaxed mb-5 max-w-4xl">
+            A real-time NMPC framework for quadrupedal loco-manipulation that couples simplified locomotion templates with full-order manipulator dynamics to effectively handle non-negligible arm mass.
+          </p>
+          
+          <div class="mt-2">
+            <AnimatedButton text="Read Paper" href="https://arxiv.org/abs/2507.22042" client:load />
+          </div>
+        </article>
+
+        <!-- Paper 2 -->
+        <article class="publication-item group relative pl-8 pb-12 border-l-[2px] border-[var(--border-subtle)] hover:border-[var(--color-accent)] transition-colors duration-500">
+          <div class="absolute -left-[5px] top-1 w-[8px] h-[18px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] group-hover:bg-[var(--color-accent)] group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_12px_var(--color-accent)] transition-all duration-300 z-10"></div>
+          
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-6 mb-3">
+            <h3 class="text-xl font-bold text-[var(--color-text)] leading-tight group-hover:text-[var(--color-accent)] transition-colors pr-2">ADMM-Based Distributed MPC with Control Barrier Functions for Safe Multi-Robot Quadrupedal Locomotion</h3>
+            <div class="inline-flex flex-shrink-0 mt-1 md:mt-0">
+              <span class="font-mono text-xs px-2.5 py-1.5 bg-[var(--bg-elevated)] text-[var(--color-muted)] rounded border border-[var(--border-subtle)] whitespace-nowrap">Under Review</span>
+            </div>
+          </div>
+          
+          <p class="text-[var(--color-muted)] text-sm md:text-base leading-relaxed mb-5 max-w-4xl">
+            A fully decentralized MPC framework using ADMM and control barrier functions to enable real-time, safe trajectory planning for multi-agent quadrupedal teams with significantly reduced computational overhead.
+          </p>
+          
+          <div class="mt-2">
+            <AnimatedButton text="Read Paper" href="https://arxiv.org/abs/2603.19170" client:load />
+          </div>
+        </article>
+
+        <!-- Paper 3 -->
+        <article class="publication-item group relative pl-8 pb-12 border-l-[2px] border-[var(--border-subtle)] hover:border-[var(--color-accent)] transition-colors duration-500">
+          <div class="absolute -left-[5px] top-1 w-[8px] h-[18px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] group-hover:bg-[var(--color-accent)] group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_12px_var(--color-accent)] transition-all duration-300 z-10"></div>
+          
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-6 mb-3">
+            <h3 class="text-xl font-bold text-[var(--color-text)] leading-tight flex items-center gap-3 pr-2">
+              Multi-Agent Navigation via Distributed Consensus-Based Optimization and Learned Locomotion
+            </h3>
+            <div class="inline-flex flex-shrink-0 mt-1 md:mt-0">
+              <span class="font-mono text-xs px-2.5 py-1.5 bg-[var(--bg-elevated)] text-[var(--color-muted)] rounded border border-[var(--border-subtle)] whitespace-nowrap">In Progress</span>
+            </div>
+          </div>
+          
+          <p class="text-[var(--color-muted)] text-sm md:text-base leading-relaxed mb-4 max-w-4xl">
+            A hierarchical control architecture for multi-agent legged navigation that integrates high-level distributed NMPC using ADMM for scalable collision avoidance with a low-level reinforcement learning policy for robust real-time locomotion.
+          </p>
+          
+          <div class="mt-2">
+            <AnimatedButton text="Coming Soon" href="#publications" client:load />
+          </div>
+        </article>
+
+        <!-- Thesis -->
+        <article class="publication-item group relative pl-8 pb-4 border-l-[2px] border-[var(--border-subtle)] hover:border-[var(--color-accent)] transition-colors duration-500">
+          <div class="absolute -left-[5px] top-1 w-[8px] h-[18px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] group-hover:bg-[var(--color-accent)] group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_12px_var(--color-accent)] transition-all duration-300 z-10"></div>
+          
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-6 mb-3">
+            <h3 class="text-xl font-bold text-[var(--color-text)] leading-tight flex items-center gap-3 pr-2">
+              Master's Thesis
+            </h3>
+            <div class="inline-flex flex-shrink-0 mt-1 md:mt-0">
+              <span class="font-mono text-xs px-2.5 py-1.5 bg-[var(--bg-elevated)] text-[var(--color-muted)] rounded border border-[var(--border-subtle)] whitespace-nowrap">In Progress</span>
+            </div>
+          </div>
+          
+          <p class="text-[var(--color-muted)] text-sm md:text-base leading-relaxed mb-4 max-w-4xl">
+            Thesis research focused on multi agent locomotion via blending of classical and learning-based controls.
+          </p>
+          
+          <div class="mt-2">
+            <AnimatedButton text="Coming Soon" href="#publications" client:load />
+          </div>
+        </article>
+      </div>
+    </section>
+
     <!-- Projects Section -->
     <section id="projects" class="editorial-section" data-scroll-section="projects">
       <div class="section-rule">
-        <span class="section-number">01</span>
+        <span class="section-number">02</span>
         <span class="rule-line"></span>
         <span class="section-title-label">projects</span>
       </div>
@@ -100,7 +198,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
       <!-- Featured Project -->
       <div
         id={`project-${featuredId}`}
-        class={`card card-hover featured-project ai-gradient-border`}
+        class={`card card-hover featured-project`}
         data-skills={featuredProject.skills.join(',')}
       >
         <div class="featured-inner">
@@ -144,26 +242,66 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     <!-- Skills Section -->
     <section id="skills" class="editorial-section" data-scroll-section="skills">
       <div class="section-rule">
-        <span class="section-number">02</span>
+        <span class="section-number">03</span>
         <span class="rule-line"></span>
         <span class="section-title-label">skills</span>
       </div>
-      <div class="skills-scroll">
-        {skills.map(skill => (
-          <button
-            class="skill-chip card card-hover"
-            data-skill={skill.name}
-          >
-            {skill.name}
-          </button>
-        ))}
+      
+      <div class="mt-8 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl overflow-hidden shadow-2xl relative font-mono">
+        <!-- Terminal Header -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]/50">
+          <div class="flex gap-2">
+            <div class="w-3 h-3 rounded-full bg-red-500/80 border border-red-600"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500/80 border border-yellow-600"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500/80 border border-green-600"></div>
+          </div>
+          <div class="text-[var(--color-muted)] text-xs tracking-widest hidden sm:block">guest@vittorio:~</div>
+          <div class="text-xs text-[var(--color-muted)]">bash</div>
+        </div>
+        
+        <!-- Terminal Body -->
+        <div class="p-4 sm:p-6 md:p-8">
+          <div class="flex items-center gap-1.5 sm:gap-2 mb-8 text-[11px] min-[370px]:text-xs sm:text-sm md:text-base whitespace-nowrap overflow-x-auto pb-2" style="scrollbar-width: none;">
+            <span class="text-[var(--color-text)] opacity-70">(base)</span>            
+            <span class="text-green-400">guest@vittorio</span>
+            <span class="text-[var(--color-text)]">:</span>
+            <span class="text-blue-400">~/skills</span>
+            <span class="text-[var(--color-text)]">$</span>
+            <span id="skills-command" class="text-[var(--color-text)] tracking-wide"></span>
+            <span id="skills-cursor" class="cursor ml-[-2px] sm:ml-[-4px]">▋</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 pb-4 font-mono">
+            {skills.map((skill, index) => (
+              <div class="skill-node opacity-0 translate-y-2 group flex flex-col cursor-crosshair rounded hover:bg-[var(--border-subtle)]/20 p-2 -m-2 transition-all duration-300">
+                <div class="flex items-center text-sm sm:text-base mb-1.5">
+                  <span class="text-green-500 mr-2 font-bold">[+]</span>
+                  <span class="font-bold text-cyan-400 group-hover:text-[var(--color-accent)] transition-colors tracking-wide">{skill.name}</span>
+                </div>
+                <div class="flex items-start text-xs sm:text-sm text-[var(--color-muted)] opacity-70 group-hover:opacity-100 transition-opacity pl-7">
+                  <span class="text-yellow-500/70 mr-2 mt-[2px] font-bold">↳</span> 
+                  {skill.projects.length > 0 ? (
+                    <span class="leading-relaxed">
+                      <span class="hidden sm:inline">used in </span>{skill.projects.map(proj => proj.replace(/-/g, ' ')).join(', ')}
+                    </span>
+                  ) : (
+                    <span class="leading-relaxed font-mono">
+                      sys_level_dependency
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+        </div>
       </div>
     </section>
 
     <!-- Activity Section -->
     <section id="activity" class="editorial-section" data-scroll-section="activity">
       <div class="section-rule">
-        <span class="section-number">03</span>
+        <span class="section-number">04</span>
         <span class="rule-line"></span>
         <span class="section-title-label">activity</span>
       </div>
@@ -176,7 +314,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     <!-- Contact Section -->
     <section id="contact" class="editorial-section contact-section" data-scroll-section="contact">
       <div class="section-rule">
-        <span class="section-number">04</span>
+        <span class="section-number">05</span>
         <span class="rule-line"></span>
         <span class="section-title-label">contact</span>
       </div>
@@ -340,6 +478,89 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
       }
     }, { passive: true });
     
+    // --- Skills Terminal Animation ---
+    const skillsSection = document.getElementById('skills');
+    const skillsCommand = document.getElementById('skills-command');
+    const skillsCursor = document.getElementById('skills-cursor');
+    const skillNodes = document.querySelectorAll('.skill-node');
+    let isSkillsAnimated = false;
+    let typeWriterInterval: ReturnType<typeof setInterval>;
+    let nodeTimeouts: ReturnType<typeof setTimeout>[] = [];
+
+    if (skillsSection && skillsCommand && skillsCursor) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !isSkillsAnimated) {
+            isSkillsAnimated = true;
+            clearInterval(typeWriterInterval);
+            nodeTimeouts.forEach(clearTimeout);
+            nodeTimeouts = [];
+            
+            // Start enter animation
+            skillsCommand.textContent = '';
+            skillsCursor.style.display = 'inline-block';
+            skillNodes.forEach(node => {
+              (node as HTMLElement).style.opacity = '0';
+              (node as HTMLElement).style.transform = 'translateY(10px)';
+            });
+
+            const enterCommand = "python fetch_skills.py";
+            let i = 0;
+            typeWriterInterval = setInterval(() => {
+              if (i < enterCommand.length) {
+                skillsCommand.textContent += enterCommand.charAt(i);
+                i++;
+              } else {
+                clearInterval(typeWriterInterval);
+                skillsCursor.style.display = 'none'; // hide cursor when command is sent
+                // Reveal skills one by one
+                skillNodes.forEach((node, idx) => {
+                  const tid = setTimeout(() => {
+                    (node as HTMLElement).style.opacity = '1';
+                    (node as HTMLElement).style.transform = 'translateY(0)';
+                  }, idx * 150 + 200); // Stagger by 150ms
+                  nodeTimeouts.push(tid);
+                });
+              }
+            }, 60);
+
+          } else if (!entry.isIntersecting && isSkillsAnimated) {
+            isSkillsAnimated = false;
+            clearInterval(typeWriterInterval);
+            nodeTimeouts.forEach(clearTimeout);
+            nodeTimeouts = [];
+            
+            // Fast clear animation
+            const leaveCommand = "clear";
+            skillsCommand.textContent = '';
+            skillsCursor.style.display = 'inline-block'; // bring back cursor to type clear
+            
+            let j = 0;
+            typeWriterInterval = setInterval(() => {
+              if (j < leaveCommand.length) {
+                skillsCommand.textContent += leaveCommand.charAt(j);
+                j++;
+              } else {
+                clearInterval(typeWriterInterval);
+                const tid = setTimeout(() => {
+                  skillNodes.forEach(node => {
+                    (node as HTMLElement).style.opacity = '0';
+                    (node as HTMLElement).style.transform = 'translateY(8px)'; // subtle drop
+                  });
+                  skillsCommand.textContent = '';
+                  // Console is clear, cursor waits for new prompt
+                  skillsCursor.style.display = 'inline-block'; 
+                }, 200);
+                nodeTimeouts.push(tid);
+              }
+            }, 50);
+          }
+        });
+      }, { threshold: 0.35 });
+
+      observer.observe(skillsSection);
+    }
+
     // Fire once on layout load
     window.requestAnimationFrame(updateScrollState);
   });
