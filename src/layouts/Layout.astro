@@ -34,9 +34,14 @@ if (title.includes(' - Project')) {
     <script>
       (function() {
         var saved = localStorage.getItem('theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var isLight = saved === 'light' || (!saved && !prefersDark);
-        if (isLight) document.documentElement.classList.add('light-mode');
+        if (saved) {
+          if (saved === 'light') document.documentElement.classList.add('light-mode');
+        } else {
+          // Only go light if the OS explicitly signals light-mode.
+          // If neither dark nor light matches (no OS preference / unsupported), default to dark.
+          var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          if (prefersLight) document.documentElement.classList.add('light-mode');
+        }
       })();
     </script>
   </head>
@@ -123,18 +128,27 @@ if (title.includes(' - Project')) {
         }
       };
 
-      const setTheme = (isDark) => {
+      const prefersLight = window.matchMedia('(prefers-color-scheme: light)');
+      // Dark if OS signals dark, OR if OS has no preference (neither dark nor light matches)
+      const systemIsDark = () => prefersDark.matches || !prefersLight.matches;
+
+      // applyTheme: visual only, does not save to localStorage
+      const applyTheme = (isDark) => {
         html.classList.toggle('light-mode', !isDark);
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
         updateThemeUI(isDark);
       };
 
-      // Initialize theme
-      const savedTheme = localStorage.getItem('theme');
-      const initialTheme = savedTheme ? savedTheme === 'dark' : prefersDark.matches;
-      setTheme(initialTheme);
+      // setTheme: visual + persist as an explicit user choice
+      const setTheme = (isDark) => {
+        applyTheme(isDark);
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      };
 
-      // Toggle the theme on button click
+      // Initialize: use saved preference, otherwise follow system (dark by default)
+      const savedTheme = localStorage.getItem('theme');
+      applyTheme(savedTheme ? savedTheme === 'dark' : systemIsDark());
+
+      // Toggle button saves an explicit preference
       themeToggle?.addEventListener('click', () => {
         const currentDark = !(html.classList.contains('light-mode'));
         setTheme(!currentDark);
@@ -234,9 +248,12 @@ if (title.includes(' - Project')) {
       });
 
       // Listen for system theme changes
-      prefersDark.addEventListener('change', (e) => {
-        setTheme(e.matches);
-      });
+      // Follow OS changes only when the user hasn't set an explicit preference
+      const onSystemThemeChange = () => {
+        if (!localStorage.getItem('theme')) applyTheme(systemIsDark());
+      };
+      prefersDark.addEventListener('change', onSystemThemeChange);
+      prefersLight.addEventListener('change', onSystemThemeChange);
 
       // Global Scroll Spinner Animation
       const scrollSpinner = document.getElementById('scroll-spinner');
