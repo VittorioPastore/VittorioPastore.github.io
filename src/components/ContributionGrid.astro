@@ -271,7 +271,10 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
 
     for (const endpoint of endpoints) {
       try {
-        const response = await fetch(endpoint, { cache: 'no-store' });
+        const response = await fetch(endpoint, {
+          cache: 'reload',
+          headers: { 'Cache-Control': 'no-cache, no-store' },
+        });
         if (!response.ok) continue;
         const payload = await response.json() as DenoPayload | JogruberPayload;
         const normalized = normalizeContributions(payload);
@@ -344,6 +347,15 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
   };
 
   initContributionGrid();
+
+  // Re-fetch when the browser restores the page from the back/forward cache
+  // (bfcache). In that case the script doesn't re-run, so without this listener
+  // the grid would show stale data after pressing Back/Forward.
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      initContributionGrid();
+    }
+  });
 </script>
 
 <style is:global>
