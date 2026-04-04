@@ -299,10 +299,20 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
     renderGrid(gridRoot, monthLabels, weeks);
 
     const triggerAnimation = () => {
-      wrapper.classList.remove('no-animation');
+      wrapper.classList.remove('no-animation', 'animations-done');
       wrapper.classList.remove('is-animated');
       void (wrapper as HTMLElement).offsetWidth; // force reflow so animation restarts
       wrapper.classList.add('is-animated');
+
+      // Release GPU layers once all animations have settled.
+      // Max delay = total cells × CELL_STEP ms; animation itself is 480ms.
+      const cells = wrapper.querySelectorAll('.contrib-cell');
+      let maxDelay = 0;
+      cells.forEach(c => {
+        const d = parseFloat((c as HTMLElement).style.animationDelay || '0');
+        if (d > maxDelay) maxDelay = d;
+      });
+      setTimeout(() => wrapper.classList.add('animations-done'), maxDelay + 520);
     };
 
     const triggerLeaveAnimation = () => {
@@ -341,6 +351,7 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    contain: layout; /* scope layout recalculations to this subtree */
   }
 
   .contrib-scroll {
@@ -430,7 +441,17 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
                 filter 0.2s ease;
     cursor: default;
     position: relative;
+    backface-visibility: hidden; /* prevents repaint flicker during transforms */
+  }
+
+  /* Only promote cells to GPU layers while actively animating */
+  .contrib-wrapper.is-animated .contrib-cell {
     will-change: transform, background, filter;
+  }
+
+  /* Reset compositing hints once animations have settled */
+  .contrib-wrapper.animations-done .contrib-cell {
+    will-change: auto;
   }
 
   /* Flash color tokens — white-hot in dark mode, vivid orange in light mode */

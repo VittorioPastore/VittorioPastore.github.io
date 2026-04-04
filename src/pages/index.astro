@@ -503,6 +503,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
             skillNodes.forEach(node => {
               (node as HTMLElement).style.opacity = '0';
               (node as HTMLElement).style.transform = 'translateY(10px)';
+              (node as HTMLElement).style.willChange = 'opacity, transform';
             });
 
             const enterCommand = "python fetch_skills.py";
@@ -520,6 +521,8 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
                   const tid = setTimeout(() => {
                     (node as HTMLElement).style.opacity = '1';
                     (node as HTMLElement).style.transform = 'translateY(0)';
+                    // Release GPU layer hint once this node has settled
+                    setTimeout(() => { (node as HTMLElement).style.willChange = 'auto'; }, 320);
                   }, idx * 150 + 200); // Stagger by 150ms
                   nodeTimeouts.push(tid);
                 });
@@ -547,9 +550,13 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
                 clearInterval(typeWriterInterval);
                 const tid = setTimeout(() => {
                   skillNodes.forEach(node => {
+                    (node as HTMLElement).style.willChange = 'opacity, transform';
                     (node as HTMLElement).style.opacity = '0';
                     (node as HTMLElement).style.transform = 'translateY(8px)'; // subtle drop
                   });
+                  setTimeout(() => {
+                    skillNodes.forEach(node => { (node as HTMLElement).style.willChange = 'auto'; });
+                  }, 320);
                   skillsCommand.textContent = '';
                   // Console is clear, cursor waits for new prompt
                   skillsCursor.style.display = 'inline-block'; 
@@ -602,6 +609,14 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
 
   .editorial-section.is-active {
     opacity: 1;
+  }
+
+  /* Replace transition-all with specific properties on skill nodes.
+     transition-all forces the browser to monitor every CSS property;
+     listing only what actually changes cuts style recalculation cost. */
+  .skill-node {
+    transition-property: opacity, transform, background-color, color !important;
+    backface-visibility: hidden;
   }
 
   /* ── Layout ── */
