@@ -261,7 +261,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
         
         <!-- Terminal Body -->
         <div class="p-4 sm:p-6 md:p-8">
-          <div class="flex items-center gap-1.5 sm:gap-2 mb-8 text-[11px] min-[370px]:text-xs sm:text-sm md:text-base whitespace-nowrap overflow-x-auto pb-2" style="scrollbar-width: none;">
+          <div id="skills-prompt-line" class="flex items-center gap-1.5 sm:gap-2 mb-8 text-[11px] min-[370px]:text-xs sm:text-sm md:text-base whitespace-nowrap overflow-x-auto pb-2" style="scrollbar-width: none;">
             <span class="text-[var(--color-text)] opacity-70">(base)</span>            
             <span class="text-green-400">guest@vittorio</span>
             <span class="text-[var(--color-text)]">:</span>
@@ -488,6 +488,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
     let nodeTimeouts: ReturnType<typeof setTimeout>[] = [];
 
     if (skillsSection && skillsCommand && skillsCursor) {
+      const skillsPromptLine = document.getElementById('skills-prompt-line');
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting && !isSkillsAnimated) {
@@ -495,7 +496,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
             clearInterval(typeWriterInterval);
             nodeTimeouts.forEach(clearTimeout);
             nodeTimeouts = [];
-            
+
             // Start enter animation
             skillsCommand.textContent = '';
             skillsCursor.style.display = 'inline-block';
@@ -509,6 +510,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
             typeWriterInterval = setInterval(() => {
               if (i < enterCommand.length) {
                 skillsCommand.textContent += enterCommand.charAt(i);
+                if (skillsPromptLine) skillsPromptLine.scrollLeft = skillsPromptLine.scrollWidth;
                 i++;
               } else {
                 clearInterval(typeWriterInterval);
@@ -539,6 +541,7 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
             typeWriterInterval = setInterval(() => {
               if (j < leaveCommand.length) {
                 skillsCommand.textContent += leaveCommand.charAt(j);
+                if (skillsPromptLine) skillsPromptLine.scrollLeft = skillsPromptLine.scrollWidth;
                 j++;
               } else {
                 clearInterval(typeWriterInterval);
@@ -1043,6 +1046,27 @@ const restProjects = restIds.map(id => ({ id, ...projects[id] }));
       white-space: normal;
       max-width: 100%;
     }
+  }
+
+  /* ── Light mode: skills terminal color overrides ── */
+  html.light-mode .text-cyan-400 {
+    color: #0e7490 !important; /* cyan-700: readable on light bg */
+  }
+
+  html.light-mode .text-green-400 {
+    color: #15803d !important; /* green-700 */
+  }
+
+  html.light-mode .text-green-500 {
+    color: #15803d !important; /* green-700 */
+  }
+
+  html.light-mode .text-blue-400 {
+    color: #1d4ed8 !important; /* blue-700 */
+  }
+
+  html.light-mode .text-yellow-500\/70 {
+    color: #92400e !important; /* amber-800 */
   }
 
   @keyframes aiGradientShift {
