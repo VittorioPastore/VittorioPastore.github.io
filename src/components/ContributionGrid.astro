@@ -317,19 +317,18 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
     const section = document.querySelector('#activity');
     if (!section) return;
 
+    const mutObserver = new MutationObserver(() => {
+      if (section.classList.contains('is-active')) {
+        triggerAnimation();
+      } else {
+        triggerLeaveAnimation();
+      }
+    });
+    mutObserver.observe(section, { attributes: true, attributeFilter: ['class'] });
+
     if (section.classList.contains('is-active')) {
       // Already active when data arrived (e.g. page loaded scrolled here)
-      wrapper.classList.add('no-animation');
-    } else {
-      const mutObserver = new MutationObserver(() => {
-        if (section.classList.contains('is-active')) {
-          wrapper.classList.remove('no-animation');
-          triggerAnimation();
-        } else {
-          triggerLeaveAnimation();
-        }
-      });
-      mutObserver.observe(section, { attributes: true, attributeFilter: ['class'] });
+      triggerAnimation();
     }
   };
 
@@ -430,7 +429,6 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
                 filter 0.2s ease;
     cursor: default;
     position: relative;
-    will-change: transform, background, filter;
   }
 
   /* Flash color tokens — white-hot in dark mode, vivid orange in light mode */
@@ -450,37 +448,28 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
   /* ── Terminal boot: active cells (level > 0) ──
      Flash white-hot (dark) / burnt-orange (light) → settle to contrib color */
   @keyframes terminalBoot {
-    0% {
+    0%   {
       background: var(--contrib-level-0);
       transform: scale(0.85);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
-      border-color: var(--contrib-cell-outline, rgba(255,255,255,0.08));
       filter: brightness(1);
     }
-    /* phosphor flash — subtle pop */
-    10% {
+    /* phosphor flash — white-hot pop */
+    10%  {
       background: var(--contrib-flash-bg);
       transform: scale(1.15);
-      box-shadow:
-        0 0 4px var(--color-accent),
-        0 0 8px var(--contrib-flash-glow);
-      border-color: var(--contrib-flash-border);
-      filter: brightness(1.3);
+      filter: brightness(1.4);
+      box-shadow: 0 0 6px var(--contrib-flash-glow);
     }
     /* cross-fade to amber */
-    32% {
+    32%  {
       background: var(--color-target);
       transform: scale(1.05);
-      box-shadow: 0 0 4px var(--contrib-flash-glow-wide);
-      border-color: rgba(245, 158, 11, 0.35);
       filter: brightness(1.1);
     }
     /* settle */
     100% {
       background: var(--color-target);
       transform: scale(1);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.05), inset 0 -1px 2px rgba(0,0,0,0.15);
-      border-color: var(--contrib-cell-outline, rgba(255,255,255,0.08));
       filter: brightness(1);
     }
   }
@@ -488,16 +477,8 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
   /* ── Ghost scan: empty cells get a faint accent whisper ── */
   @keyframes terminalScanEmpty {
     0%   { background: var(--contrib-level-0); }
-    10%  {
-      background: var(--contrib-flash-glow-wide);
-      box-shadow: 0 0 4px var(--contrib-flash-glow);
-      border-color: var(--contrib-flash-glow);
-    }
-    100% {
-      background: var(--contrib-level-0);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.05), inset 0 -1px 2px rgba(0,0,0,0.15);
-      border-color: var(--contrib-cell-outline, rgba(255,255,255,0.08));
-    }
+    10%  { background: var(--contrib-flash-glow-wide); }
+    100% { background: var(--contrib-level-0); }
   }
 
   /* Trigger boot animation when section scrolls into view */
