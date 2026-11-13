@@ -1,0 +1,99 @@
+/* Paper tokens: the house style of the figures (white paper, neutral greys, Google Sans, black selection pill).
+   Colour carries meaning only: amber = reference, green = healthy / published, red = danger. */
+@import '@fontsource-variable/google-sans/index.css';
+@import '@fontsource-variable/google-sans-code/index.css';
+
+:root {
+  --paper: #ffffff;
+  --zone: #f1f4f9;
+  --zone-2: #e7ebf1;
+  --card: #ffffff;
+  --line: #dfe3e8;
+  --line-strong: #c4c9d0;
+  --ink: #1f1f1f;
+  --ink-2: #444746;
+  --muted: #5f6368;
+  --faint: #80868b;
+  --pill-bg: #111111;
+  --pill-fg: #ffffff;
+  --amber: #c26a00;
+  --amber-container: #fef7e0;
+  --green: #188038;
+  --danger: #c5221f;
+
+  --r-zone: 16px;
+  --r-card: 12px;
+  --r-chip: 6px;
+
+  --sans: 'Google Sans Variable', 'Google Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'Google Sans Code Variable', 'Google Sans Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --gutter: clamp(14px, 3vw, 56px);
+  --gap: clamp(10px, 1.1vw, 18px);
+  --zone-pad: clamp(16px, 2vw, 32px);
+  --card-pad: clamp(16px, 1.5vw, 26px);
+  --header-h: 56px;
+
+  --contrib-level-0: #eceff3;
+  --contrib-level-1: #c4c9d0;
+  --contrib-level-2: #9aa0a6;
+  --contrib-level-3: #5f6368;
+  --contrib-level-4: #111111;
+
+  /* Names the older components still read. */
+  --bg-base: var(--paper);
+  --bg-surface: var(--card);
+  --bg-elevated: var(--zone);
+  --border-subtle: var(--line);
+  --border-hover: var(--line-strong);
+  --color-text: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--ink);
+
+  color-scheme: light;
+}
+
+html.dark-mode {
+  --paper: #131314;
+  --zone: #1e1f20;
+  --zone-2: #2a2b2d;
+  --card: #131314;
+  --line: #37393b;
+  --line-strong: #4f5357;
+  --ink: #e3e3e3;
+  --ink-2: #c4c7c5;
+  --muted: #9aa0a6;
+  --faint: #80868b;
+  --pill-bg: #f1f3f4;
+  --pill-fg: #111111;
+  --amber: #f2a03d;
+  --amber-container: #3a2c10;
+  --green: #81c995;
+  --danger: #f28b82;
+
+  --contrib-level-0: #232527;
+  --contrib-level-1: #4f5357;
+  --contrib-level-2: #80868b;
+  --contrib-level-3: #bdc1c6;
+  --contrib-level-4: #ffffff;
+
+  color-scheme: dark;
+}
+
+/* Figures stay on light paper in either theme, like the rendered ones: this resets the tokens inside a figure. */
+.paper-light {
+  --paper: #ffffff;
+  --zone: #f1f4f9;
+  --zone-2: #e7ebf1;
+  --card: #ffffff;
+  --line: #dfe3e8;
+  --line-strong: #c4c9d0;
+  --ink: #1f1f1f;
+  --ink-2: #444746;
+  --muted: #5f6368;
+  --faint: #80868b;
+  --pill-bg: #111111;
+  --pill-fg: #ffffff;
+  color: var(--ink);
+  color-scheme: light;
+}

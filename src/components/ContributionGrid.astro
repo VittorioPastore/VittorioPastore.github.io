@@ -51,11 +51,11 @@ const buildGrid = (contribs: Cell[]) => {
       result.push(week); labels.push('');
     }
   } else {
-    // Placeholder: 52 empty weeks ending today
+    // Placeholder: 53 empty weeks ending today, the same width as the fetched year so nothing shifts when it arrives
     const endDate = new Date();
     endDate.setUTCDate(endDate.getUTCDate() - endDate.getUTCDay() + 6); // end of current week
     const startDate = new Date(endDate);
-    startDate.setUTCDate(startDate.getUTCDate() - 52 * 7 + 1);
+    startDate.setUTCDate(startDate.getUTCDate() - 53 * 7 + 1);
     startDate.setUTCDate(startDate.getUTCDate() - startDate.getUTCDay()); // rewind to Sunday
 
     let current = new Date(startDate);
@@ -63,7 +63,7 @@ const buildGrid = (contribs: Cell[]) => {
     let weekStart: Date | null = null;
     let weekCount = 0;
 
-    while (weekCount < 52) {
+    while (weekCount < 53) {
       if (week.length === 0) weekStart = new Date(current);
       week.push({ date: toIsoDate(current), count: 0, level: 0 });
       if (week.length === 7) {
@@ -81,8 +81,15 @@ const buildGrid = (contribs: Cell[]) => {
 const { weeks, monthLabels } = buildGrid([]);
 ---
 
-<div class="contrib-wrapper card rounded-xl p-4 sm:p-6" data-contrib-grid data-username="VittorioPastore">
-  <p class="section-label mb-4">// github </p>
+<div class="contrib-wrapper card" data-contrib-grid data-username="VittorioPastore">
+  <div class="contrib-head">
+    <p class="kicker">GitHub contributions</p>
+    <div class="contrib-legend" aria-hidden="true">
+      <span class="meta">less</span>
+      {[0, 1, 2, 3, 4].map(l => <i style={`background: ${COLORS[l]}`} />)}
+      <span class="meta">more</span>
+    </div>
+  </div>
 
   <div class="contrib-scroll">
     <div class="contrib-inner">
@@ -260,6 +267,7 @@ const { weeks, monthLabels } = buildGrid([]);
     }).join('');
 
     weeksRoot.innerHTML = weeksMarkup;
+    (gridRoot.querySelector('.contrib-inner') as HTMLElement | null)?.style.setProperty('--weeks', String(weeks.length));
   };
 
 const fetchContributions = async (username: string): Promise<ClientContribution[]> => {
@@ -301,47 +309,32 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
 
     renderGrid(gridRoot, monthLabels, weeks);
 
-    const triggerAnimation = () => {
-      wrapper.classList.remove('no-animation', 'animations-done');
-      wrapper.classList.remove('is-animated');
-      void (wrapper as HTMLElement).offsetWidth; // force reflow so animation restarts
-      wrapper.classList.add('is-animated');
+    // Newest weeks are on the right: start a narrow (scrolling) grid there.
+    const scroller = gridRoot.querySelector('.contrib-scroll');
+    if (scroller) scroller.scrollLeft = scroller.scrollWidth;
 
-      // Release GPU layers once all animations have settled.
-      // Max delay = total cells × CELL_STEP ms; animation itself is 480ms.
-      const cells = wrapper.querySelectorAll('.contrib-cell');
-      let maxDelay = 0;
-      cells.forEach(c => {
-        const d = parseFloat((c as HTMLElement).style.animationDelay || '0');
-        if (d > maxDelay) maxDelay = d;
-      });
-      setTimeout(() => wrapper.classList.add('animations-done'), maxDelay + 520);
-    };
-
-    const triggerLeaveAnimation = () => {
-      // Keep colors visible; swap to no-animation so cells stay amber.
-      // The section's own opacity:0.55 (when not is-active) handles visual dimming.
-      wrapper.classList.remove('is-animated');
-      wrapper.classList.add('no-animation');
-    };
-
-    // Mirror the same trigger as the section title glitch: watch for is-active
-    // being added to #activity by the scroll handler in index.astro.
-    const section = document.querySelector('#activity');
-    if (!section) return;
-
-    const mutObserver = new MutationObserver(() => {
-      if (section.classList.contains('is-active')) {
-        triggerAnimation();
-      } else {
-        triggerLeaveAnimation();
-      }
+    // Fill the cells in once, the first time the grid scrolls into view.
+    const cells = wrapper.querySelectorAll('.contrib-cell');
+    let maxDelay = 0;
+    cells.forEach(c => {
+      const d = parseFloat((c as HTMLElement).style.animationDelay || '0');
+      if (d > maxDelay) maxDelay = d;
     });
-    mutObserver.observe(section, { attributes: true, attributeFilter: ['class'] });
-
-    if (section.classList.contains('is-active')) {
-      // Already active when data arrived (e.g. page loaded scrolled here)
-      triggerAnimation();
+    const play = () => {
+      wrapper.classList.remove('no-animation', 'animations-done');
+      wrapper.classList.add('is-animated');
+      setTimeout(() => wrapper.classList.add('animations-done'), maxDelay + 420);
+    };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      wrapper.classList.add('no-animation');
+    } else {
+      const seen = new IntersectionObserver(entries => {
+        if (entries.some(e => e.isIntersecting)) {
+          seen.disconnect();
+          play();
+        }
+      }, { threshold: 0.6 });
+      seen.observe(wrapper);
     }
   };
 
@@ -362,179 +355,95 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    contain: layout; /* scope layout recalculations to this subtree */
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
 
+  .contrib-head { display: flex; justify-content: space-between; align-items: center; gap: 8px 16px; flex-wrap: wrap; }
+  .contrib-legend { display: flex; align-items: center; gap: 4px; }
+  .contrib-legend i { width: 10px; height: 10px; border-radius: 3px; display: block; }
+  .contrib-legend .meta { font-size: 0.64rem; margin: 0 3px; }
+
+  /* The cell size follows the card width, so the year fills a wide screen and scrolls on a narrow one. */
   .contrib-scroll {
+    container-type: inline-size;
     overflow-x: auto;
     max-width: 100%;
     min-width: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    scrollbar-width: thin;
   }
 
   .contrib-inner {
+    --cg: 3px;
+    --weeks: 53;
+    --cell: clamp(10px, calc((100cqw - 34px - (var(--weeks) - 1) * var(--cg)) / var(--weeks)), 24px);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     width: max-content;
-    margin: 0 auto;
     min-width: max-content;
+    margin: 0 auto;
   }
 
-  .contrib-month-row {
-    display: flex;
-    align-items: flex-end;
-    gap: 2px;
-    height: 16px;
-  }
-
-  .contrib-day-spacer {
-    width: 28px;
-    flex-shrink: 0;
-  }
-
+  .contrib-month-row { display: flex; align-items: flex-end; gap: var(--cg); height: 14px; }
+  .contrib-day-spacer { width: 30px; flex-shrink: 0; margin-right: 1px; }
   .contrib-month-cell {
-    width: 14px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10px;
-    color: var(--color-muted);
+    width: var(--cell);
+    flex-shrink: 0;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted);
     overflow: visible;
     white-space: nowrap;
   }
 
-  .contrib-body {
-    display: flex;
-    gap: 4px;
-    min-width: 0;
-  }
-
-  .contrib-day-col {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    width: 28px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
+  .contrib-body { display: flex; gap: 4px; min-width: 0; }
+  .contrib-day-col { display: flex; flex-direction: column; gap: var(--cg); width: 30px; flex-shrink: 0; }
   .contrib-day-label {
     display: block;
-    height: 12px;
-    line-height: 12px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10px;
-    color: var(--color-muted);
+    height: var(--cell);
+    line-height: var(--cell);
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted);
     text-align: right;
-    padding-right: 4px;
+    padding-right: 5px;
   }
 
-  .contrib-weeks {
-    display: flex;
-    gap: 3px;
-  }
-
-  .contrib-week {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
+  .contrib-weeks { display: flex; gap: var(--cg); }
+  .contrib-week { display: flex; flex-direction: column; gap: var(--cg); }
 
   .contrib-cell {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
+    width: var(--cell);
+    height: var(--cell);
+    border-radius: 22%;
     flex-shrink: 0;
     background: var(--contrib-level-0);
-    border: 1px solid var(--contrib-cell-outline, rgba(255, 255, 255, 0.08));
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), inset 0 -1px 2px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
-                box-shadow 0.2s ease,
-                border-color 0.2s ease,
-                filter 0.2s ease;
+    transform: scale(0.6); /* every cell waits small, so the grid never shows as a full blank block first */
     cursor: default;
-    position: relative;
-    backface-visibility: hidden; /* prevents repaint flicker during transforms */
   }
 
-  /* Only promote cells to GPU layers while actively animating */
-  .contrib-wrapper.is-animated .contrib-cell {
-    will-change: transform, background, filter;
+  /* Small squares grow to full size in a scattered order; the ones with contributions take their colour as they do. */
+  @keyframes contribFill {
+    from { background: var(--contrib-level-0); transform: scale(0.6); }
+    to   { background: var(--color-target); transform: scale(1); }
+  }
+  @keyframes contribGrow {
+    from { transform: scale(0.6); }
+    to   { transform: scale(1); }
   }
 
-  /* Reset compositing hints once animations have settled */
-  .contrib-wrapper.animations-done .contrib-cell {
-    will-change: auto;
-  }
+  .contrib-wrapper.is-animated .contrib-cell { animation: contribGrow 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .contrib-wrapper.is-animated .contrib-cell:not([data-level="0"]) { animation-name: contribFill; }
 
-  /* Flash color tokens — white-hot in dark mode, vivid orange in light mode */
-  :root {
-    --contrib-flash-bg: #fff8e1;
-    --contrib-flash-border: rgba(255, 248, 225, 0.95);
-    --contrib-flash-glow: rgba(245, 158, 11, 0.6);
-    --contrib-flash-glow-wide: rgba(245, 158, 11, 0.3);
-  }
-  html.light-mode {
-    --contrib-flash-bg: #c2410c;
-    --contrib-flash-border: rgba(194, 65, 12, 0.9);
-    --contrib-flash-glow: rgba(194, 65, 12, 0.55);
-    --contrib-flash-glow-wide: rgba(194, 65, 12, 0.25);
-  }
+  .contrib-wrapper.no-animation .contrib-cell,
+  .contrib-wrapper.animations-done .contrib-cell { animation: none; transform: none; }
+  .contrib-wrapper.no-animation .contrib-cell:not([data-level="0"]),
+  .contrib-wrapper.animations-done .contrib-cell:not([data-level="0"]) { background: var(--color-target); }
 
-  /* ── Terminal boot: active cells (level > 0) ──
-     Flash white-hot (dark) / burnt-orange (light) → settle to contrib color */
-  @keyframes terminalBoot {
-    0%   {
-      background: var(--contrib-level-0);
-      transform: scale(0.85);
-      filter: brightness(1);
-    }
-    /* phosphor flash — white-hot pop */
-    10%  {
-      background: var(--contrib-flash-bg);
-      transform: scale(1.15);
-      filter: brightness(1.4);
-      box-shadow: 0 0 6px var(--contrib-flash-glow);
-    }
-    /* cross-fade to amber */
-    32%  {
-      background: var(--color-target);
-      transform: scale(1.05);
-      filter: brightness(1.1);
-    }
-    /* settle */
-    100% {
-      background: var(--color-target);
-      transform: scale(1);
-      filter: brightness(1);
-    }
-  }
-
-  /* ── Ghost scan: empty cells get a faint accent whisper ── */
-  @keyframes terminalScanEmpty {
-    0%   { background: var(--contrib-level-0); }
-    10%  { background: var(--contrib-flash-glow-wide); }
-    100% { background: var(--contrib-level-0); }
-  }
-
-  /* Trigger boot animation when section scrolls into view */
-  .contrib-wrapper.is-animated .contrib-cell:not([data-level="0"]) {
-    animation: terminalBoot 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .contrib-wrapper.is-animated .contrib-cell[data-level="0"] {
-    animation: terminalScanEmpty 250ms ease-out both;
-  }
-
-  /* Already visible on load — skip animation, just show colors */
-  .contrib-wrapper.no-animation .contrib-cell:not([data-level="0"]) {
-    background: var(--color-target);
-  }
-
-  /* Hover */
-  .contrib-cell:hover {
-    transform: scale(1.4) !important;
-    z-index: 10;
-    border-color: rgba(255, 255, 255, 0.3);
-    filter: brightness(1.15);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  }
+  .contrib-cell:hover { outline: 1.5px solid var(--ink); outline-offset: 1px; }
 </style>

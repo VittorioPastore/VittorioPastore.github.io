@@ -48,42 +48,26 @@
 
 <style is:global>
   /* Hide scrollbar and prevent scroll during boot */
-  html.booting {
-    overflow: hidden !important;
-  }
-  html.booting body {
-    overflow: hidden !important;
-  }
+  html.booting { overflow: hidden !important; }
+  html.booting body { overflow: hidden !important; }
 
-  /* Boot log colors — must be global since these spans are inserted dynamically */
-  .boot-ok {
-    color: #00cc00 !important;
-    font-weight: bold;
-  }
-  .boot-fail {
-    color: #e74c3c !important;
-  }
-  .boot-white {
-    color: #fff !important;
-  }
-  .boot-blue {
-    color: #5599ff !important;
-  }
+  /* Boot log colours: must be global since these spans are inserted dynamically */
+  .boot-ok { color: var(--green) !important; font-weight: 500; }
+  .boot-fail { color: var(--danger) !important; }
+  .boot-white { color: var(--ink) !important; }
+  .boot-blue { color: var(--ink) !important; }
 </style>
 
 <style>
   .boot-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    inset: 0;
     z-index: 99999;
-    background: #000;
+    background: var(--paper);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;
+    font-family: var(--mono);
   }
 
   /* ===== GRUB SCREEN ===== */
@@ -92,42 +76,40 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 2rem;
+    justify-content: center;
+    padding: clamp(16px, 4vw, 48px);
     box-sizing: border-box;
-    background: #000;
-    color: #aaa;
-    font-size: clamp(12px, 1.4vw, 18px);
+    color: var(--ink-2);
+    font-size: clamp(12px, 0.6rem + 0.5vw, 16px);
     line-height: 1.5;
   }
 
   .grub-header {
-    color: #aaa;
-    margin-bottom: 1.5rem;
-    font-size: clamp(12px, 1.4vw, 18px);
-    max-width: 700px;
+    color: var(--muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin: 0 auto 12px;
+    max-width: 760px;
     width: 100%;
-    align-self: center;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .grub-menu-box {
-    border: 1px solid #555;
-    padding: 0.5rem 0;
+    background: var(--zone);
+    border-radius: var(--r-zone);
+    padding: clamp(8px, 1.2vw, 14px);
     flex-shrink: 0;
-    max-width: 700px;
+    max-width: 760px;
     width: 100%;
-    align-self: center;
     margin: 0 auto;
   }
 
-  .grub-menu-inner {
-    padding: 0;
-  }
+  .grub-menu-inner { display: grid; gap: 4px; }
 
   .grub-item {
-    padding: 0.35rem 1rem;
-    color: #aaa;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    color: var(--ink-2);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -135,76 +117,54 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  .grub-item.grub-selected {
-    background: #aaa;
-    color: #000;
-  }
+  /* The selected entry is the black selection pill. */
+  .grub-item.grub-selected { background: var(--pill-bg); color: var(--pill-fg); }
 
   .grub-footer {
-    margin-top: 2rem;
-    color: #aaa;
-    font-size: clamp(10px, 1.2vw, 15px);
+    margin-top: 1.5rem;
+    font-size: 0.72rem;
     text-align: center;
-    line-height: 1.4;
+    line-height: 1.6;
   }
-
-  .grub-footer p {
-    margin: 0;
-    color: #e8a735 !important;
-  }
-
-  .grub-mobile-instructions {
-    display: none;
-  }
+  .grub-footer p { margin: 0; color: var(--muted); }
+  .grub-mobile-instructions { display: none; }
 
   /* Boot button for touch devices */
   .grub-boot-btn {
     display: none;
     margin: 1.25rem auto 0;
-    padding: 0.6rem 2.5rem;
-    background: #aaa;
-    color: #000;
+    min-height: 44px;
+    padding: 0 2.5rem;
+    background: var(--pill-bg);
+    color: var(--pill-fg);
     border: none;
-    font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;
-    font-size: clamp(13px, 1.4vw, 18px);
-    font-weight: bold;
+    border-radius: 999px;
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    font-weight: 500;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .grub-boot-btn:active {
-    background: #fff;
-  }
+  .grub-boot-btn:active { opacity: 0.8; }
 
   @media (hover: none) and (pointer: coarse) {
-    .grub-desktop-instructions {
-      display: none;
-    }
-    .grub-mobile-instructions {
-      display: block;
-      margin-top: 0.5rem;
-    }
-    .grub-boot-btn {
-      display: block;
-    }
+    .grub-desktop-instructions { display: none; }
+    .grub-mobile-instructions { display: block; margin-top: 0.5rem; }
+    .grub-boot-btn { display: block; }
   }
 
-  .grub-timer {
-    margin-top: 1.5rem;
-    color: #aaa;
-    font-size: clamp(10px, 1.2vw, 15px);
-    text-align: center;
-  }
+  .grub-timer { margin-top: 1.25rem; color: var(--muted); font-size: 0.72rem; text-align: center; }
 
   /* ===== BOOT SCREEN ===== */
   .boot-screen {
     width: 100%;
     height: 100%;
-    padding: 1rem 2rem;
+    padding: clamp(14px, 2.5vw, 32px);
     box-sizing: border-box;
-    background: #000;
-    color: #ccc;
-    font-size: clamp(11px, 1.2vw, 15px);
-    line-height: 1.35;
+    background: var(--paper);
+    color: var(--muted);
+    font-size: clamp(10.5px, 0.55rem + 0.45vw, 14px);
+    line-height: 1.45;
     overflow: hidden;
     position: relative;
   }
@@ -219,25 +179,12 @@
     color: inherit;
   }
 
-  .boot-cursor {
-    display: inline;
-    animation: blink 0.7s step-end infinite;
-    color: #ccc;
-  }
-
-  @keyframes blink {
-    50% { opacity: 0; }
-  }
+  .boot-cursor { display: inline; animation: blink 0.7s step-end infinite; color: var(--ink); }
+  @keyframes blink { 50% { opacity: 0; } }
 
   /* Fade out transition */
-  .boot-overlay.fade-out {
-    animation: bootFadeOut 0.6s ease-out forwards;
-  }
-
-  @keyframes bootFadeOut {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
-  }
+  .boot-overlay.fade-out { animation: bootFadeOut 0.6s ease-out forwards; }
+  @keyframes bootFadeOut { 0% { opacity: 1; } 100% { opacity: 0; } }
 </style>
 
 <script>
@@ -542,8 +489,8 @@
         const percent = Math.round(progress * 100).toString().padStart(3, ' ');
 
         bootLog.innerHTML = `
-<div style="color: #5599ff; margin-bottom: 1rem; font-weight: bold; font-size: 1.2rem;">Loading memtest86+ v7.0...</div>
-<div style="color: #00cc00;">[${filled}${empty}] ${percent}%</div>
+<div style="color: var(--ink); margin-bottom: 1rem; font-weight: 500; font-size: 1.1rem;">Loading memtest86+ v7.0...</div>
+<div style="color: var(--green);">[${filled}${empty}] ${percent}%</div>
 `;
         await new Promise(resolve => setTimeout(resolve, delayPerStep));
       }

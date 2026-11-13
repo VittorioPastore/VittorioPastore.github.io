@@ -1,0 +1,84 @@
+---
+// MemoryChart.astro — GPU memory before and after compacting the motion library, on one GB axis with the card's
+// 12 GB limit. Used as the lead figure of the BONES-SEED post and on its home-page card.
+const MAX = 41; // GB across the plot; the totals sit in the padding to its right
+const LIMIT = 12;
+const TRAIN = 8.4; // trainer state 4.7 + program temporaries 3.7
+const LIB_BEFORE = 31.9;
+const LIB_AFTER = 2.18;
+const ticks = [0, 8, 16, 24, 32, 40];
+const pct = (gb: number) => `${((gb / MAX) * 100).toFixed(3)}%`;
+const gb = (x: number) => x.toFixed(1);
+---
+
+<div class="mc" role="img" aria-label={`GPU memory before: ${gb(LIB_BEFORE + TRAIN)} GB, of which the motion library is ${gb(LIB_BEFORE)} GB. After: ${gb(LIB_AFTER + TRAIN)} GB, which fits on the 12 GB RTX 5070.`}>
+  <div class="mc-plot">
+    {ticks.map(t => <span class="mc-grid" style={`left: ${pct(t)}`}></span>)}
+    <span class="mc-limit" style={`left: ${pct(LIMIT)}`}><b>RTX 5070: 12 GB</b></span>
+
+    <div class="mc-row">
+      <span class="mc-name">before</span>
+      <span class="mc-bar lib" style={`width: ${pct(LIB_BEFORE)}`}><span class="w">motion library&nbsp;&nbsp;</span>{gb(LIB_BEFORE)} GB</span>
+      <span class="mc-bar train" style={`width: ${pct(TRAIN)}`}><span><span class="w">training&nbsp;&nbsp;</span>{gb(TRAIN)} GB</span></span>
+      <b class="mc-total">{gb(LIB_BEFORE + TRAIN)} GB</b>
+    </div>
+
+    <div class="mc-row after">
+      <span class="mc-name">after</span>
+      <span class="mc-bar lib" style={`width: ${pct(LIB_AFTER)}`}></span>
+      <span class="mc-bar train" style={`width: ${pct(TRAIN)}`}><span><span class="w">training&nbsp;&nbsp;</span>{gb(TRAIN)} GB</span></span>
+      <b class="mc-total fits" style={`left: ${pct(LIMIT)}`}>{gb(LIB_AFTER + TRAIN)} GB, fits</b>
+      <span class="mc-callout" style={`left: ${pct(LIB_AFTER / 2)}`}>
+        <svg viewBox="0 0 40 20" aria-hidden="true"><line x1="0" y1="0" x2="40" y2="20" /></svg>
+        <span>motion library&nbsp;&nbsp;{gb(LIB_AFTER)} GB</span>
+      </span>
+    </div>
+
+    <div class="mc-axis">
+      {ticks.map(t => <span style={`left: ${pct(t)}`}>{t} GB</span>)}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Left padding holds the row names, right padding the total after the longest bar. */
+  .mc { container-type: inline-size; width: 100%; min-width: 0; font-size: 0.92rem; }
+  .mc-plot { position: relative; display: grid; gap: 2.2rem; padding: 1.1rem 0 0; margin: 2.1rem 5.6rem 0 4rem; }
+
+  /* Layers, back to front: grid lines, the dashed limit, bars, labels. */
+  .mc-grid { position: absolute; top: 0; bottom: 1.9rem; width: 1px; background: var(--line); z-index: 0; }
+  .mc-limit { position: absolute; top: -0.4rem; bottom: 1.9rem; width: 0; border-left: 2px dashed var(--ink); z-index: 1; }
+  .mc-limit b { position: absolute; bottom: 100%; left: 0; transform: translateX(-50%); padding-bottom: 6px; font-weight: 700; white-space: nowrap; }
+
+  .mc-row { position: relative; display: flex; align-items: center; height: 3.3rem; z-index: 2; }
+  .mc-row.after { margin-bottom: 3rem; }
+  .mc-name { position: absolute; right: calc(100% + 12px); color: var(--ink-2); font-size: 1.05rem; }
+  .mc-bar { height: 100%; display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; flex: none; }
+  .mc-bar.lib { background: var(--ink); color: var(--paper); font-weight: 700; }
+  .mc-bar.train { background: var(--line-strong); color: var(--ink-2); margin-left: 2px; }
+  .mc-total { margin-left: 12px; font-size: 1.15rem; font-weight: 700; white-space: nowrap; }
+  .mc-total.fits { position: absolute; margin-left: 14px; background: var(--card); padding: 2px 5px; }
+
+  .mc-callout { position: absolute; top: 100%; display: flex; flex-direction: column; align-items: flex-start; color: var(--ink-2); white-space: nowrap; }
+  .mc-callout svg { width: 40px; height: 20px; margin-top: 3px; overflow: visible; }
+  .mc-callout line { stroke: var(--faint); stroke-width: 1.2; }
+  .mc-callout span { margin-left: 14px; margin-top: 2px; background: var(--card); padding: 1px 5px; }
+
+  .mc-axis { position: relative; height: 1.4rem; z-index: 2; }
+  .mc-axis span { position: absolute; top: 0; transform: translateX(-50%); color: var(--faint); font-size: 0.82rem; white-space: nowrap; }
+
+  /* Narrow plots: numbers only inside the bars; narrower still, the first total sits above its bar. */
+  @container (max-width: 640px) {
+    .mc-bar .w { display: none; }
+    .mc-total { font-size: 1rem; }
+    .mc-name { font-size: 0.95rem; }
+  }
+  @container (max-width: 420px) {
+    .mc-plot { gap: 2.6rem; margin-right: 0.6rem; margin-left: 3.4rem; }
+    .mc-bar.train > span { display: none; }
+    .mc-row:not(.after) .mc-total { position: absolute; right: 0; bottom: calc(100% + 4px); margin: 0; background: var(--card); padding: 0 3px; }
+    .mc-limit b { font-size: 0.8rem; transform: translateX(-30%); }
+    .mc-axis span { font-size: 0.72rem; }
+    .mc-axis span:nth-child(even) { display: none; }
+  }
+</style>

@@ -1,73 +1,45 @@
 ---
 // src/pages/squeaky-greyhound.astro
-import Layout from '../layouts/Layout.astro';
-const title = "Squeaky and Greyhound";
-const publishDate = "April 10, 2023";
+import ProjectLayout from '../layouts/ProjectLayout.astro';
 ---
-<Layout title={`${title} - Project`}>
-  <main class="container mx-auto px-4 py-16">
-    <p class="section-label mb-6">
-      <a href="/" style="color: var(--color-muted);">~/projects</a>
-      <span class="mx-1">/</span>squeaky-greyhound
-    </p>
-    <article class="card p-12 rounded-xl max-w-3xl mx-auto">
-      <!-- Project Header -->
-      <header class="mb-8">
-        <h1 class="text-5xl font-bold mb-2">{title}</h1>
-        <p class="text-gray-200 text-lg">Published on {publishDate}</p>
-      </header>
+<ProjectLayout title="Squeaky and Greyhound" slug="squeaky-greyhound" date="April 10, 2023" tags={['Python', 'ROS', 'Raisim', 'C++']}>
+  <p>
+    Servo Squeaky is a 3D printed, open-source quadruped robot developed by the Terrestrial Robotics Engineering and Controls at Virginia Tech. It features a servo-based powertrain that enables high-fidelity walking and crawling.
+  </p>
+  <p>
+    Initially, I redesigned some of Servo Squeaky's mechanical components to make it operational. A video demonstration shows the improved version with a custom inverse kinematics algorithm programmed onto a Teensy microcontroller.
+  </p>
+  <p>
+    Once the robot was functional, it was handed off to the high-level software team for advanced algorithms. I then focused on creating a new version, dubbed Greyhound, with enhanced mobility—enabling running and jumping.
+  </p>
+  <p>
+    Greyhound conceals brushless DC motors and 3D printed gearboxes within its legs. A demonstration of the PID control system and the low-level inverse kinematics converting end-effector positions to motor commands is shown in the video.
+  </p>
 
-      <!-- Project Content -->
-      <section class="prose max-w-none text-gray-200">
-        <p>
-          Servo Squeaky is a 3D printed, open-source quadruped robot developed by the Terrestrial Robotics Engineering and Controls at Virginia Tech. It features a servo-based powertrain that enables high-fidelity walking and crawling.
-        </p>
-        <p>
-          Initially, I redesigned some of Servo Squeaky's mechanical components to make it operational. A video demonstration shows the improved version with a custom inverse kinematics algorithm programmed onto a Teensy microcontroller.
-        </p>
-        <p>
-          Once the robot was functional, it was handed off to the high-level software team for advanced algorithms. I then focused on creating a new version, dubbed Greyhound, with enhanced mobility—enabling running and jumping.
-        </p>
-        <p>
-          Greyhound conceals brushless DC motors and 3D printed gearboxes within its legs. A demonstration of the PID control system and the low-level inverse kinematics converting end-effector positions to motor commands is shown below.
-        </p>
-
-        <!-- Embedded YouTube Video -->
-        <div class="video-container my-8">
-            <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/SC4uWbzgVt0" 
-            title="YouTube video player" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen 
-            class="rounded-2xl w-full">
-            </iframe>
-        </div>        
-        
-        <!-- Project Images -->
-        <figure class="my-8">
-          <img src="/squeaky-greyhound-1.png" alt="Squeaky and Greyhound - Image 1" class="rounded-2xl w-full" />
-          <figcaption class="text-center text-sm text-gray-400 mt-2">
-            Design implementation and results.
-          </figcaption>
-        </figure>
-        <div class="grid grid-cols-2 gap-8 my-8">
-          <figure>
-            <img src="/squeaky-greyhound-2.png" alt="Squeaky and Greyhound - Image 2" class="rounded-2xl w-full" />
-            <figcaption class="text-center text-sm text-gray-400 mt-2">
-              System communication diagram.
-            </figcaption>
-          </figure>
-          <figure>
-            <img src="/squeaky-greyhound-3.png" alt="Squeaky and Greyhound - Image 3" class="rounded-2xl w-full" />
-            <figcaption class="text-center text-sm text-gray-400 mt-2">
-              Mechanical design goals and implementation
-            </figcaption>
-          </figure>
-        </div>
-      </section>
-    </article>
-  </main>
-</Layout>
+  <Fragment slot="media">
+    <figure class="fig">
+      <div class="fig-frame video">
+        <iframe
+          src="https://www.youtube.com/embed/SC4uWbzgVt0"
+          title="YouTube video player"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>
+    </figure>
+    <figure class="fig">
+      <div class="fig-frame"><img src="/squeaky-greyhound-1.png" alt="Squeaky and Greyhound - Image 1" width="959" height="821" loading="lazy" /></div>
+      <figcaption>Design implementation and results.</figcaption>
+    </figure>
+    <div class="media-grid">
+      <figure class="fig">
+        <div class="fig-frame"><img src="/squeaky-greyhound-2.png" alt="Squeaky and Greyhound - Image 2" width="800" height="673" loading="lazy" /></div>
+        <figcaption>System communication diagram.</figcaption>
+      </figure>
+      <figure class="fig">
+        <div class="fig-frame"><img src="/squeaky-greyhound-3.png" alt="Squeaky and Greyhound - Image 3" width="687" height="595" loading="lazy" /></div>
+        <figcaption>Mechanical design goals and implementation</figcaption>
+      </figure>
+    </div>
+  </Fragment>
+</ProjectLayout>

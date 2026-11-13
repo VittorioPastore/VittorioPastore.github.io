@@ -1,0 +1,424 @@
+---
+// HeroStage.astro — the live hero: a humanoid rendered in the browser (three.js), playing rollouts of the policy
+// trained on a MacBook (run mlx_lafan1_2h, iteration 4,750). The model and motions are baked into /g1-hero.glb.
+// If WebGL is unavailable the photo is shown instead.
+const clips = [
+  { id: 'dance', label: 'Dance' },
+  { id: 'run', label: 'Run' },
+  { id: 'fight', label: 'Fight' },
+  { id: 'fallAndGetUp', label: 'Get up' },
+];
+---
+
+<div class="stage" id="hero-stage">
+  <canvas
+    id="hero-canvas"
+    role="img"
+    aria-label="A simulated humanoid robot dancing, running, fighting and getting up, driven by a policy trained on a MacBook. Motions: LAFAN1 clips, Ubisoft La Forge."
+  ></canvas>
+
+  <picture class="stage-fallback">
+    <source srcset="/vittoTransparent-900.webp 900w, /vittoTransparent-1800.webp 1800w" sizes="(min-width: 900px) 50vw, 100vw" type="image/webp" />
+    <img src="/vittoTransparent.png" alt="Vittorio Pastore with robots" width="3516" height="3105" loading="lazy" />
+  </picture>
+
+  <div class="clips" role="group" aria-label="Motion">
+    {clips.map((c, i) => (
+      <button type="button" data-clip={c.id} aria-pressed={i === 0 ? 'true' : 'false'}>{c.label}</button>
+    ))}
+  </div>
+</div>
+
+<style>
+  .stage {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 1 / 1;
+    max-height: min(62svh, 34rem);
+  }
+  @media (min-width: 640px) and (min-aspect-ratio: 5 / 4) {
+    .stage { aspect-ratio: 1.12 / 1; max-height: calc(100svh - var(--header-h) - 2 * var(--hero-pad)); }
+  }
+
+  /* The canvas edges are feathered, so the floor never ends in a visible rectangle. */
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    touch-action: pan-y;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, #000 80%, transparent 97%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, #000 80%, transparent 97%);
+    mask-composite: intersect;
+  }
+  .stage.is-live canvas { opacity: 1; }
+
+  .stage-fallback { display: none; }
+  .stage.is-failed canvas, .stage.is-failed .clips { display: none; }
+  .stage.is-failed .stage-fallback { display: flex; position: absolute; inset: 0; }
+  .stage-fallback img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+
+  /* Motion picker: the black pill is the selection, as everywhere else. */
+  .clips {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--card);
+  }
+  .clips button {
+    font: 500 0.84rem/1 var(--sans);
+    color: var(--muted);
+    background: none;
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 14px;
+    min-height: 34px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+  }
+  .clips button:hover { color: var(--ink); }
+  .clips button[aria-pressed='true'] { background: var(--pill-bg); color: var(--pill-fg); }
+</style>
+
+<script>
+  const stage = document.getElementById('hero-stage');
+  const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement | null;
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('#hero-stage .clips button'));
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  async function start() {
+    if (!stage || !canvas) return;
+    const THREE = await import('three');
+    const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+    const { RoomEnvironment } = await import('three/examples/jsm/environments/RoomEnvironment.js');
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+    const scene = new THREE.Scene();
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; // soft reflections on the shell
+    pmrem.dispose();
+
+    const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 60);
+    const target = new THREE.Vector3(0, 0.8, 0);
+
+    // Three-point lighting: a warm key spot from the front that casts the shadow, a strong cool rim from behind that
+    // outlines the body, a warm kicker on the other side, and very little fill.
+    const fill = new THREE.HemisphereLight(0xdfe8ff, 0x1c1d22, 0.3);
+    const key = new THREE.SpotLight(0xffe4c8, 5, 0, 0.44, 0.9, 0);
+    key.position.set(2.6, 4.4, 3.2);
+    key.target.position.copy(target);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 1;
+    key.shadow.camera.far = 14;
+    key.shadow.bias = -0.0003;
+    key.shadow.radius = 7;
+    const rim = new THREE.DirectionalLight(0xa9c8ff, 3.5);
+    rim.position.set(-3.2, 2.8, -3.4);
+    const kicker = new THREE.DirectionalLight(0xffc48a, 1.2);
+    kicker.position.set(3.4, 1.4, -2.6);
+    scene.add(fill, key, key.target, rim, kicker);
+
+    // Floor: the shadow, a soft pool of light, and a hairline grid. Pool and grid fade out with distance from the
+    // robot, so the floor dissolves into the page instead of ending at the canvas edge.
+    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.3, depthWrite: false });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), shadowMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    floor.renderOrder = -3; // floor layers draw first, in this order, and never hide one another
+    scene.add(floor);
+
+    const fadeVertex = `
+      varying vec2 vFloor;
+      void main() {
+        vec4 world = modelMatrix * vec4(position, 1.0);
+        vFloor = world.xz; // distance is taken per pixel: a grid line's two ends are both far from the robot
+        gl_Position = projectionMatrix * viewMatrix * world;
+      }`;
+    const fadeFragment = `
+      uniform vec3 uColor;
+      uniform float uOpacity;
+      uniform float uInner;
+      uniform float uOuter;
+      varying vec2 vFloor;
+      void main() {
+        float fade = 1.0 - smoothstep(uInner, uOuter, length(vFloor));
+        float a = uOpacity * fade * fade;
+        if (a < 0.002) discard;
+        gl_FragColor = vec4(uColor, a);
+        #include <colorspace_fragment>
+      }`;
+    const fading = (inner: number, outer: number) =>
+      new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        depthTest: false,
+        vertexShader: fadeVertex,
+        fragmentShader: fadeFragment,
+        uniforms: { uColor: { value: new THREE.Color() }, uOpacity: { value: 1 }, uInner: { value: inner }, uOuter: { value: outer } },
+      });
+
+    const poolMat = fading(0, 2.1);
+    const pool = new THREE.Mesh(new THREE.CircleGeometry(2.2, 48), poolMat);
+    pool.rotation.x = -Math.PI / 2;
+    pool.renderOrder = -2;
+    scene.add(pool);
+
+    const CELL = 0.5;
+    const HALF = 7;
+    const pts: number[] = [];
+    for (let i = -HALF; i <= HALF; i += CELL) pts.push(-HALF, 0, i, HALF, 0, i, i, 0, -HALF, i, 0, HALF);
+    const gridGeo = new THREE.BufferGeometry();
+    gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    const gridMat = fading(0.3, 3.2);
+    const grid = new THREE.LineSegments(gridGeo, gridMat);
+    grid.renderOrder = -1;
+    grid.frustumCulled = false;
+    scene.add(grid);
+
+    // Load the robot. It sits in a group that turns it, so a new motion can start facing the way the last one ended.
+    const gltf = await new GLTFLoader().loadAsync('/g1-hero.glb');
+    const robot = gltf.scene;
+    const turn = new THREE.Group();
+    turn.add(robot);
+    scene.add(turn);
+
+    const shell = new THREE.MeshStandardMaterial({ color: 0x9da1a9, metalness: 0.72, roughness: 0.34 });
+    const darkPart = new THREE.MeshStandardMaterial({ color: 0x101114, metalness: 0.45, roughness: 0.4 });
+    const glow = new THREE.MeshBasicMaterial({ color: 0x38c6ff, toneMapped: false }); // the light ring around the face
+    let pelvis: InstanceType<typeof THREE.Object3D> | null = null;
+    robot.traverse(o => {
+      if (!pelvis && /pelvis$/i.test(o.name)) pelvis = o;
+      const mesh = o as InstanceType<typeof THREE.Mesh>;
+      if (mesh.isMesh) {
+        const kind = (mesh.material as InstanceType<typeof THREE.Material>).name;
+        mesh.material = kind === 'glow' ? glow : kind === 'dark' ? darkPart : shell;
+        mesh.castShadow = kind !== 'glow';
+        if (kind === 'glow' && mesh.parent?.parent) {
+          // a little of the ring's light spills onto the chest and arms (body frame: x forward, z up)
+          const spill = new THREE.PointLight(0x38c6ff, 0.5, 0.9, 2);
+          spill.position.set(0.16, 0, 0.42);
+          mesh.parent.parent.add(spill);
+        }
+        mesh.frustumCulled = false; // bounds are those of the quantized mesh, not of its animated pose
+      }
+    });
+    if (!pelvis) throw new Error('root body not found');
+    const root = pelvis as InstanceType<typeof THREE.Object3D>;
+
+    // Colours and light levels follow the page theme: low-key on dark, brighter on paper.
+    const css = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const applyTheme = () => {
+      const dark = document.documentElement.classList.contains('dark-mode');
+      gridMat.uniforms.uColor.value.set(css('--line-strong') || '#c4c9d0');
+      gridMat.uniforms.uOpacity.value = dark ? 0.8 : 0.9;
+      poolMat.uniforms.uColor.value.set(dark ? '#ffffff' : '#000000');
+      poolMat.uniforms.uOpacity.value = dark ? 0.07 : 0.03;
+      shadowMat.opacity = dark ? 0.7 : 0.34;
+      renderer.toneMappingExposure = dark ? 1.0 : 1.05;
+      scene.environmentIntensity = dark ? 0.22 : 0.6;
+      fill.intensity = dark ? 0.08 : 0.55;
+      key.intensity = dark ? 4.2 : 4.4;
+      rim.intensity = dark ? 6.0 : 2.6;
+      kicker.intensity = dark ? 2.0 : 0.8;
+    };
+    applyTheme();
+    new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    // Motions. Each clip carries the path its root travelled (removed from the motion when it was baked); the floor
+    // scrolls by that path's own steps, so switching clips never moves the floor.
+    const yawOf = (x: number, y: number, z: number, w: number) => Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
+    const mixer = new THREE.AnimationMixer(robot);
+    type Clip = {
+      name: string;
+      action: ReturnType<typeof mixer.clipAction>;
+      duration: number;
+      yaw0: number;
+      path: (t: number) => [number, number];
+    };
+    const clipsByName = new Map<string, Clip>();
+    for (const anim of gltf.animations) {
+      const ti = anim.tracks.findIndex(t => t.name.startsWith('track.'));
+      const pathTrack = ti >= 0 ? anim.tracks.splice(ti, 1)[0] : null;
+      const interp = pathTrack ? pathTrack.createInterpolant() : null;
+      const rot = anim.tracks.find(t => t.name === `${root.name}.quaternion`);
+      const q = rot ? rot.values : [0, 0, 0, 1];
+      const action = mixer.clipAction(anim);
+      action.setLoop(THREE.LoopOnce, 1);
+      action.clampWhenFinished = true;
+      clipsByName.set(anim.name, {
+        name: anim.name,
+        action,
+        duration: anim.duration,
+        yaw0: yawOf(q[0], q[1], q[2], q[3]),
+        path: t => {
+          if (!interp) return [0, 0];
+          const v = interp.evaluate(Math.min(Math.max(t, 0), anim.duration));
+          return [v[0], v[1]];
+        },
+      });
+    }
+    const order = buttons.map(b => b.dataset.clip || '').filter(n => clipsByName.has(n));
+
+    const FADE = 0.9; // seconds of blending from one motion into the next
+    const FACING = -0.55; // heading of the very first motion: three-quarter view toward the camera
+    let cur: Clip | null = null;
+    let turnYaw = 0;
+    let turning: { from: number; to: number; t: number } | null = null;
+    let lastPath: [number, number] | null = null;
+    const scroll = { x: 0, z: 0 };
+
+    const play = (name: string) => {
+      const next = clipsByName.get(name);
+      if (!next || next === cur) return;
+      const prev = cur;
+      next.action.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();
+      if (prev) {
+        prev.action.crossFadeTo(next.action, FADE, false);
+        // Start the new motion facing the way the robot faces now, by turning the whole robot over the blend.
+        const facing = turnYaw + yawOf(root.quaternion.x, root.quaternion.y, root.quaternion.z, root.quaternion.w);
+        let d = facing - next.yaw0 - turnYaw;
+        d = Math.atan2(Math.sin(d), Math.cos(d));
+        turning = { from: turnYaw, to: turnYaw + d, t: 0 };
+        setTimeout(() => {
+          if (cur !== prev) prev.action.stop();
+        }, FADE * 1000 + 60);
+      } else {
+        turnYaw = FACING - next.yaw0;
+      }
+      cur = next;
+      lastPath = null;
+      buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.clip === name)));
+    };
+    buttons.forEach(b => b.addEventListener('click', () => play(b.dataset.clip || '')));
+
+    // Camera: a slow sway, plus a little parallax from the pointer.
+    let aim = { x: 0, y: 0 };
+    const look = { x: 0, y: 0 };
+    window.addEventListener('pointermove', e => {
+      const r = stage.getBoundingClientRect();
+      aim = {
+        x: Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2))),
+        y: Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2))),
+      };
+    }, { passive: true });
+
+    let distance = 5;
+    const resize = () => {
+      const w = stage.clientWidth;
+      const h = stage.clientHeight;
+      if (w === 0 || h === 0) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      // Far enough to keep about 2.05 m of height and 2.5 m of width in frame.
+      const t = Math.tan((camera.fov * Math.PI) / 360);
+      distance = Math.max(2.05 / (2 * t), 2.5 / (2 * t * camera.aspect));
+      camera.updateProjectionMatrix();
+    };
+    new ResizeObserver(resize).observe(stage);
+    resize();
+
+    const mod = (v: number) => ((v % CELL) + CELL) % CELL;
+    let elapsed = 0;
+    const frame = (dt: number) => {
+      elapsed += dt;
+      mixer.update(dt);
+
+      if (turning) {
+        turning.t += dt;
+        const p = Math.min(turning.t / FADE, 1);
+        turnYaw = turning.from + (turning.to - turning.from) * (p * p * (3 - 2 * p));
+        if (p >= 1) turning = null;
+      }
+      turn.rotation.y = turnYaw;
+
+      if (cur) {
+        // Scroll the floor by the distance this motion travelled since the last frame (z-up x, y -> x, -z, turned).
+        const p = cur.path(cur.action.time);
+        if (lastPath) {
+          const dx = p[0] - lastPath[0];
+          const dz = -(p[1] - lastPath[1]);
+          const c = Math.cos(turnYaw);
+          const s = Math.sin(turnYaw);
+          scroll.x -= dx * c + dz * s;
+          scroll.z -= -dx * s + dz * c;
+        }
+        lastPath = p;
+        grid.position.x = mod(scroll.x);
+        grid.position.z = mod(scroll.z);
+
+        // Blend into the next motion a little before this one ends.
+        if (cur.action.time >= cur.duration - FADE - 0.05 && order.length > 1) {
+          play(order[(order.indexOf(cur.name) + 1) % order.length]);
+        }
+      }
+
+      look.x += (aim.x - look.x) * 0.06;
+      look.y += (aim.y - look.y) * 0.06;
+      // Visitors who ask for reduced motion get a fixed camera; the robot itself still moves.
+      const yaw = calm ? 0.5 : 0.5 + Math.sin(elapsed * 0.16) * 0.2 - look.x * 0.38;
+      const pitch = calm ? 0.07 : 0.07 + look.y * 0.06;
+      camera.position.set(
+        target.x + Math.sin(yaw) * Math.cos(pitch) * distance,
+        target.y + Math.sin(pitch) * distance,
+        target.z + Math.cos(yaw) * Math.cos(pitch) * distance,
+      );
+      camera.lookAt(target);
+      renderer.render(scene, camera);
+    };
+
+    play(order[0]);
+    // Render only while the stage is on screen and the tab is visible.
+    let visible = true;
+    let running = false;
+    let lastT = 0;
+    const loop = (now: number) => {
+      if (!visible || document.hidden) {
+        running = false;
+        return;
+      }
+      // Never step backwards: a frame's timestamp can be slightly earlier than the clock read that started the loop,
+      // and a negative step makes a play-once motion finish (and freeze) at its first frame.
+      frame(Math.min(Math.max((now - lastT) / 1000, 0), 0.05));
+      lastT = now;
+      requestAnimationFrame(loop);
+    };
+    const wake = () => {
+      if (running || !visible || document.hidden) return;
+      running = true;
+      lastT = performance.now();
+      requestAnimationFrame(loop);
+    };
+    new IntersectionObserver(entries => {
+      visible = entries.some(e => e.isIntersecting);
+      wake();
+    }).observe(stage);
+    document.addEventListener('visibilitychange', wake);
+
+    frame(0);
+    stage.classList.add('is-live');
+    wake();
+  }
+
+  start().catch(err => {
+    console.warn('Hero stage unavailable:', err);
+    stage?.classList.add('is-failed');
+  });
+</script>

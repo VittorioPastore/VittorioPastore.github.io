@@ -1,1093 +1,439 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
-import AnimatedButton from '../components/AnimatedButton';
 import ContributionGrid from '../components/ContributionGrid.astro';
 import FunnyFeed from '../components/FunnyFeed';
+import MemoryChart from '../components/MemoryChart.astro';
+import HeroStage from '../components/HeroStage.astro';
+
+const publications = [
+  {
+    title: 'A Nonlinear MPC Framework for Loco-Manipulation of Quadrupedal Robots with Non-Negligible Manipulator Dynamics',
+    venue: 'IEEE RA-L',
+    summary:
+      'A real-time NMPC framework for quadrupedal loco-manipulation that couples simplified locomotion templates with full-order manipulator dynamics to effectively handle non-negligible arm mass.',
+    href: 'https://arxiv.org/abs/2507.22042',
+    posted: '2025-07-01', // arXiv 2507: July 2025
+    cta: 'Read paper',
+  },
+  {
+    title: 'ADMM-Based Distributed MPC with Control Barrier Functions for Safe Multi-Robot Quadrupedal Locomotion',
+    venue: 'Under Review',
+    summary:
+      'A fully decentralized MPC framework using ADMM and control barrier functions to enable real-time, safe trajectory planning for multi-agent quadrupedal teams with significantly reduced computational overhead.',
+    href: 'https://arxiv.org/abs/2603.19170',
+    posted: '2026-03-01', // arXiv 2603: March 2026
+    cta: 'Read paper',
+  },
+  {
+    title: 'Multi-Agent Navigation via Distributed Consensus-Based Optimization and Learned Locomotion',
+    venue: 'In Progress',
+    summary:
+      'A hierarchical control architecture for multi-agent legged navigation that integrates high-level distributed NMPC using ADMM for scalable collision avoidance with a low-level reinforcement learning policy for robust real-time locomotion.',
+    href: null,
+    cta: 'Coming soon',
+  },
+  {
+    title: "Master's Thesis",
+    venue: 'VT Library',
+    summary: 'Thesis research focused on multi agent locomotion via blending of classical and learning-based controls.',
+    href: 'https://hdl.handle.net/10919/143475',
+    cta: 'Read thesis',
+  },
+];
 
 const skills = [
-  { name: 'Python & C++', projects: ['squeaky-greyhound', 'neural-trader'] },
+  { name: 'Python & C++', projects: ['humanoid-on-a-macbook', 'bones-seed-in-92-bytes', 'squeaky-greyhound', 'neural-trader'] },
   { name: 'PyTorch & TensorFlow', projects: ['neural-trader'] },
   { name: 'ROS 2', projects: ['squeaky-greyhound'] },
-  { name: 'Isaac Lab, MuJoCo & Raisim', projects: ['squeaky-greyhound'] },
+  { name: 'Isaac Lab, MuJoCo & Raisim', projects: ['humanoid-on-a-macbook', 'bones-seed-in-92-bytes', 'squeaky-greyhound'] },
   { name: 'Distributed NMPC', projects: ['controls-ios-application', 'nawcad'] },
   { name: 'Multi-Agent RL', projects: ['neural-trader'] },
   { name: 'Embodied AI', projects: ['mailclient'] },
   { name: 'MATLAB & Simulink', projects: ['nawcad', 'neural-trader'] },
   { name: 'Swift & Core ML', projects: ['mailclient', 'controls-ios-application'] },
-  { name: 'Linux, Git & Docker', projects: [] }
+  { name: 'Linux, Git & Docker', projects: [] },
 ];
 
 const projects = {
+  'humanoid-on-a-macbook': {
+    title: 'Training a Humanoid on a MacBook',
+    short: 'MLX humanoid',
+    description: 'A world-model motion tracker ported from NVIDIA GPUs to MLX: 1,024 simulated Unitree G1s on an M1 Pro, and one policy that tracks 40 motion clips after 79 minutes.',
+    skills: ['Python', 'MLX', 'MuJoCo', 'Reinforcement Learning'],
+    href: '/humanoid-on-a-macbook',
+    posted: '2026-11-13',
+    image: '/mlx-humanoid-figure.webp',
+    imageAlt: '1,024 simulated G1 robots on a MacBook, a robot with its imagined future steps, and a strip comparing 128 GPUs for 7 days, 1 GPU for 3 hours and 1 MacBook for 79 minutes',
+  },
+  'bones-seed-in-92-bytes': {
+    title: '131 Hours of Motion in 92 Bytes a Frame',
+    short: 'BONES-SEED',
+    description: 'A 131-hour humanoid motion library stored as root pose, quaternion and int16 joint angles, so it trains on one 12 GB GPU.',
+    skills: ['Python', 'JAX', 'MuJoCo', 'Reinforcement Learning'],
+    href: '/bones-seed-in-92-bytes',
+    posted: '2026-11-13',
+    figure: 'memory',
+  },
   'squeaky-greyhound': {
     title: 'Squeaky and Greyhound',
+    short: 'Squeaky & Greyhound',
     description: 'A 3D printed quadruped robot project featuring advanced inverse kinematics and a sleek mechanical design for enhanced mobility.',
     skills: ['Python', 'ROS', 'Raisim', 'C++'],
-    href: '/squeaky-greyhound'
+    href: '/squeaky-greyhound',
+    posted: '2023-04-10',
   },
   'nawcad': {
     title: 'Senior Design: NAWCAD',
-    description: 'Integrated test stand system design connecting mechanical engineering with a drone\'s flight stack using a custom Matlab GUI.',
+    short: 'NAWCAD',
+    description: "Integrated test stand system design connecting mechanical engineering with a drone's flight stack using a custom Matlab GUI.",
     skills: ['Controls Theory', 'Matlab'],
-    href: '/nawcad'
+    href: '/nawcad',
+    posted: '2024-05-30',
   },
   'controls-ios-application': {
     title: 'Controls IOS Application',
-    description: 'A personal project experimenting with PID control, Apple\'s Swift language, and custom UI design for simulating control systems.',
+    short: 'Controls iOS',
+    description: "A personal project experimenting with PID control, Apple's Swift language, and custom UI design for simulating control systems.",
     skills: ['Controls Theory', 'Swift'],
-    href: '/controls-ios-application'
+    href: '/controls-ios-application',
+    posted: '2025-04-10',
   },
   'mailclient': {
     title: 'Prysm Mail',
+    short: 'Prysm Mail',
     description: 'A new type of email client leveraging local LLMs for enhanced privacy and user experience.',
     skills: ['Swift', 'CoreML', 'Embodied AI', 'Natural Language Processing'],
-    href: '/mailclient'
+    href: '/mailclient',
+    posted: '2025-08-04',
   },
   'neural-trader': {
     title: 'Neural Trader (AI Project)',
-    description: 'A neural network based financial advisor built with Matlab\'s Neural Network Toolbox and Python for data scraping and analysis.',
+    short: 'Neural Trader',
+    description: "A neural network based financial advisor built with Matlab's Neural Network Toolbox and Python for data scraping and analysis.",
     skills: ['Python', 'PyTorch', 'TensorFlow'],
-    href: '/neural-trader'
+    href: '/neural-trader',
+    posted: '2025-04-10',
   },
   'website': {
     title: 'This Website',
+    short: 'Website',
     description: 'Yes, I made this website from scratch! No online website builders here. Check out the source code on GitHub.',
     skills: ['Web Development', 'JavaScript', 'Astro'],
-    href: '/website'
-  }
+    href: '/website',
+    posted: '2025-04-11',
+  },
 };
 
-const [featuredId, ...restIds] = Object.keys(projects);
-const featuredProject = projects[featuredId];
-const restProjects = restIds.map(id => ({ id, ...projects[id] }));
+// Projects that have a figure are featured, each as a full-width card; the others fill the grid below.
+// A project is listed only once its page exists in src/pages, so a post that is not published yet stays off the site.
+const pages = import.meta.glob('./*.astro');
+const live = (id: string) => `./${id}.astro` in pages;
+const all = Object.entries(projects).filter(([id]) => live(id)).map(([id, p]) => ({ id, ...p }));
+const featured = all.filter(p => p.image || p.figure);
+const rest = all.filter(p => !(p.image || p.figure));
+
+const papers = publications.filter(p => !p.title.includes('Thesis')).length;
+const sections = [
+  { id: 'publications', label: 'Publications', meta: `${papers} papers · 1 thesis` },
+  { id: 'projects', label: 'Projects', meta: `${all.length} builds` },
+  { id: 'skills', label: 'Skills', meta: `${skills.length} areas` },
+  { id: 'activity', label: 'Activity', meta: 'GitHub, past year' },
+  { id: 'contact', label: 'Contact', meta: 'LinkedIn · GitHub · Email' },
+];
+const num = (i: number) => String(i + 1).padStart(2, '0');
+// The first card of the grid (the newest project) spans however many columns leave every row full.
+const span = (cols: number) => ((1 - rest.length) % cols + cols) % cols || cols;
+const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
 ---
 
 <Layout title="Vittorio Pastore - Portfolio">
-
-  <!-- Hero: full-viewport, outside editorial-main -->
-  <section class="hero">
-    <div class="hero-shell">
-      <div class="hero-inner">
-        <p class="section-label hero-path">~/vittorio<span class="cursor">▋</span></p>
-        <h1 class="hero-name">Vittorio<br/>Pastore</h1>
-        <div class="hero-accent-line"></div>
-        <p class="hero-bio">
-          Robotics Researcher at Virginia Tech.<br/>
-          Passionate about Reinforcement Learning, Music, and Photography.
-        </p>
-        <div class="hero-cta">
-          <AnimatedButton text="View Projects" href="#projects" client:load />
-          <AnimatedButton text="Contact Me" href="#contact" client:load />
+  <main class="page">
+    <!-- Hero: one screen, laid out like a figure page -->
+    <section class="wrap hero">
+      <div class="hero-text">
+        <div class="hero-lead">
+          <h1 class="hero-name">Vittorio<br />Pastore</h1>
+          <p class="hero-bio">
+            Robotics Researcher at Virginia Tech.<br />
+            Passionate about Reinforcement Learning, Music, and Photography.
+          </p>
+          <div class="btn-row">
+            <a class="btn primary" href="#projects">View projects</a>
+            <a class="btn" href="#contact">Contact me</a>
+          </div>
         </div>
       </div>
-      <div class="hero-photo-wrap">
-        <img
-          src="/vittoTransparent.png"
-          alt="Vittorio Pastore with robots"
-          class="hero-photo"
-        />
-      </div>
-    </div>
-  </section>
 
-  <main class="editorial-main">
-    <!-- Publications Section -->
-    <section id="publications" class="editorial-section" data-scroll-section="publications">
-      <div class="section-rule">
-        <span class="section-number">01</span>
-        <span class="rule-line"></span>
-        <span class="section-title-label">publications</span>
-      </div>
-
-      <div class="publications-list flex flex-col pl-3 md:pl-4">
-        <!-- Paper 1 -->
-        <article class="publication-item group relative pl-8 pb-12 border-l-[2px] border-[var(--border-subtle)] hover:border-[var(--color-accent)] transition-colors duration-500">
-          <!-- Terminal block cursor instead of a ball -->
-          <div class="absolute -left-[5px] top-1 w-[8px] h-[18px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] group-hover:bg-[var(--color-accent)] group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_12px_var(--color-accent)] transition-all duration-300 z-10"></div>
-          
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-6 mb-3">
-            <h3 class="text-xl font-bold text-[var(--color-text)] leading-tight group-hover:text-[var(--color-accent)] transition-colors pr-2">A Nonlinear MPC Framework for Loco-Manipulation of Quadrupedal Robots with Non-Negligible Manipulator Dynamics</h3>
-            <div class="inline-flex flex-shrink-0 mt-1 md:mt-0">
-              <span class="font-mono text-xs px-2.5 py-1.5 bg-[var(--bg-elevated)] text-[var(--color-muted)] rounded border border-[var(--border-subtle)] whitespace-nowrap">IEEE RA-L</span>
-            </div>
-          </div>
-          
-          <p class="text-[var(--color-muted)] text-sm md:text-base leading-relaxed mb-5 max-w-4xl">
-            A real-time NMPC framework for quadrupedal loco-manipulation that couples simplified locomotion templates with full-order manipulator dynamics to effectively handle non-negligible arm mass.
-          </p>
-          
-          <div class="mt-2">
-            <AnimatedButton text="Read Paper" href="https://arxiv.org/abs/2507.22042" client:load />
-          </div>
-        </article>
-
-        <!-- Paper 2 -->
-        <article class="publication-item group relative pl-8 pb-12 border-l-[2px] border-[var(--border-subtle)] hover:border-[var(--color-accent)] transition-colors duration-500">
-          <div class="absolute -left-[5px] top-1 w-[8px] h-[18px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] group-hover:bg-[var(--color-accent)] group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_12px_var(--color-accent)] transition-all duration-300 z-10"></div>
-          
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-6 mb-3">
-            <h3 class="text-xl font-bold text-[var(--color-text)] leading-tight group-hover:text-[var(--color-accent)] transition-colors pr-2">ADMM-Based Distributed MPC with Control Barrier Functions for Safe Multi-Robot Quadrupedal Locomotion</h3>
-            <div class="inline-flex flex-shrink-0 mt-1 md:mt-0">
-              <span class="font-mono text-xs px-2.5 py-1.5 bg-[var(--bg-elevated)] text-[var(--color-muted)] rounded border border-[var(--border-subtle)] whitespace-nowrap">Under Review</span>
-            </div>
-          </div>
-          
-          <p class="text-[var(--color-muted)] text-sm md:text-base leading-relaxed mb-5 max-w-4xl">
-            A fully decentralized MPC framework using ADMM and control barrier functions to enable real-time, safe trajectory planning for multi-agent quadrupedal teams with significantly reduced computational overhead.
-          </p>
-          
-          <div class="mt-2">
-            <AnimatedButton text="Read Paper" href="https://arxiv.org/abs/2603.19170" client:load />
-          </div>
-        </article>
-
-        <!-- Paper 3 -->
-        <article class="publication-item group relative pl-8 pb-12 border-l-[2px] border-[var(--border-subtle)] hover:border-[var(--color-accent)] transition-colors duration-500">
-          <div class="absolute -left-[5px] top-1 w-[8px] h-[18px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] group-hover:bg-[var(--color-accent)] group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_12px_var(--color-accent)] transition-all duration-300 z-10"></div>
-          
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-6 mb-3">
-            <h3 class="text-xl font-bold text-[var(--color-text)] leading-tight flex items-center gap-3 pr-2">
-              Multi-Agent Navigation via Distributed Consensus-Based Optimization and Learned Locomotion
-            </h3>
-            <div class="inline-flex flex-shrink-0 mt-1 md:mt-0">
-              <span class="font-mono text-xs px-2.5 py-1.5 bg-[var(--bg-elevated)] text-[var(--color-muted)] rounded border border-[var(--border-subtle)] whitespace-nowrap">In Progress</span>
-            </div>
-          </div>
-          
-          <p class="text-[var(--color-muted)] text-sm md:text-base leading-relaxed mb-4 max-w-4xl">
-            A hierarchical control architecture for multi-agent legged navigation that integrates high-level distributed NMPC using ADMM for scalable collision avoidance with a low-level reinforcement learning policy for robust real-time locomotion.
-          </p>
-          
-          <div class="mt-2">
-            <AnimatedButton text="Coming Soon" href="#publications" client:load />
-          </div>
-        </article>
-
-        <!-- Thesis -->
-        <article class="publication-item group relative pl-8 pb-4 border-l-[2px] border-[var(--border-subtle)] hover:border-[var(--color-accent)] transition-colors duration-500">
-          <div class="absolute -left-[5px] top-1 w-[8px] h-[18px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] group-hover:bg-[var(--color-accent)] group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_12px_var(--color-accent)] transition-all duration-300 z-10"></div>
-          
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-6 mb-3">
-            <h3 class="text-xl font-bold text-[var(--color-text)] leading-tight flex items-center gap-3 pr-2">
-              Master's Thesis
-            </h3>
-            <div class="inline-flex flex-shrink-0 mt-1 md:mt-0">
-              <span class="font-mono text-xs px-2.5 py-1.5 bg-[var(--bg-elevated)] text-[var(--color-muted)] rounded border border-[var(--border-subtle)] whitespace-nowrap">VT Library</span>
-            </div>
-          </div>
-          
-          <p class="text-[var(--color-muted)] text-sm md:text-base leading-relaxed mb-4 max-w-4xl">
-            Thesis research focused on multi agent locomotion via blending of classical and learning-based controls.
-          </p>
-
-          <div class="mt-2">
-            <AnimatedButton text="Read Thesis" href="https://hdl.handle.net/10919/143475" client:load />
-          </div>
-        </article>
-      </div>
+      <HeroStage />
     </section>
 
-    <!-- Projects Section -->
-    <section id="projects" class="editorial-section" data-scroll-section="projects">
-      <div class="section-rule">
-        <span class="section-number">02</span>
-        <span class="rule-line"></span>
-        <span class="section-title-label">projects</span>
-      </div>
-
-      <!-- Featured Project -->
-      <div
-        id={`project-${featuredId}`}
-        class={`card card-hover featured-project`}
-        data-skills={featuredProject.skills.join(',')}
-      >
-        <div class="featured-inner">
-          <div class="featured-meta">
-            <span class="section-label">featured</span>
-            <h2 class="featured-title">{featuredProject.title}</h2>
+    <div class="wrap stack">
+      <!-- 01 Publications -->
+      <section id="publications" class="zone">
+        <header class="zone-head">
+          <div>
+            <p class="kicker">01</p>
+            <h2 class="zone-title">Publications</h2>
           </div>
-          <div class="featured-body">
-            <p class="featured-description">{featuredProject.description}</p>
-            <div class="skill-tags">
-              {featuredProject.skills.map(skill => (
-                <span class="skill-tag">{skill}</span>
-              ))}
-            </div>
-            <AnimatedButton text="View Project" href={featuredProject.href} client:load />
-          </div>
+          <p class="meta">{sections[0].meta}</p>
+        </header>
+        <div class="pub-grid">
+          {publications.map(p => {
+            const body = (
+              <>
+                <p class="kicker pub-venue">
+                  {p.posted && <span class="pill" data-posted={p.posted} hidden>New</span>}
+                  {p.venue}
+                </p>
+                <h3>{p.title}</h3>
+                <p class="card-text">{p.summary}</p>
+                {p.href ? <span class="go">{p.cta}</span> : <span class="meta">{p.cta}</span>}
+              </>
+            );
+            return p.href ? <a class="card pub" href={p.href}>{body}</a> : <article class="card pub">{body}</article>;
+          })}
         </div>
-      </div>
+      </section>
 
-      <!-- Remaining Projects Grid -->
-      <div class="projects-grid">
-        {restProjects.map(({ id, title, description, skills: projectSkills, href }) => (
-          <div
-            id={`project-${id}`}
-            class="card card-hover project-card"
-            data-skills={projectSkills.join(',')}
-          >
-            <h3 class="project-title">{title}</h3>
-            <p class="project-description">{description}</p>
-            <div class="skill-tags">
-              {projectSkills.map(skill => (
-                <span class="skill-tag">{skill}</span>
-              ))}
-            </div>
-            <AnimatedButton text="View Project" href={href} client:load />
+      <!-- 02 Projects -->
+      <section id="projects" class="zone">
+        <header class="zone-head">
+          <div>
+            <p class="kicker">02</p>
+            <h2 class="zone-title">Projects</h2>
           </div>
+          <p class="meta">{sections[1].meta}</p>
+        </header>
+
+        {featured.map(f => (
+          <a class="card featured" id={`project-${f.id}`} href={f.href}>
+            <div class="featured-text">
+              <span class="pill" data-posted={f.posted} hidden>New</span>
+              <h3 class="featured-title">{f.title}</h3>
+              <p class="card-text">{f.description}</p>
+              <div class="tags">{f.skills.map(s => <span class="tag">{s}</span>)}</div>
+              <span class="go">Read the post</span>
+            </div>
+            {f.image
+              ? <img class="featured-fig" src={f.image} alt={f.imageAlt} width="2808" height="1853" loading="lazy" />
+              : <div class="featured-fig framed paper-light"><MemoryChart /></div>}
+          </a>
         ))}
-      </div>
-    </section>
 
-    <!-- Skills Section -->
-    <section id="skills" class="editorial-section" data-scroll-section="skills">
-      <div class="section-rule">
-        <span class="section-number">03</span>
-        <span class="rule-line"></span>
-        <span class="section-title-label">skills</span>
-      </div>
-      
-      <div class="mt-8 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl overflow-hidden shadow-2xl relative font-mono">
-        <!-- Terminal Header -->
-        <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]/50">
-          <div class="flex gap-2">
-            <div class="w-3 h-3 rounded-full bg-red-500/80 border border-red-600"></div>
-            <div class="w-3 h-3 rounded-full bg-yellow-500/80 border border-yellow-600"></div>
-            <div class="w-3 h-3 rounded-full bg-green-500/80 border border-green-600"></div>
-          </div>
-          <div class="text-[var(--color-muted)] text-xs tracking-widest hidden sm:block">guest@vittorio:~</div>
-          <div class="text-xs text-[var(--color-muted)]">bash</div>
-        </div>
-        
-        <!-- Terminal Body -->
-        <div class="p-4 sm:p-6 md:p-8">
-          <div id="skills-prompt-line" class="flex items-center gap-1.5 sm:gap-2 mb-8 text-[11px] min-[370px]:text-xs sm:text-sm md:text-base whitespace-nowrap overflow-x-auto pb-2" style="scrollbar-width: none;">
-            <span class="text-[var(--color-text)] opacity-70">(base)</span>            
-            <span class="text-green-400">guest@vittorio</span>
-            <span class="text-[var(--color-text)]">:</span>
-            <span class="text-blue-400">~/skills</span>
-            <span class="text-[var(--color-text)]">$</span>
-            <span id="skills-command" class="text-[var(--color-text)] tracking-wide"></span>
-            <span id="skills-cursor" class="cursor ml-[-2px] sm:ml-[-4px]">▋</span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 pb-4 font-mono">
-            {skills.map((skill, index) => (
-              <div class="skill-node opacity-0 translate-y-2 group flex flex-col cursor-crosshair rounded hover:bg-[var(--border-subtle)]/20 p-2 -m-2 transition-all duration-300">
-                <div class="flex items-center text-sm sm:text-base mb-1.5">
-                  <span class="text-green-500 mr-2 font-bold">[+]</span>
-                  <span class="font-bold text-cyan-400 group-hover:text-[var(--color-accent)] transition-colors tracking-wide">{skill.name}</span>
+        <div class:list={['project-grid', { four: rest.length % 4 === 0 }]}>
+          {rest.map((p, i) => (
+            <a class:list={['card', 'project', { lead: i === 0 }]} id={`project-${p.id}`} href={p.href} style={i === 0 ? leadSpans : undefined}>
+              <div class="project-inner">
+                <div class="project-head">
+                  <span class="pill" data-posted={p.posted} hidden>New</span>
+                  <h3>{p.title}</h3>
                 </div>
-                <div class="flex items-start text-xs sm:text-sm text-[var(--color-muted)] opacity-70 group-hover:opacity-100 transition-opacity pl-7">
-                  <span class="text-yellow-500/70 mr-2 mt-[2px] font-bold">↳</span> 
-                  {skill.projects.length > 0 ? (
-                    <span class="leading-relaxed">
-                      <span class="hidden sm:inline">used in </span>{skill.projects.map(proj => proj.replace(/-/g, ' ')).join(', ')}
-                    </span>
-                  ) : (
-                    <span class="leading-relaxed font-mono">
-                      sys_level_dependency
-                    </span>
-                  )}
+                <div class="project-body">
+                  <p class="card-text">{p.description}</p>
+                  <div class="tags">{p.skills.map(s => <span class="tag">{s}</span>)}</div>
+                  <span class="go">View project</span>
                 </div>
               </div>
-            ))}
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <!-- 03 Skills -->
+      <section id="skills" class="zone">
+        <header class="zone-head">
+          <div>
+            <p class="kicker">03</p>
+            <h2 class="zone-title">Skills</h2>
           </div>
-          
+          <p class="meta">skill → where it was used</p>
+        </header>
+        <div class="card skills">
+          {skills.map((s, i) => (
+            <div class="skill-row">
+              <span class="meta">{num(i)}</span>
+              <span class="skill-name">{s.name}</span>
+              <span class="tags">
+                {s.projects.filter(live).length > 0
+                  ? s.projects.filter(live).map(id => <a class="tag" href={`#project-${id}`}>{projects[id].short}</a>)
+                  : <span class="meta">everyday tooling</span>}
+              </span>
+            </div>
+          ))}
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Activity Section -->
-    <section id="activity" class="editorial-section" data-scroll-section="activity">
-      <div class="section-rule">
-        <span class="section-number">04</span>
-        <span class="rule-line"></span>
-        <span class="section-title-label">activity</span>
-      </div>
-      <ContributionGrid />
-      <div class="activity-bottom">
-        <FunnyFeed client:load />
-      </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="editorial-section contact-section" data-scroll-section="contact">
-      <div class="section-rule">
-        <span class="section-number">05</span>
-        <span class="rule-line"></span>
-        <span class="section-title-label">contact</span>
-      </div>
-      <div class="contact-inner">
-        <p class="section-label">// get in touch</p>
-        <h2 class="contact-heading">Let's work<br/>together.</h2>
-        <div class="contact-links">
-          <AnimatedButton text="LinkedIn" href="https://www.linkedin.com/in/vittorio-pastore-6474691b1/" client:load />
-          <AnimatedButton text="GitHub" href="https://github.com/VittorioPastore" client:load />
-          <AnimatedButton text="Email Me" href="mailto:vitto@vt.edu" client:load />
+      <!-- 04 Activity -->
+      <section id="activity" class="zone">
+        <header class="zone-head">
+          <div>
+            <p class="kicker">04</p>
+            <h2 class="zone-title">Activity</h2>
+          </div>
+          <p class="meta">live from GitHub</p>
+        </header>
+        <div class="activity-grid">
+          <ContributionGrid />
+          <FunnyFeed client:visible />
         </div>
-      </div>
-    </section>
+      </section>
 
+      <!-- 05 Contact -->
+      <section id="contact" class="zone contact">
+        <div class="contact-lead">
+          <p class="kicker">05 · Contact</p>
+          <h2 class="contact-title">Let's work<br />together.</h2>
+        </div>
+        <div class="contact-cards">
+          <a class="card contact-card" href="https://www.linkedin.com/in/vittorio-pastore-6474691b1/">
+            <span class="kicker">LinkedIn</span>
+            <span class="contact-value">Vittorio Pastore</span>
+            <span class="go" aria-hidden="true"></span>
+          </a>
+          <a class="card contact-card" href="https://github.com/VittorioPastore">
+            <span class="kicker">GitHub</span>
+            <span class="contact-value">VittorioPastore</span>
+            <span class="go" aria-hidden="true"></span>
+          </a>
+          <a class="card contact-card" href="mailto:vitto@vt.edu">
+            <span class="kicker">Email</span>
+            <span class="contact-value">vitto@vt.edu</span>
+            <span class="go" aria-hidden="true"></span>
+          </a>
+        </div>
+        <picture class="contact-photo">
+          <source srcset="/vittoTransparent-900.webp 900w, /vittoTransparent-1800.webp 1800w" sizes="(min-width: 900px) 40vw, 90vw" type="image/webp" />
+          <img src="/vittoTransparent.png" alt="Vittorio Pastore with robots" width="3516" height="3105" loading="lazy" />
+        </picture>
+      </section>
+    </div>
   </main>
 </Layout>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const skillButtons = document.querySelectorAll('[data-skill]');
-    skillButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const skillName = button.getAttribute('data-skill');
-        highlightProjects(skillName);
-      });
-    });
-
-    // --- Minimal Scroll Effects ---
-
-    const scrollStatusBar = document.getElementById('scroll-status-bar');
-    const scrollSpinner = document.getElementById('scroll-spinner');
-    const scrollPath = document.getElementById('scroll-path');
-    const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-    
-    const sections = Array.from(document.querySelectorAll('[data-scroll-section]'));
-    
-    // Store original text for scrambling
-    document.querySelectorAll('.section-title-label').forEach(lbl => {
-      lbl.setAttribute('data-original', lbl.textContent || '');
-    });
-
-    const intervals = new Map<HTMLElement | Element, ReturnType<typeof setInterval>>();
-    const timeouts = new Map<HTMLElement | Element, ReturnType<typeof setTimeout>>();
-
-    function typeCommand(element: HTMLElement | Element, prefix: string, command: string, finalPath: string) {
-      if (!command) return;
-      if (intervals.has(element)) clearInterval(intervals.get(element));
-      if (timeouts.has(element)) clearTimeout(timeouts.get(element));
-      
-      let index = 0;
-      element.innerHTML = `<span class="path-prefix">${prefix}</span>`;
-      
-      const interval = setInterval(() => {
-        if (index <= command.length) {
-          element.innerHTML = `<span class="path-prefix">${prefix}</span><span class="path-command">${command.substring(0, index)}</span>`;
-          index++;
-        } else {
-          clearInterval(interval);
-          const tid = setTimeout(() => {
-            element.innerHTML = `<span class="path-prefix">${finalPath}</span>`;
-          }, 350);
-          timeouts.set(element, tid);
-        }
-      }, 40);
-      intervals.set(element, interval);
-    }
-
-    function scrambleText(element: HTMLElement | Element, targetText: string) {
-      if (!targetText) return;
-      const chars = '!<>-_\\\\/[]{}—=+*^?#_';
-      let iteration = -3; // Start negative for a visual pause
-      if (intervals.has(element)) clearInterval(intervals.get(element));
-      
-      const interval = setInterval(() => {
-        let currentString = '';
-        for (let i = 0; i < targetText.length; i++) {
-          if (i < Math.floor(iteration)) {
-            currentString += targetText[i];
-          } else {
-            currentString += chars[Math.floor(Math.random() * chars.length)];
-          }
-        }
-        element.textContent = currentString;
-        
-        if (iteration >= targetText.length) {
-          clearInterval(intervals.get(element));
-          element.textContent = targetText;
-        }
-        iteration += Math.random() * 1.5;
-      }, 35);
-      intervals.set(element, interval);
-    }
-
-    let ticking = false;
-    let lastSectionKey = '';
-
-    const updateScrollState = () => {
-      const scrollY = window.scrollY;
-      
-      // Update global scroll variable for CSS parallax
-      const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      document.documentElement.style.setProperty('--scroll-ratio', Math.min(Math.max(scrollY / maxScroll, 0), 1).toFixed(4));
-
-
-      // 2. Identify active section based on scroll position crossing mid viewport
-      let activeKey = '';
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const rect = sections[i].getBoundingClientRect();
-        if (rect.top <= window.innerHeight * 0.45) {
-          activeKey = sections[i].getAttribute('data-scroll-section') || '';
-          break;
-        }
-      }
-
-      // Fallback: forcefully select the last section if we've scrolled all the way to the bottom
-      const maxY = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      if (window.scrollY >= maxY - 10 && sections.length > 0) {
-        activeKey = sections[sections.length - 1].getAttribute('data-scroll-section') || '';
-      }
-
-      // 3. Floating HUD logic
-      if (scrollStatusBar && scrollPath) {
-        const currentPathAttr = scrollPath.getAttribute('data-current');
-        const prevDir = currentPathAttr || '~$'; // capture what it currently was to build the prompt
-        const newDir = activeKey ? `~/${activeKey}$` : '~$';
-        
-        const cdTarget = activeKey ? activeKey : '~';
-        const commandStr = ` cd ${cdTarget}`;
-        
-        if (currentPathAttr !== newDir) {
-          scrollPath.setAttribute('data-current', newDir);
-          typeCommand(scrollPath, prevDir, commandStr, newDir);
-        }
-      }
-      
-      // 4. Focus/Scramble the literal section header when coming into view
-      if (activeKey !== lastSectionKey) {
-        sections.forEach(sec => {
-          const isMatch = sec.getAttribute('data-scroll-section') === activeKey;
-          if (isMatch && !sec.classList.contains('is-active')) {
-            sec.classList.add('is-active');
-            const lbl = sec.querySelector('.section-title-label');
-            if (lbl) {
-              scrambleText(lbl, lbl.getAttribute('data-original') || '');
-            }
-          } else if (!isMatch) {
-            sec.classList.remove('is-active');
-          }
-        });
-        lastSectionKey = activeKey;
-      }
-    };
-
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          updateScrollState();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
-    
-    // --- Skills Terminal Animation ---
-    const skillsSection = document.getElementById('skills');
-    const skillsCommand = document.getElementById('skills-command');
-    const skillsCursor = document.getElementById('skills-cursor');
-    const skillNodes = document.querySelectorAll('.skill-node');
-    let isSkillsAnimated = false;
-    let typeWriterInterval: ReturnType<typeof setInterval>;
-    let nodeTimeouts: ReturnType<typeof setTimeout>[] = [];
-
-    if (skillsSection && skillsCommand && skillsCursor) {
-      const skillsPromptLine = document.getElementById('skills-prompt-line');
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !isSkillsAnimated) {
-            isSkillsAnimated = true;
-            clearInterval(typeWriterInterval);
-            nodeTimeouts.forEach(clearTimeout);
-            nodeTimeouts = [];
-
-            // Start enter animation
-            skillsCommand.textContent = '';
-            skillsCursor.style.display = 'inline-block';
-            skillNodes.forEach(node => {
-              (node as HTMLElement).style.opacity = '0';
-              (node as HTMLElement).style.transform = 'translateY(10px)';
-              (node as HTMLElement).style.willChange = 'opacity, transform';
-            });
-
-            const enterCommand = "python fetch_skills.py";
-            let i = 0;
-            typeWriterInterval = setInterval(() => {
-              if (i < enterCommand.length) {
-                skillsCommand.textContent += enterCommand.charAt(i);
-                if (skillsPromptLine) skillsPromptLine.scrollLeft = skillsPromptLine.scrollWidth;
-                i++;
-              } else {
-                clearInterval(typeWriterInterval);
-                skillsCursor.style.display = 'none'; // hide cursor when command is sent
-                // Reveal skills one by one
-                skillNodes.forEach((node, idx) => {
-                  const tid = setTimeout(() => {
-                    (node as HTMLElement).style.opacity = '1';
-                    (node as HTMLElement).style.transform = 'translateY(0)';
-                    // Release GPU layer hint once this node has settled
-                    setTimeout(() => { (node as HTMLElement).style.willChange = 'auto'; }, 320);
-                  }, idx * 150 + 200); // Stagger by 150ms
-                  nodeTimeouts.push(tid);
-                });
-              }
-            }, 60);
-
-          } else if (!entry.isIntersecting && isSkillsAnimated) {
-            isSkillsAnimated = false;
-            clearInterval(typeWriterInterval);
-            nodeTimeouts.forEach(clearTimeout);
-            nodeTimeouts = [];
-            
-            // Fast clear animation
-            const leaveCommand = "clear";
-            skillsCommand.textContent = '';
-            skillsCursor.style.display = 'inline-block'; // bring back cursor to type clear
-            
-            let j = 0;
-            typeWriterInterval = setInterval(() => {
-              if (j < leaveCommand.length) {
-                skillsCommand.textContent += leaveCommand.charAt(j);
-                if (skillsPromptLine) skillsPromptLine.scrollLeft = skillsPromptLine.scrollWidth;
-                j++;
-              } else {
-                clearInterval(typeWriterInterval);
-                const tid = setTimeout(() => {
-                  skillNodes.forEach(node => {
-                    (node as HTMLElement).style.willChange = 'opacity, transform';
-                    (node as HTMLElement).style.opacity = '0';
-                    (node as HTMLElement).style.transform = 'translateY(8px)'; // subtle drop
-                  });
-                  setTimeout(() => {
-                    skillNodes.forEach(node => { (node as HTMLElement).style.willChange = 'auto'; });
-                  }, 320);
-                  skillsCommand.textContent = '';
-                  // Console is clear, cursor waits for new prompt
-                  skillsCursor.style.display = 'inline-block'; 
-                }, 200);
-                nodeTimeouts.push(tid);
-              }
-            }, 50);
-          }
-        });
-      }, { threshold: 0.35 });
-
-      observer.observe(skillsSection);
-    }
-
-    // Fire once on layout load
-    window.requestAnimationFrame(updateScrollState);
+<script is:inline>
+  // "New" shows only on papers and projects posted in the last 30 days, checked in the visitor's browser so it
+  // expires on its own without a rebuild.
+  document.querySelectorAll('.pill[data-posted]').forEach(function (pill) {
+    var age = (Date.now() - Date.parse(pill.getAttribute('data-posted'))) / 86400000;
+    if (age >= 0 && age <= 30) pill.hidden = false;
   });
-
-  function highlightProjects(skillName: string | null) {
-    if (!skillName) return;
-    // Remove any existing highlights
-    document.querySelectorAll('[id^="project-"]').forEach(project => {
-      project.classList.remove('highlight');
-    });
-
-    // Find projects with matching skills
-    const projectElements = document.querySelectorAll(`[data-skills*="${skillName}"]`);
-
-    if (projectElements.length > 0) {
-      // Scroll to the first matching project
-      projectElements[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      // Highlight matching projects
-      projectElements.forEach(project => {
-        project.classList.add('highlight');
-
-        // Remove highlight after a few seconds
-        setTimeout(() => {
-          project.classList.remove('highlight');
-        }, 2000); // 2 seconds
-      });
-    }
-  }
 </script>
+
 <style>
-  .editorial-section[data-scroll-section] {
-    transition: opacity 0.5s ease;
-    opacity: 0.55;
-  }
-
-  .editorial-section.is-active {
-    opacity: 1;
-  }
-
-  /* Replace transition-all with specific properties on skill nodes.
-     transition-all forces the browser to monitor every CSS property;
-     listing only what actually changes cuts style recalculation cost. */
-  .skill-node {
-    transition-property: opacity, transform, background-color, color !important;
-    backface-visibility: hidden;
-  }
-
-  /* ── Layout ── */
-  .editorial-main {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 2rem 8rem;
-    min-width: 0;
-    overflow-x: hidden;
-    width: 100%;
-  }
-
-  /* ── Hero ── */
+  /* ── Hero: one screen. The text and the live stage share a bottom line (both rows of buttons), and the pair is
+     centred in the space under the header. Side by side on landscape screens, stacked on portrait. ── */
   .hero {
-    width: 100%;
-    max-width: 100%;
-    min-height: 100vh;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
+    --hero-pad: clamp(20px, 5vh, 56px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: clamp(24px, 5vh, 56px) clamp(16px, 3vw, 56px);
+    min-height: calc(100vh - var(--header-h));
+    min-height: calc(100svh - var(--header-h));
+    padding-block: var(--hero-pad);
   }
 
-  .hero-shell {
-    position: relative;
-    width: 100%;
-    max-width: 1240px;
-    min-height: 100vh;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-  }
-
-  /* Text: anchored to left edge */
-  .hero-inner {
-    position: relative;
-    z-index: 2;
-    max-width: 500px;
-    width: 100%;
-    padding: 8rem 3rem 8rem 0;
-    transform: translate3d(0, calc(var(--scroll-ratio, 0) * -24px), 0);
-  }
-
-  /* Photo: right half — starts at 42% for more breathing room */
-  .hero-photo-wrap {
-    position: absolute;
-    left: 42%;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 1;
-    pointer-events: none;
-    transform: translate3d(0, calc(var(--scroll-ratio, 0) * 85px), 0);
-    opacity: calc(1 - (var(--scroll-ratio, 0) * 0.72));
-  }
-
-  /* Fade from dark on left edge — removed: colour overlay caused banding on transparent PNG */
-
-  /* Photo contained within the right half — no overflow */
-  /* Mask fades the left edge of the image itself — no colour overlay, no banding */
-  .hero-photo {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center;
-    z-index: 1;
-    mask-image: linear-gradient(to right, transparent 0%, black 25%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 25%);
-  }
-
-  @media (max-width: 768px) {
-    .hero-shell {
-      padding: 0 1rem;
-    }
-
-    .hero-inner {
-      max-width: 100%;
-      padding: 6rem 0 4rem;
-    }
-
-    .hero-name {
-      font-size: clamp(2.2rem, 13vw, 4.5rem);
-    }
-
-    .hero-bio {
-      max-width: 100%;
-      font-size: 1rem;
-    }
-    .hero-photo-wrap {
-      display: none;
-    }
-  }
-
-  .hero-path {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.1em;
-    margin-bottom: 2rem;
-  }
+  .hero-text { min-width: 0; }
+  .hero-lead { display: flex; flex-direction: column; gap: clamp(14px, 2.4vh, 26px); }
 
   .hero-name {
-    font-size: clamp(3.5rem, 10vw, 8rem);
-    font-weight: 800;
-    line-height: 0.95;
-    letter-spacing: -0.03em;
-    color: var(--color-text);
-    margin-bottom: 1.5rem;
+    font-size: clamp(2.9rem, min(15vw, 15vh), 9.5rem);
+    font-weight: 500;
+    line-height: 0.94;
+    letter-spacing: -0.045em;
+    margin-left: -0.045em; /* the V's side bearing: lines its stroke up with the text below */
+  }
+  .hero-bio { font-size: clamp(1rem, 0.92rem + 0.45vw, 1.3rem); line-height: 1.5; color: var(--ink-2); max-width: 30rem; text-wrap: balance; }
+
+  @media (min-width: 640px) and (min-aspect-ratio: 5 / 4) {
+    .hero { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); align-items: end; }
+    .hero-name { font-size: clamp(2.9rem, min(8.4vw, 17vh), 9.5rem); }
   }
 
-  .hero-accent-line {
-    width: 4rem;
-    height: 3px;
-    background: var(--color-accent);
-    margin-bottom: 1.75rem;
-  }
+  /* ── Publications ── */
+  .pub-grid { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 760px) { .pub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1500px) { .pub-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .pub { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .pub h3 { text-wrap: pretty; }
+  .pub-venue { display: flex; align-items: center; gap: 8px; }
+  .pub .card-text { flex: 1; }
 
-  .hero-bio {
-    font-size: 1.125rem;
-    color: var(--color-muted);
-    line-height: 1.7;
-    margin-bottom: 2.5rem;
-    max-width: 480px;
+  /* ── Projects ── */
+  .featured { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--card-pad); align-items: center; margin-bottom: var(--gap); }
+  .featured-text { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+  .featured-title { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; text-wrap: balance; }
+  .featured .card-text { font-size: 1rem; max-width: 34rem; }
+  .featured-fig { display: block; width: 100%; height: auto; border-radius: 8px; }
+  .featured-fig.framed { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--card-pad); }
+  @media (min-width: 900px) {
+    .featured { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
   }
-
-  .hero-cta {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    width: 100%;
+  /* One to four columns. The first card spans --s2 / --s3 / --s4 columns (set from the number of cards) so no
+     row is left with a single stretched or orphaned card. */
+  .project-grid { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
+  .project { container-type: inline-size; display: flex; }
+  .project-inner { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .project-head { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .project-body { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .project .card-text { flex: 1; }
+  @media (min-width: 600px) {
+    .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .project.lead { grid-column: span var(--s2); }
   }
-
-  /* ── Section rules ── */
-  .editorial-section {
-    margin-bottom: 6rem;
-    min-width: 0;
+  @media (min-width: 900px) {
+    .project-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .project.lead { grid-column: span var(--s3); }
   }
-
-  .section-rule {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
+  @media (min-width: 1400px) {
+    .project-grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .project-grid.four .project.lead { grid-column: span var(--s4); }
   }
-
-  .section-number {
-    font-family: monospace;
-    font-size: 0.75rem;
-    color: var(--color-accent);
-    letter-spacing: 0.05em;
-    white-space: nowrap;
+  /* A card wide enough to be a row of its own puts its title beside its text. */
+  @container (min-width: 720px) {
+    .project-inner { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--card-pad); align-items: start; }
+    .project-head h3 { font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); letter-spacing: -0.015em; line-height: 1.15; text-wrap: balance; }
   }
+  .card:target { border-color: var(--ink); outline: 1px solid var(--ink); }
 
-  .rule-line {
-    position: relative;
-    flex: 1;
-    height: 1px;
-    background: var(--border-subtle);
-    overflow: hidden;
-  }
-
-  .rule-line::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, #d97706 0%, #F59E0B 60%, transparent 100%);
-    transform-origin: left center;
-    transform: scaleX(calc(0.16 + (var(--scroll-ratio, 0) * 0.84)));
-    opacity: 0.5;
-    transition: opacity 0.25s ease;
-  }
-
-  .editorial-section.is-active .rule-line::after {
-    opacity: 0.92;
-  }
-
-  .section-title-label {
-    font-family: monospace;
-    font-size: 0.75rem;
-    color: var(--color-accent);
-    letter-spacing: 0.1em;
-    text-transform: lowercase;
-    white-space: nowrap;
-  }
-
-  /* ── Featured project ── */
-  .featured-project {
-    padding: 2.5rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    max-width: 100%;
-  }
-
-  .featured-inner {
+  /* ── Skills: a two-column table on wide screens ── */
+  .skills { padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; }
+  .skill-row {
     display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 3rem;
-    align-items: start;
-    min-width: 0;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 7px 14px;
+    padding: 13px var(--card-pad) 14px;
+    border-bottom: 1px solid var(--line);
   }
-
-  @media (max-width: 640px) {
-    .featured-inner {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-  }
-
-  .featured-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    min-width: 0;
-  }
-
-  .featured-title {
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--color-text);
-    overflow-wrap: anywhere;
-  }
-
-  .featured-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    min-width: 0;
-  }
-
-  .featured-description {
-    color: var(--color-muted);
-    line-height: 1.7;
-    font-size: 1rem;
-    overflow-wrap: anywhere;
-  }
-
-  /* ── Rest of projects grid ── */
-  .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  @media (max-width: 640px) {
-    .editorial-main {
-      padding: 0 0.875rem 6rem;
-    }
-
-    .featured-project {
-      padding: 1rem;
-    }
-
-    .project-card {
-      padding: 1rem;
-    }
-
-    .section-rule {
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
-
-    .projects-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .project-card {
-    padding: 1.75rem;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    min-width: 0;
-    width: 100%;
-  }
-
-  .project-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text);
-    line-height: 1.3;
-    overflow-wrap: anywhere;
-  }
-
-  .project-description {
-    color: var(--color-muted);
-    font-size: 0.875rem;
-    line-height: 1.65;
-    flex: 1;
-    overflow-wrap: anywhere;
-  }
-
-  /* ── Skill tags ── */
-  .skill-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .skill-tag {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.6rem;
-    border-radius: 4px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    color: var(--color-muted);
-    font-family: monospace;
-  }
-
-  /* ── Skills scroll row ── */
-  .skills-scroll {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .skill-chip {
-    font-size: 0.8rem;
-    font-family: monospace;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    color: var(--color-text);
-    white-space: nowrap;
-    transition: border-color 0.2s, color 0.2s;
-  }
-
-  .skill-chip:hover {
-    color: var(--color-accent);
-    border-color: var(--color-accent);
+  .skill-row:last-child { border-bottom: 0; }
+  .skill-name { font-weight: 500; }
+  .skill-row .tags { grid-column: 2; }
+  @media (min-width: 900px) {
+    .skills { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .skill-row:nth-child(odd) { border-right: 1px solid var(--line); }
+    .skill-row:nth-last-child(-n + 2) { border-bottom: 0; }
   }
 
   /* ── Activity ── */
-  .activity-bottom {
-    margin-top: 1.25rem;
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
-  }
+  .activity-grid { display: grid; gap: var(--zone-pad); grid-template-columns: minmax(0, 1fr); }
 
   /* ── Contact ── */
-  .contact-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    max-width: 100%;
-    min-width: 0;
-    width: 100%;
-  }
-
-  .contact-heading {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    color: var(--color-text);
-    overflow-wrap: anywhere;
-  }
-
-  @media (max-width: 640px) {
-    .skill-chip {
-      white-space: normal;
-      max-width: 100%;
-    }
-  }
-
-  .contact-links {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  /* ── Highlight ── */
-  .highlight {
-    border-color: #F59E0B !important;
-    transition: all 0.5s ease;
-  }
-
-  /* ── AI Rainbow Gradient Border for MailClient ── */
-  .ai-gradient-border {
-    position: relative;
-    border: 2px solid transparent;
-    border-radius: 12px;
-    background:
-      linear-gradient(var(--bg-surface), var(--bg-surface)) padding-box,
-      linear-gradient(
-        45deg,
-        rgba(255, 0, 150, 0.4),
-        rgba(0, 204, 255, 0.4),
-        rgba(128, 0, 255, 0.4),
-        rgba(255, 204, 0, 0.4),
-        rgba(255, 0, 150, 0.4)
-      ) border-box;
-    background-size: 100% 100%, 300% 300%;
-    background-position: 0 0, 0% 0%;
-    animation: aiGradientShift 8s ease-in-out infinite;
-  }
-
-  .ai-gradient-border:hover {
-    animation-duration: 4s;
-  }
-
-  /* Final mobile overrides placed late so they are not overridden by base rules above */
-  @media (max-width: 768px) {
-    .hero-shell {
-      padding: 0 1rem;
-    }
-
-    .hero-inner {
-      max-width: 100%;
-      padding: 6rem 0 4rem;
-    }
-
-    .hero-name {
-      font-size: clamp(2.2rem, 13vw, 4.5rem);
-    }
-
-    .hero-bio {
-      max-width: 100%;
-      font-size: 1rem;
-    }
-
-    .hero-photo-wrap {
-      display: none;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .project-card {
-      padding: 1rem;
-    }
-
-    .skill-chip {
-      white-space: normal;
-      max-width: 100%;
-    }
-  }
-
-  /* ── Light mode: skills terminal color overrides ── */
-  html.light-mode .text-cyan-400 {
-    color: #0e7490 !important; /* cyan-700: readable on light bg */
-  }
-
-  html.light-mode .text-green-400 {
-    color: #15803d !important; /* green-700 */
-  }
-
-  html.light-mode .text-green-500 {
-    color: #15803d !important; /* green-700 */
-  }
-
-  html.light-mode .text-blue-400 {
-    color: #1d4ed8 !important; /* blue-700 */
-  }
-
-  html.light-mode .text-yellow-500\/70 {
-    color: #92400e !important; /* amber-800 */
-  }
-
-  @keyframes aiGradientShift {
-    0%, 100% { background-position: 0% 0%; }
-    25%       { background-position: 100% 0%; }
-    50%       { background-position: 100% 100%; }
-    75%       { background-position: 0% 100%; }
+  /* Title and links in one column, the photo beside them standing on the zone's bottom edge. */
+  .contact { display: grid; gap: var(--zone-pad); grid-template-columns: minmax(0, 1fr); align-items: end; }
+  .contact-photo { display: block; align-self: end; margin-bottom: calc(-1 * var(--zone-pad)); }
+  .contact-photo img { display: block; width: min(100%, 30rem); height: auto; margin-inline: auto; }
+  .contact-title { font-size: clamp(2.2rem, 1.2rem + 4.6vw, 5.5rem); font-weight: 500; letter-spacing: -0.035em; line-height: 1; margin-top: 10px; }
+  .contact-cards { display: grid; gap: var(--gap); }
+  .contact-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 16px; }
+  .contact-card .kicker { grid-column: 1; }
+  .contact-value { grid-column: 1; font-size: 1.15rem; font-weight: 500; overflow-wrap: anywhere; }
+  .contact-card .go { grid-column: 2; grid-row: 1 / span 2; font-size: 1.2rem; }
+  @media (min-width: 900px) {
+    .contact { grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); grid-template-rows: auto auto; padding-top: clamp(24px, 4vw, 56px); }
+    .contact-lead, .contact-cards { grid-column: 1; }
+    .contact-photo { grid-column: 2; grid-row: 1 / span 2; }
+    .contact-photo img { width: 100%; max-width: 36rem; max-height: 30rem; object-fit: contain; object-position: center bottom; }
   }
 </style>

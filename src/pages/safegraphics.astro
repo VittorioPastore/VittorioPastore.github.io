@@ -1,7 +1,8 @@
 ---
 // src/pages/safegraphics.astro — Minimalistic safe graphics version of the homepage
+import '../styles/tokens.css';
 const skills = [
-  { name: 'Python', projects: ['neural-trader', 'squeaky-greyhound'] },
+  { name: 'Python', projects: ['humanoid-on-a-macbook', 'bones-seed-in-92-bytes', 'neural-trader', 'squeaky-greyhound'] },
   { name: 'PyTorch', projects: ['neural-trader'] },
   { name: 'TensorFlow', projects: ['neural-trader'] },
   { name: 'ROS', projects: ['squeaky-greyhound'] },
@@ -12,6 +13,18 @@ const skills = [
 ];
 
 const projects = {
+  'humanoid-on-a-macbook': {
+    title: 'Training a Humanoid on a MacBook',
+    description: 'A world-model motion tracker ported from NVIDIA GPUs to MLX: 1,024 simulated Unitree G1s on an M1 Pro, and one policy that tracks 40 motion clips after 79 minutes.',
+    skills: ['Python', 'MLX', 'MuJoCo', 'Reinforcement Learning'],
+    href: '/humanoid-on-a-macbook'
+  },
+  'bones-seed-in-92-bytes': {
+    title: '131 Hours of Motion in 92 Bytes a Frame',
+    description: 'A 131-hour humanoid motion library stored as root pose, quaternion and int16 joint angles, so it trains on one 12 GB GPU.',
+    skills: ['Python', 'JAX', 'MuJoCo', 'Reinforcement Learning'],
+    href: '/bones-seed-in-92-bytes'
+  },
   'mailclient': {
     title: 'Prysm Mail',
     description: 'A new type of email client leveraging local LLMs for enhanced privacy and user experience.',
@@ -59,6 +72,11 @@ const projects = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Vittorio Pastore - Portfolio (Safe Graphics)</title>
     <meta name="description" content="Vittorio Pastore's personal website — safe graphics mode" />
+    <script is:inline>
+      try {
+        if (localStorage.getItem('paper-theme') === 'dark') document.documentElement.classList.add('dark-mode');
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <header>
@@ -107,7 +125,7 @@ const projects = {
       <section id="projects">
         <h2>## Featured Projects</h2>
         <div class="project-list">
-          {Object.entries(projects).map(([id, project]) => (
+          {Object.entries(projects).filter(([id]) => `./${id}.astro` in import.meta.glob('./*.astro')).map(([id, project]) => (
             <div class="project-card" id={`project-${id}`} data-skills={project.skills.join(',')}>
               <h3>
                 <a href={project.href}>→ {project.title}</a>
@@ -139,219 +157,141 @@ const projects = {
     </footer>
 
     <style>
-      /* Reset & base */
-      *, *::before, *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+      /* Reset & base: plain text on paper */
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
       html {
-        background: #000000;
-        color: #d4d4d4;
-        font-family: 'Courier New', 'Lucida Console', 'Consolas', monospace;
+        background: var(--paper);
+        color: var(--ink-2);
+        font-family: var(--mono);
         font-size: 15px;
         line-height: 1.6;
         scroll-behavior: smooth;
       }
 
       body {
-        /* max-width: 1200px; */
-        margin: 0 auto;
-        padding: 1rem 3rem;
+        padding: 1rem max(var(--gutter), calc((100% - 1100px) / 2));
         min-height: 100vh;
+        min-height: 100svh;
         display: flex;
         flex-direction: column;
       }
 
-      a {
-        color: #6aafff;
-        text-decoration: none;
-      }
-      a:hover {
-        color: #fff;
-        text-decoration: underline;
-      }
+      a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+      a:hover { text-decoration-color: var(--ink); }
 
       /* Nav */
-      header {
-        border-bottom: 1px solid #333;
-        padding-bottom: 0.75rem;
-        margin-bottom: 2rem;
-      }
-      nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-      }
-      .logo {
-        color: #00cc00;
-        font-weight: bold;
-        font-size: 1rem;
-      }
-      .nav-links {
-        display: flex;
-        gap: 1.25rem;
-        flex-wrap: wrap;
-      }
-      .nav-links a {
-        color: #888;
-        font-size: 0.9rem;
-      }
-      .nav-links a:hover {
-        color: #fff;
-      }
-      .switch-mode {
-        color: #e8a735 !important;
+      header { border-bottom: 1px solid var(--line); padding-bottom: 0.75rem; margin-bottom: 2rem; }
+      nav { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
+      .logo { color: var(--ink); font-weight: 500; font-size: 1rem; }
+      .nav-links { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center; }
+      .nav-links a { color: var(--muted); font-size: 0.9rem; text-decoration: none; }
+      .nav-links a:hover { color: var(--ink); }
+      .nav-links a.switch-mode {
+        background: var(--pill-bg);
+        color: var(--pill-fg);
+        border-radius: 999px;
+        padding: 0.2rem 0.8rem;
+        font-size: 0.8rem;
       }
 
       /* Hero */
-      .hero {
-        margin-bottom: 3rem;
-        text-align: center;
-      }
+      .hero { margin-bottom: 3rem; text-align: center; }
       .ascii-box {
-        color: #d4d4d4;
-        font-size: clamp(10px, 2.2vw, 15px);
+        color: var(--ink);
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        font-size: clamp(9px, 2.2vw, 15px);
         line-height: 1.4;
         display: inline-block;
         text-align: left;
         margin-bottom: 1.5rem;
       }
-      .hero-links {
-        display: flex;
-        gap: 1.5rem;
-        justify-content: center;
-        margin-bottom: 1rem;
-      }
+      .hero-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem; }
       .safe-notice {
-        color: #e8a735;
+        display: inline-block;
+        color: var(--amber);
+        background: var(--amber-container);
+        border-radius: 8px;
+        padding: 0.3rem 0.8rem;
         font-size: 0.8rem;
         margin-top: 0.5rem;
       }
 
       /* Buttons */
       .btn {
-        color: #6aafff;
-        border: 1px solid #333;
+        color: var(--ink);
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
         padding: 0.4rem 0.85rem;
         font-family: inherit;
         font-size: 0.9rem;
-        background: transparent;
+        background: var(--card);
         display: inline-block;
-      }
-      .btn:hover {
-        background: #1a1a2e;
-        color: #fff;
-        border-color: #555;
         text-decoration: none;
       }
+      .btn:hover { border-color: var(--ink); }
 
       /* Section headings */
-      section {
-        margin-bottom: 3rem;
-      }
+      section { margin-bottom: 3rem; }
       h2 {
-        color: #00cc00;
-        font-size: 1.1rem;
-        font-weight: bold;
+        color: var(--ink);
+        font-size: 1.05rem;
+        font-weight: 500;
         margin-bottom: 1.25rem;
-        border-bottom: 1px dashed #333;
+        border-bottom: 1px dashed var(--line-strong);
         padding-bottom: 0.4rem;
       }
 
       /* Skills */
-      .skill-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
+      .skill-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
       .skill-tag {
-        color: #b0b0b0;
-        border: 1px solid #2a2a2a;
+        color: var(--ink-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
         padding: 0.25rem 0.6rem;
         font-size: 0.85rem;
         cursor: pointer;
       }
-      .skill-tag:hover {
-        color: #fff;
-        border-color: #555;
-        background: #1a1a2e;
-      }
+      .skill-tag:hover { color: var(--ink); border-color: var(--ink); }
 
       /* Projects */
-      .project-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-      }
+      .project-list { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
       .project-card {
-        border: 1px solid #222;
+        border: 1px solid var(--line);
+        border-radius: var(--r-card);
         padding: 1rem 1.25rem;
         transition: border-color 0.2s;
       }
-      .project-card:hover {
-        border-color: #444;
-      }
-      .project-card.highlight {
-        border-color: #6aafff;
-      }
-      .project-card h3 {
-        font-size: 1rem;
-        margin-bottom: 0.4rem;
-      }
-      .project-card h3 a {
-        color: #6aafff;
-      }
-      .project-desc {
-        color: #999;
-        font-size: 0.85rem;
-        margin-bottom: 0.6rem;
-      }
-      .project-skills {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.4rem;
-      }
+      .project-card:hover { border-color: var(--line-strong); }
+      .project-card.highlight { border-color: var(--ink); }
+      .project-card h3 { font-size: 1rem; font-weight: 500; margin-bottom: 0.4rem; }
+      .project-card h3 a { text-decoration: none; }
+      .project-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.6rem; }
+      .project-skills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
       .tag {
-        color: #777;
-        font-size: 0.75rem;
-        background: #161616;
+        color: var(--muted);
+        font-size: 0.72rem;
+        background: var(--zone);
+        border-radius: 6px;
         padding: 0.15rem 0.5rem;
-        border: 1px solid #1f1f1f;
       }
 
       /* Contact */
-      .contact-links {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-      }
+      .contact-links { display: flex; gap: 1rem; flex-wrap: wrap; }
 
       /* Footer */
       footer {
         margin-top: auto;
-        padding-top: 2rem;
-        border-top: 1px solid #222;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--line);
         text-align: center;
-        color: #555;
+        color: var(--muted);
         font-size: 0.8rem;
-      }
-      footer a {
-        color: #e8a735;
       }
 
       /* Mobile */
       @media (max-width: 600px) {
-        .ascii-box {
-          font-size: 9px;
-        }
-        nav {
-          flex-direction: column;
-          align-items: flex-start;
-        }
+        nav { flex-direction: column; align-items: flex-start; }
       }
     </style>
 

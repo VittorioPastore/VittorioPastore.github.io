@@ -1,0 +1,55 @@
+---
+// src/layouts/ProjectLayout.astro — a project page: figure-style head, text on paper, illustrations in a zone beside it.
+import Layout from './Layout.astro';
+
+interface Props {
+  title: string;
+  slug: string;
+  date: string;
+  caption?: string;
+  tags?: string[];
+}
+
+const { title, slug, date, caption, tags = [] } = Astro.props;
+const hasMedia = Astro.slots.has('media');
+---
+
+<Layout title={`${title} - Project`} active="projects">
+  <main class="page">
+    <div class="wrap">
+      <header class="page-head">
+        <div>
+          <p class="kicker"><a href="/#projects">Projects</a> / {slug}</p>
+          <h1 class="page-title">{title}</h1>
+          {caption && <p class="page-caption">{caption}</p>}
+        </div>
+        <div class="page-meta meta">
+          <span>Published {date}</span>
+          {tags.length > 0 && <span>{tags.join(' · ')}</span>}
+        </div>
+      </header>
+
+      <div class={hasMedia ? 'split project-body' : 'project-body'}>
+        <div class="prose sticky project-text">
+          <slot />
+          <p class="back"><a class="btn" href="/#projects">← All projects</a></p>
+        </div>
+        {hasMedia && (
+          <div class="zone stack">
+            <slot name="media" />
+          </div>
+        )}
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .project-body { padding-top: 4px; }
+  .project-text { padding-block: 4px; }
+  .back { margin-top: 2em; }
+  .back a { text-decoration: none; }
+  @media (min-width: 1000px) {
+    .project-text { padding-right: clamp(8px, 2vw, 40px); }
+  }
+</style>

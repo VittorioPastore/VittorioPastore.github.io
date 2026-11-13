@@ -67,28 +67,18 @@ const JokeFeed = () => {
   }, []);
 
   return (
-    <div
-      className="rounded-xl p-4 sm:p-6 h-full"
-      style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
-    >
-      <p className="section-label mb-4">// laughs</p>
+    <div className="card joke-feed">
+      <p className="kicker">Laughs</p>
       {loading ? (
-        <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem' }}>Loading...</p>
+        <p className="meta">Loading...</p>
       ) : error ? (
-        <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>
+        <p className="meta" style={{ color: 'var(--danger)' }}>{error}</p>
       ) : (
-        <ul className="space-y-4">
-          {jokes.slice(0, 5).map((joke, i) => (
-            <li
-              key={joke.id}
-              style={i < 4 ? { borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1rem' } : {}}
-            >
-              <p className="text-sm font-medium mb-1" style={{ color: 'var(--color-text)' }}>
-                {joke.setup}
-              </p>
-              <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
-                {joke.punchline}
-              </p>
+        <ul>
+          {jokes.slice(0, 5).map(joke => (
+            <li key={joke.id}>
+              <p className="joke-setup">{joke.setup}</p>
+              <p className="joke-punchline">{joke.punchline}</p>
             </li>
           ))}
         </ul>
