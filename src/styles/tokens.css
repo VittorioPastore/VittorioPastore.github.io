@@ -35,10 +35,10 @@
   --header-h: 56px;
 
   --contrib-level-0: #eceff3;
-  --contrib-level-1: #c4c9d0;
-  --contrib-level-2: #9aa0a6;
-  --contrib-level-3: #5f6368;
-  --contrib-level-4: #111111;
+  --contrib-level-1: #9be9a8;
+  --contrib-level-2: #40c463;
+  --contrib-level-3: #30a14e;
+  --contrib-level-4: #216e39;
 
   /* Names the older components still read. */
   --bg-base: var(--paper);
@@ -53,7 +53,9 @@
   color-scheme: light;
 }
 
-html.dark-mode {
+/* The site is light. The machine underneath it is not: the boot menu and boot log, the shutdown screen, the memory
+   test and safe graphics mode are dark, which they get by carrying this class. */
+.paper-dark {
   --paper: #131314;
   --zone: #1e1f20;
   --zone-2: #2a2b2d;
@@ -70,17 +72,10 @@ html.dark-mode {
   --amber-container: #3a2c10;
   --green: #81c995;
   --danger: #f28b82;
-
-  --contrib-level-0: #232527;
-  --contrib-level-1: #4f5357;
-  --contrib-level-2: #80868b;
-  --contrib-level-3: #bdc1c6;
-  --contrib-level-4: #ffffff;
-
   color-scheme: dark;
 }
 
-/* Figures stay on light paper in either theme, like the rendered ones: this resets the tokens inside a figure. */
+/* Figures sit on white paper: this resets the tokens inside a figure, whatever surrounds it. */
 .paper-light {
   --paper: #ffffff;
   --zone: #f1f4f9;

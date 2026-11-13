@@ -8,5 +8,9 @@ export default defineConfig({
     host: true
   },
   site: 'https://www.vittoriopastore.com',
+  // The post was first published under this address.
+  redirects: {
+    '/bones-seed-in-92-bytes': '/bones-seed-on-a-5070',
+  },
   //base: 'Portfolio',
 });

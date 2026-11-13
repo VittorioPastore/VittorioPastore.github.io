@@ -1,0 +1,94 @@
+<!doctype html>
+<!--
+  Source of public/bones-seed-gpu-memory.png: GPU memory before and after compacting the motion library, on one
+  GB axis with the RTX 5070's 12 GB limit. The figure is a fixed 496 × 316 px, rendered at 4× by
+
+    npm run figures
+
+  It is a picture rather than live markup so that it scales as one piece at every screen size.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face {
+    font-family: 'Google Sans Variable';
+    font-weight: 400 700;
+    src: url('../node_modules/@fontsource-variable/google-sans/files/google-sans-latin-wght-normal.woff2') format('woff2-variations');
+  }
+  :root {
+    --card: #ffffff; --line: #dfe3e8; --line-strong: #c4c9d0;
+    --ink: #1f1f1f; --ink-2: #444746; --faint: #80868b;
+    /* GB across the plot, and the values drawn on it */
+    --max: 41;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 496px; height: 316px; overflow: hidden; background: var(--card); }
+  body { font: 400 15px/1.2 'Google Sans Variable', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  /* Left margin holds the row names, right margin the total after the longest bar. */
+  .plot { position: absolute; left: 87px; right: 109px; top: 56px; bottom: 24px; }
+  .plot > * { position: absolute; }
+  .at { left: calc(var(--gb) / var(--max) * 100%); }
+  .wide { width: calc(var(--gb) / var(--max) * 100%); }
+
+  /* Back to front: grid lines, the dashed limit, bars, labels. */
+  .grid { top: 0; bottom: 30px; width: 1px; background: var(--line); }
+  .limit { top: -8px; bottom: 30px; width: 0; border-left: 2px dashed var(--ink); }
+  .limit b { position: absolute; bottom: 100%; left: 0; transform: translateX(-50%); padding-bottom: 7px; font-weight: 700; white-space: nowrap; }
+
+  .row { left: 0; right: 0; height: 50px; display: flex; align-items: center; }
+  .row.before { top: 16px; }
+  .row.after { top: 98px; }
+  .name { position: absolute; right: calc(100% + 12px); color: var(--ink-2); font-size: 16.5px; }
+  .bar { height: 100%; flex: none; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+  .bar.lib { background: var(--ink); color: #fff; font-weight: 700; }
+  .bar.train { background: var(--line-strong); color: var(--ink-2); margin-left: 2px; }
+  .total { margin-left: 11px; font-size: 18px; font-weight: 700; white-space: nowrap; }
+  .total.fits { position: absolute; margin-left: 12px; background: var(--card); padding: 2px 5px; }
+
+  .callout { top: 100%; display: flex; flex-direction: column; align-items: flex-start; color: var(--ink-2); white-space: nowrap; position: absolute; }
+  .callout svg { width: 44px; height: 22px; margin-top: 3px; overflow: visible; }
+  .callout line { stroke: var(--faint); stroke-width: 1.2; }
+  .callout span { margin-left: 16px; margin-top: 2px; background: var(--card); padding: 1px 5px; }
+
+  .tick { bottom: 0; transform: translateX(-50%); color: var(--faint); font-size: 13.5px; white-space: nowrap; }
+</style>
+</head>
+<body>
+  <div class="plot">
+    <span class="grid at" style="--gb: 0"></span>
+    <span class="grid at" style="--gb: 8"></span>
+    <span class="grid at" style="--gb: 16"></span>
+    <span class="grid at" style="--gb: 24"></span>
+    <span class="grid at" style="--gb: 32"></span>
+    <span class="grid at" style="--gb: 40"></span>
+    <span class="limit at" style="--gb: 12"><b>RTX 5070: 12 GB</b></span>
+
+    <div class="row before">
+      <span class="name">before</span>
+      <span class="bar lib wide" style="--gb: 31.9">31.9 GB</span>
+      <span class="bar train wide" style="--gb: 8.4">8.4 GB</span>
+      <b class="total">40.3 GB</b>
+    </div>
+
+    <div class="row after">
+      <span class="name">after</span>
+      <span class="bar lib wide" style="--gb: 2.18"></span>
+      <span class="bar train wide" style="--gb: 8.4">8.4 GB</span>
+      <b class="total fits at" style="--gb: 12">10.6 GB, fits</b>
+      <span class="callout at" style="--gb: 1.09">
+        <svg viewBox="0 0 44 22" aria-hidden="true"><line x1="0" y1="0" x2="44" y2="22" /></svg>
+        <span>motion library&nbsp;&nbsp;2.2 GB</span>
+      </span>
+    </div>
+
+    <span class="tick at" style="--gb: 0">0 GB</span>
+    <span class="tick at" style="--gb: 8">8 GB</span>
+    <span class="tick at" style="--gb: 16">16 GB</span>
+    <span class="tick at" style="--gb: 24">24 GB</span>
+    <span class="tick at" style="--gb: 32">32 GB</span>
+    <span class="tick at" style="--gb: 40">40 GB</span>
+  </div>
+</body>
+</html>

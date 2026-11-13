@@ -1,7 +1,8 @@
 ---
 // HeroStage.astro — the live hero: a humanoid rendered in the browser (three.js), playing rollouts of the policy
 // trained on a MacBook (run mlx_lafan1_2h, iteration 4,750). The model and motions are baked into /g1-hero.glb.
-// If WebGL is unavailable the photo is shown instead.
+// The robot is white, faces the visitor, and stands directly on the page: there is no backdrop. The translucent
+// orange figures to its side are its own next poses. If WebGL is unavailable the photo is shown instead.
 const clips = [
   { id: 'dance', label: 'Dance' },
   { id: 'run', label: 'Run' },
@@ -14,7 +15,7 @@ const clips = [
   <canvas
     id="hero-canvas"
     role="img"
-    aria-label="A simulated humanoid robot dancing, running, fighting and getting up, driven by a policy trained on a MacBook. Motions: LAFAN1 clips, Ubisoft La Forge."
+    aria-label="A simulated white humanoid robot dancing, running, fighting and getting up, driven by a policy trained on a MacBook. Three translucent orange figures beside it show its next poses. Motions: LAFAN1 clips, Ubisoft La Forge."
   ></canvas>
 
   <picture class="stage-fallback">
@@ -34,14 +35,14 @@ const clips = [
     position: relative;
     width: 100%;
     min-width: 0;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 5 / 4;
     max-height: min(66svh, 38rem);
   }
   @media (min-width: 640px) and (min-aspect-ratio: 5 / 4) {
-    .stage { aspect-ratio: 1 / 1; max-height: calc(100svh - var(--header-h) - 2 * var(--hero-pad)); }
+    .stage { aspect-ratio: 4 / 3; max-height: calc(100svh - var(--header-h) - 2 * var(--hero-pad)); }
   }
 
-  /* The canvas edges are feathered, so the floor never ends in a visible rectangle. */
+  /* The canvas edges are feathered, so the floor's light and shadow never end in a visible rectangle. */
   canvas {
     position: absolute;
     inset: 0;
@@ -50,13 +51,15 @@ const clips = [
     display: block;
     opacity: 0;
     transition: opacity 0.8s ease;
-    touch-action: pan-y;
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, #000 80%, transparent 97%);
+    touch-action: pan-y; /* a sideways drag turns the view; an up-and-down swipe still scrolls the page */
+    cursor: grab;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent), linear-gradient(to bottom, #000 82%, transparent 97%);
     -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent), linear-gradient(to bottom, #000 80%, transparent 97%);
+    mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent), linear-gradient(to bottom, #000 82%, transparent 97%);
     mask-composite: intersect;
   }
   .stage.is-live canvas { opacity: 1; }
+  .stage.is-dragging canvas { cursor: grabbing; }
 
   .stage-fallback { display: none; }
   .stage.is-failed canvas, .stage.is-failed .clips { display: none; }
@@ -108,22 +111,26 @@ const clips = [
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMapping = THREE.NeutralToneMapping; // keeps the white shell white
 
     const scene = new THREE.Scene();
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; // soft reflections on the shell
     pmrem.dispose();
 
+    // The robot stands at the origin and its next poses are laid out beside it, along +x: to the right on screen.
+    const GHOSTS = 3;
+    const SPACING = 0.4; // metres between one figure and the next
+    const LEAD = 0.18; // seconds between one figure and the next
     const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 60);
-    const target = new THREE.Vector3(0, 0.74, 0);
+    const target = new THREE.Vector3((GHOSTS * SPACING) / 2, 0.6, 0); // its height is set with the framing, below
 
-    // Three-point lighting: a warm key from the front that casts the shadow, a strong cool rim from behind that
-    // outlines the body, a warm kicker on the other side, and very little fill.
-    const fill = new THREE.HemisphereLight(0xdfe8ff, 0x1c1d22, 0.3);
+    // Studio lighting: a broad soft fill, a key from the front that casts the shadow, and a rim from behind that
+    // outlines the body.
+    const fill = new THREE.HemisphereLight(0xffffff, 0xc9ccd2, 1.1);
     // A directional key: its shadow map covers the whole visible floor, so the map's edge never shows as a line.
-    const key = new THREE.DirectionalLight(0xffe4c8, 5);
-    key.position.set(2.6, 4.4, 3.2);
+    const key = new THREE.DirectionalLight(0xfff4ea, 1.9);
+    key.position.set(1.4, 4.6, 3.4);
     key.target.position.copy(target);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
@@ -132,192 +139,275 @@ const clips = [
     key.shadow.camera.near = 0.5;
     key.shadow.camera.far = 16;
     key.shadow.bias = -0.0005;
-    key.shadow.radius = 4;
-    const rim = new THREE.DirectionalLight(0xa9c8ff, 3.5);
+    key.shadow.radius = 5;
+    const rim = new THREE.DirectionalLight(0xcfe0ff, 0.9);
     rim.position.set(-3.2, 2.8, -3.4);
-    const kicker = new THREE.DirectionalLight(0xffc48a, 1.2);
-    kicker.position.set(3.4, 1.4, -2.6);
-    scene.add(fill, key, key.target, rim, kicker);
+    scene.add(fill, key, key.target, rim);
 
-    // Floor: the shadow, a soft pool of light, and a hairline grid. Pool and grid fade out with distance from the
-    // robot, so the floor dissolves into the page instead of ending at the canvas edge.
-    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.3, depthWrite: false });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), shadowMat);
+    // Floor: the robot's shadow and a soft pool of tone under the figures. The pool fades out with distance, so the
+    // floor dissolves into the page instead of ending at the canvas edge.
+    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.26, depthWrite: false });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(9, 7), shadowMat);
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
-    floor.position.y = -0.02; // just under the soles, so a limb resting on the ground is never drawn over
-    floor.renderOrder = -3; // floor layers draw first, in this order, and never hide one another
+    floor.position.set(target.x, -0.02, 0); // just under the soles, so a limb resting on the ground is never drawn over
+    floor.renderOrder = -2; // floor layers draw first, in this order, and never hide one another
     scene.add(floor);
 
-    const fadeVertex = `
-      varying vec2 vFloor;
-      void main() {
-        vec4 world = modelMatrix * vec4(position, 1.0);
-        vFloor = world.xz; // distance is taken per pixel: a grid line's two ends are both far from the robot
-        gl_Position = projectionMatrix * viewMatrix * world;
-      }`;
-    const fadeFragment = `
-      uniform vec3 uColor;
-      uniform float uOpacity;
-      uniform float uInner;
-      uniform float uOuter;
-      varying vec2 vFloor;
-      void main() {
-        float fade = 1.0 - smoothstep(uInner, uOuter, length(vFloor));
-        float a = uOpacity * fade * fade;
-        if (a < 0.002) discard;
-        gl_FragColor = vec4(uColor, a);
-        #include <colorspace_fragment>
-      }`;
-    const fading = (inner: number, outer: number) =>
-      new THREE.ShaderMaterial({
-        transparent: true,
-        depthWrite: false,
-        vertexShader: fadeVertex,
-        fragmentShader: fadeFragment,
-        uniforms: { uColor: { value: new THREE.Color() }, uOpacity: { value: 1 }, uInner: { value: inner }, uOuter: { value: outer } },
-      });
-
-    const poolMat = fading(0, 2.1);
-    const pool = new THREE.Mesh(new THREE.CircleGeometry(2.2, 48), poolMat);
+    const poolMat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      uniforms: { uColor: { value: new THREE.Color() }, uOpacity: { value: 1 } },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }`,
+      fragmentShader: `
+        uniform vec3 uColor;
+        uniform float uOpacity;
+        varying vec2 vUv;
+        void main() {
+          float fade = 1.0 - smoothstep(0.0, 1.0, length(vUv - 0.5) * 2.0);
+          float a = uOpacity * fade * fade;
+          if (a < 0.002) discard;
+          gl_FragColor = vec4(uColor, a);
+          #include <colorspace_fragment>
+        }`,
+    });
+    const pool = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 4.4), poolMat); // an ellipse, wider than deep
     pool.rotation.x = -Math.PI / 2;
-    pool.position.y = -0.02;
-    pool.renderOrder = -2;
+    pool.position.set(target.x, -0.02, 0);
+    pool.renderOrder = -1;
     scene.add(pool);
-
-    const CELL = 0.5;
-    const HALF = 7;
-    const pts: number[] = [];
-    for (let i = -HALF; i <= HALF; i += CELL) pts.push(-HALF, 0, i, HALF, 0, i, i, 0, -HALF, i, 0, HALF);
-    const gridGeo = new THREE.BufferGeometry();
-    gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-    const gridMat = fading(0.3, 3.2);
-    const grid = new THREE.LineSegments(gridGeo, gridMat);
-    grid.position.y = -0.02;
-    grid.renderOrder = -1;
-    grid.frustumCulled = false;
-    scene.add(grid);
 
     // Load the robot. It sits in a group that turns it, so a new motion can start facing the way the last one ended.
     const gltf = await new GLTFLoader().loadAsync('/g1-hero.glb');
-    const robot = gltf.scene;
-    const turn = new THREE.Group();
-    turn.add(robot);
-    scene.add(turn);
-
-    const shell = new THREE.MeshStandardMaterial({ color: 0x9da1a9, metalness: 0.72, roughness: 0.34 });
-    const darkPart = new THREE.MeshStandardMaterial({ color: 0x101114, metalness: 0.45, roughness: 0.4 });
-    const glow = new THREE.MeshBasicMaterial({ color: 0x38c6ff, toneMapped: false }); // the light ring around the face
-    let pelvis: InstanceType<typeof THREE.Object3D> | null = null;
-    robot.traverse(o => {
-      if (!pelvis && /pelvis$/i.test(o.name)) pelvis = o;
+    const shell = new THREE.MeshPhysicalMaterial({ color: 0xf3f3f1, metalness: 0, roughness: 0.36, clearcoat: 0.5, clearcoatRoughness: 0.3 });
+    const darkPart = new THREE.MeshStandardMaterial({ color: 0x33363b, metalness: 0.2, roughness: 0.45 });
+    const visor = new THREE.MeshStandardMaterial({ color: 0x1b1d20, metalness: 0.3, roughness: 0.25 }); // the ring around the face
+    gltf.scene.traverse(o => {
       const mesh = o as InstanceType<typeof THREE.Mesh>;
       if (mesh.isMesh) {
         const kind = (mesh.material as InstanceType<typeof THREE.Material>).name;
-        mesh.material = kind === 'glow' ? glow : kind === 'dark' ? darkPart : shell;
-        mesh.castShadow = kind !== 'glow';
-        if (kind === 'glow' && mesh.parent?.parent) {
-          // a little of the ring's light spills onto the chest and arms (body frame: x forward, z up)
-          const spill = new THREE.PointLight(0x38c6ff, 0.5, 0.9, 2);
-          spill.position.set(0.16, 0, 0.42);
-          mesh.parent.parent.add(spill);
-        }
+        mesh.material = kind === 'glow' ? visor : kind === 'dark' ? darkPart : shell;
+        mesh.castShadow = true;
         mesh.frustumCulled = false; // bounds are those of the quantized mesh, not of its animated pose
       }
     });
-    if (!pelvis) throw new Error('root body not found');
-    const root = pelvis as InstanceType<typeof THREE.Object3D>;
 
-    // Colours and light levels follow the page theme: low-key on dark, brighter on paper.
-    const css = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    const applyTheme = () => {
-      const dark = document.documentElement.classList.contains('dark-mode');
-      gridMat.uniforms.uColor.value.set(css('--line-strong') || '#c4c9d0');
-      gridMat.uniforms.uOpacity.value = dark ? 0.8 : 0.9;
-      poolMat.uniforms.uColor.value.set(dark ? '#ffffff' : '#000000');
-      poolMat.uniforms.uOpacity.value = dark ? 0.07 : 0.03;
-      shadowMat.opacity = dark ? 0.7 : 0.34;
-      renderer.toneMappingExposure = dark ? 1.0 : 1.05;
-      scene.environmentIntensity = dark ? 0.22 : 0.6;
-      fill.intensity = dark ? 0.08 : 0.55;
-      key.intensity = dark ? 2.6 : 2.8;
-      rim.intensity = dark ? 6.0 : 2.6;
-      kicker.intensity = dark ? 2.0 : 0.8;
-    };
-    applyTheme();
-    new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-    // Motions. Each clip carries the path its root travelled (removed from the motion when it was baked); the floor
-    // scrolls by that path's own steps, so switching clips never moves the floor.
-    const yawOf = (x: number, y: number, z: number, w: number) => Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
-    const mixer = new THREE.AnimationMixer(robot);
-    type Clip = {
-      name: string;
-      action: ReturnType<typeof mixer.clipAction>;
-      duration: number;
-      yaw0: number;
-      path: (t: number) => [number, number];
-    };
+    // Motions. Each clip carries the path its root travelled (removed from the motion when it was baked); the figures
+    // stay in place, so that track is dropped.
+    const yawOf = (q: { x: number; y: number; z: number; w: number }) => Math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z));
+    const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
+    const rootName = (() => {
+      let name = '';
+      gltf.scene.traverse(o => {
+        if (!name && /pelvis$/i.test(o.name)) name = o.name;
+      });
+      return name;
+    })();
+    if (!rootName) throw new Error('root body not found');
+    type Clip = { name: string; anim: InstanceType<typeof THREE.AnimationClip>; duration: number; yaw0: number };
     const clipsByName = new Map<string, Clip>();
     for (const anim of gltf.animations) {
       const ti = anim.tracks.findIndex(t => t.name.startsWith('track.'));
-      const pathTrack = ti >= 0 ? anim.tracks.splice(ti, 1)[0] : null;
-      const interp = pathTrack ? pathTrack.createInterpolant() : null;
-      const rot = anim.tracks.find(t => t.name === `${root.name}.quaternion`);
+      if (ti >= 0) anim.tracks.splice(ti, 1);
+      const rot = anim.tracks.find(t => t.name === `${rootName}.quaternion`);
       const q = rot ? rot.values : [0, 0, 0, 1];
-      const action = mixer.clipAction(anim);
-      action.setLoop(THREE.LoopOnce, 1);
-      action.clampWhenFinished = true;
-      clipsByName.set(anim.name, {
-        name: anim.name,
-        action,
-        duration: anim.duration,
-        yaw0: yawOf(q[0], q[1], q[2], q[3]),
-        path: t => {
-          if (!interp) return [0, 0];
-          const v = interp.evaluate(Math.min(Math.max(t, 0), anim.duration));
-          return [v[0], v[1]];
-        },
-      });
+      clipsByName.set(anim.name, { name: anim.name, anim, duration: anim.duration, yaw0: yawOf({ x: q[0], y: q[1], z: q[2], w: q[3] }) });
     }
     const order = buttons.map(b => b.dataset.clip || '').filter(n => clipsByName.has(n));
 
     const FADE = 0.9; // seconds of blending from one motion into the next
-    const FACING = -0.55; // heading of the very first motion: three-quarter view toward the camera
-    let cur: Clip | null = null;
-    let turnYaw = 0;
-    let turning: { from: number; to: number; t: number } | null = null;
-    let lastPath: [number, number] | null = null;
-    const scroll = { x: 0, z: 0 };
+    const HOME_YAW = 0.1; // where the camera sits when nobody is dragging it: just right of straight ahead
+    // Heading the robot is held near. At heading 0 its front points along +x, to the right on screen; a quarter turn
+    // back from there it points at the home camera, so it faces the visitor.
+    const FACING = HOME_YAW - Math.PI / 2;
 
-    const play = (name: string) => {
-      const next = clipsByName.get(name);
-      if (!next || next === cur) return;
-      const prev = cur;
-      next.action.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();
-      if (prev) {
-        prev.action.crossFadeTo(next.action, FADE, false);
-        // Start the new motion facing the way the robot faces now, by turning the whole robot over the blend.
-        const facing = turnYaw + yawOf(root.quaternion.x, root.quaternion.y, root.quaternion.z, root.quaternion.w);
-        let d = facing - next.yaw0 - turnYaw;
-        d = Math.atan2(Math.sin(d), Math.cos(d));
-        turning = { from: turnYaw, to: turnYaw + d, t: 0 };
-        setTimeout(() => {
-          if (cur !== prev) prev.action.stop();
-        }, FADE * 1000 + 60);
-      } else {
-        turnYaw = FACING - next.yaw0;
+    // A figure: one copy of the model with its own clock. The robot and each of its ghosts are figures running the
+    // same motions; a ghost's clock is simply ahead of the robot's.
+    type Figure = ReturnType<typeof makeFigure>;
+    const makeFigure = (model: InstanceType<typeof THREE.Object3D>) => {
+      const turn = new THREE.Group();
+      turn.add(model);
+      scene.add(turn);
+      const root = model.getObjectByName(rootName)!;
+      const mixer = new THREE.AnimationMixer(model);
+      const actions = new Map<string, ReturnType<typeof mixer.clipAction>>();
+      for (const c of clipsByName.values()) {
+        const a = mixer.clipAction(c.anim);
+        a.setLoop(THREE.LoopOnce, 1);
+        a.clampWhenFinished = true;
+        actions.set(c.name, a);
       }
-      cur = next;
-      lastPath = null;
-      buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.clip === name)));
+      const fig = {
+        turn,
+        root,
+        mixer,
+        cur: null as Clip | null,
+        clock: 0,
+        turnYaw: 0,
+        turning: null as { from: number; to: number; t: number } | null,
+        retiring: [] as { clip: Clip; at: number }[],
+        time: () => (fig.cur ? actions.get(fig.cur.name)!.time : 0),
+        play(name: string) {
+          const next = clipsByName.get(name);
+          if (!next || next === fig.cur) return;
+          const prev = fig.cur;
+          const action = actions.get(name)!;
+          action.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();
+          if (prev) {
+            actions.get(prev.name)!.crossFadeTo(action, FADE, false);
+            // Start the new motion facing the way the figure faces now, by turning the whole figure over the blend.
+            const facing = fig.turnYaw + yawOf(root.quaternion);
+            fig.turning = { from: fig.turnYaw, to: fig.turnYaw + wrap(facing - next.yaw0 - fig.turnYaw), t: 0 };
+            fig.retiring.push({ clip: prev, at: fig.clock + FADE + 0.06 });
+          } else {
+            fig.turnYaw = FACING - next.yaw0;
+          }
+          fig.cur = next;
+        },
+        // Put this figure where `other` is now, mid-motion, with nothing else blending in.
+        matchTo(other: Figure) {
+          mixer.stopAllAction();
+          fig.retiring = [];
+          fig.cur = other.cur;
+          fig.turnYaw = other.turnYaw;
+          fig.turning = other.turning ? { ...other.turning } : null;
+          if (fig.cur) {
+            const a = actions.get(fig.cur.name)!;
+            a.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();
+            a.time = other.time();
+          }
+          mixer.update(0);
+        },
+        advance(dt: number) {
+          fig.clock += dt;
+          mixer.update(dt);
+          if (fig.turning) {
+            fig.turning.t += dt;
+            const p = Math.min(fig.turning.t / FADE, 1);
+            fig.turnYaw = fig.turning.from + (fig.turning.to - fig.turning.from) * (p * p * (3 - 2 * p));
+            if (p >= 1) fig.turning = null;
+          }
+          fig.retiring = fig.retiring.filter(r => {
+            if (fig.clock < r.at) return true;
+            if (fig.cur !== r.clip) actions.get(r.clip.name)!.stop();
+            return false;
+          });
+          // Blend into the next motion a little before this one ends.
+          if (fig.cur && fig.time() >= fig.cur.duration - FADE - 0.05 && order.length > 1) {
+            fig.play(order[(order.indexOf(fig.cur.name) + 1) % order.length]);
+          }
+        },
+      };
+      return fig;
+    };
+
+    // The ghosts are copies of the model in one translucent orange each, fading out the further ahead they are.
+    // Each is drawn as a single even layer: its shape goes into the depth buffer first, so only its nearest surface
+    // is then coloured, and limbs that cross do not add up into darker patches.
+    const ghostShape = new THREE.MeshBasicMaterial({
+      colorWrite: false,
+      transparent: true, // so it is drawn after the robot, not before
+      polygonOffset: true, // a hair behind the coloured surface, so the two never fight over a pixel
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1,
+    });
+    const ghostMats: InstanceType<typeof THREE.MeshStandardMaterial>[] = [];
+    const ghostModels = Array.from({ length: GHOSTS }, () => {
+      const mat = new THREE.MeshStandardMaterial({ color: 0xff8a4d, emissive: 0xff8a4d, roughness: 0.7, metalness: 0, transparent: true, depthWrite: false });
+      ghostMats.push(mat);
+      const model = gltf.scene.clone(true);
+      const meshes: InstanceType<typeof THREE.Mesh>[] = [];
+      model.traverse(o => {
+        if ((o as InstanceType<typeof THREE.Mesh>).isMesh) meshes.push(o as InstanceType<typeof THREE.Mesh>);
+      });
+      for (const mesh of meshes) {
+        mesh.material = mat;
+        mesh.castShadow = false;
+        mesh.renderOrder = 1;
+        const shape = new THREE.Mesh(mesh.geometry, ghostShape);
+        shape.frustumCulled = false;
+        mesh.add(shape); // renderOrder 0: before the colour
+      }
+      return model;
+    });
+    const robot = makeFigure(gltf.scene);
+    const ghosts = ghostModels.map((model, k) => {
+      const g = makeFigure(model);
+      g.turn.position.x = (k + 1) * SPACING;
+      return g;
+    });
+    // A ghost's groups, which carry its place in the drawing order: the ghosts are drawn whole, farthest first.
+    const ghostGroups = ghosts.map(g => {
+      const groups: InstanceType<typeof THREE.Object3D>[] = [];
+      g.turn.traverse(o => {
+        if ((o as InstanceType<typeof THREE.Group>).isGroup) groups.push(o);
+      });
+      return groups;
+    });
+
+    // Light levels for a white robot on a white page, and the ghosts: a light wash of orange, each less than half
+    // as solid as the one before.
+    poolMat.uniforms.uColor.value.set('#5f6368');
+    poolMat.uniforms.uOpacity.value = 0.1;
+    renderer.toneMappingExposure = 1.05;
+    scene.environmentIntensity = 0.7;
+    ghostMats.forEach((m, k) => {
+      m.emissiveIntensity = 0.3;
+      m.opacity = 0.55 * 0.45 ** k;
+    });
+
+    // Starting a motion: the robot blends into it from where it is, and each ghost shows where that blend will be
+    // a little later.
+    const play = (name: string) => {
+      if (!clipsByName.has(name) || robot.cur?.name === name) return;
+      ghosts.forEach(g => g.matchTo(robot));
+      [robot, ...ghosts].forEach((f, k) => {
+        f.play(name);
+        if (k > 0) f.advance(k * LEAD);
+      });
     };
     buttons.forEach(b => b.addEventListener('click', () => play(b.dataset.clip || '')));
 
-    // Camera: a slow sway, plus a little parallax from the pointer.
+    // Camera: a slow sway, plus a little parallax from the pointer. Dragging the stage turns the view around the
+    // figures; two seconds after the drag ends it eases back home.
+    const HOME_AFTER = 2; // seconds
+    const orbit = { yaw: 0, pitch: 0 }; // what dragging has added to the view
+    let drag: { id: number; x: number; y: number } | null = null;
+    let releasedAt = -Infinity; // on the stage's clock (`elapsed`)
+    const endDrag = (e: PointerEvent) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      drag = null;
+      releasedAt = elapsed;
+      orbit.yaw = wrap(orbit.yaw); // so the way home is the short way round
+      stage.classList.remove('is-dragging');
+    };
+    canvas.addEventListener('pointerdown', e => {
+      if (drag || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+      canvas.setPointerCapture(e.pointerId);
+      stage.classList.add('is-dragging');
+      if (e.pointerType === 'mouse') e.preventDefault(); // no text selection while dragging
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const perPixel = Math.PI / Math.max(stage.clientWidth, 1); // the stage's width is half a turn
+      orbit.yaw -= (e.clientX - drag.x) * perPixel;
+      orbit.pitch = Math.max(-0.04, Math.min(1.1, orbit.pitch + (e.clientY - drag.y) * perPixel)); // never under the floor
+      drag.x = e.clientX;
+      drag.y = e.clientY;
+    });
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+
     let aim = { x: 0, y: 0 };
     const look = { x: 0, y: 0 };
     window.addEventListener('pointermove', e => {
+      if (drag) return; // the view is in the visitor's hand
       const r = stage.getBoundingClientRect();
       aim = {
         x: Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2))),
@@ -332,60 +422,58 @@ const clips = [
       if (w === 0 || h === 0) return;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
-      // Far enough to keep about 1.8 m of height and 2.2 m of width in frame.
+      // The floor sits just above the motion picker, with 1.6 m of room over it and, for the robot and its ghosts,
+      // 2.4 m of width in frame.
+      const picker = stage.querySelector<HTMLElement>('.clips');
+      const below = picker ? Math.min((stage.getBoundingClientRect().bottom - picker.getBoundingClientRect().top + 12) / h, 0.4) : 0.1;
       const t = Math.tan((camera.fov * Math.PI) / 360);
-      distance = Math.max(1.8 / (2 * t), 2.2 / (2 * t * camera.aspect));
+      const tall = Math.max(1.6 / (1 - below), 2.4 / camera.aspect); // metres of height in frame
+      distance = tall / (2 * t);
+      target.y = tall * (0.5 - below);
       camera.updateProjectionMatrix();
     };
     new ResizeObserver(resize).observe(stage);
     resize();
 
-    const mod = (v: number) => ((v % CELL) + CELL) % CELL;
     let elapsed = 0;
+    let shown = ''; // the motion the picker marks as playing
+    let steer = 0; // extra turn shared by all figures, which keeps the robot facing the visitor however its motion turns
     const frame = (dt: number) => {
       elapsed += dt;
-      mixer.update(dt);
+      robot.advance(dt);
+      ghosts.forEach(g => g.advance(dt));
 
-      if (turning) {
-        turning.t += dt;
-        const p = Math.min(turning.t / FADE, 1);
-        turnYaw = turning.from + (turning.to - turning.from) * (p * p * (3 - 2 * p));
-        if (p >= 1) turning = null;
-      }
-      turn.rotation.y = turnYaw;
-
-      if (cur) {
-        // Scroll the floor by the distance this motion travelled since the last frame (z-up x, y -> x, -z, turned).
-        const p = cur.path(cur.action.time);
-        if (lastPath) {
-          const dx = p[0] - lastPath[0];
-          const dz = -(p[1] - lastPath[1]);
-          const c = Math.cos(turnYaw);
-          const s = Math.sin(turnYaw);
-          scroll.x -= dx * c + dz * s;
-          scroll.z -= -dx * s + dz * c;
-        }
-        lastPath = p;
-        grid.position.x = mod(scroll.x);
-        grid.position.z = mod(scroll.z);
-
-        // Blend into the next motion a little before this one ends.
-        if (cur.action.time >= cur.duration - FADE - 0.05 && order.length > 1) {
-          play(order[(order.indexOf(cur.name) + 1) % order.length]);
-        }
+      // Follow the robot's heading, a little behind it, and only while it is upright: lying down it has no heading.
+      const q = robot.root.quaternion;
+      const upright = Math.max(0, 1 - 2 * (q.x * q.x + q.y * q.y));
+      steer += wrap(FACING - (robot.turnYaw + steer + yawOf(q))) * (1 - Math.exp(-4 * upright * upright * dt));
+      robot.turn.rotation.y = robot.turnYaw + steer;
+      ghosts.forEach(g => (g.turn.rotation.y = g.turnYaw + steer));
+      if (robot.cur && robot.cur.name !== shown) {
+        shown = robot.cur.name;
+        buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.clip === shown)));
       }
 
       look.x += (aim.x - look.x) * 0.06;
       look.y += (aim.y - look.y) * 0.06;
-      // Visitors who ask for reduced motion get a fixed camera; the robot itself still moves.
-      const yaw = calm ? 0.5 : 0.5 + Math.sin(elapsed * 0.16) * 0.2 - look.x * 0.38;
-      const pitch = calm ? 0.07 : 0.07 + look.y * 0.06;
+      if (!drag && elapsed - releasedAt > HOME_AFTER) {
+        const ease = 1 - Math.exp(-3.5 * dt);
+        orbit.yaw -= orbit.yaw * ease;
+        orbit.pitch -= orbit.pitch * ease;
+      }
+      // Visitors who ask for reduced motion get a camera that only moves when they drag it; the robot itself still moves.
+      const yaw = (calm ? HOME_YAW : HOME_YAW + Math.sin(elapsed * 0.16) * 0.12 - look.x * 0.25) + orbit.yaw;
+      const pitch = (calm ? 0.06 : 0.06 + look.y * 0.05) + orbit.pitch;
       camera.position.set(
         target.x + Math.sin(yaw) * Math.cos(pitch) * distance,
         target.y + Math.sin(pitch) * distance,
         target.z + Math.cos(yaw) * Math.cos(pitch) * distance,
       );
       camera.lookAt(target);
+      ghosts
+        .map((g, k) => ({ k, d: g.turn.position.distanceToSquared(camera.position) }))
+        .sort((a, b) => b.d - a.d)
+        .forEach(({ k }, rank) => ghostGroups[k].forEach(o => (o.renderOrder = rank + 1)));
       renderer.render(scene, camera);
     };
 

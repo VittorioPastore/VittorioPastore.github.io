@@ -3,7 +3,6 @@
 import Layout from '../layouts/Layout.astro';
 import ContributionGrid from '../components/ContributionGrid.astro';
 import FunnyFeed from '../components/FunnyFeed';
-import MemoryChart from '../components/MemoryChart.astro';
 import HeroStage from '../components/HeroStage.astro';
 
 const publications = [
@@ -15,6 +14,8 @@ const publications = [
     href: 'https://arxiv.org/abs/2507.22042',
     posted: '2025-07-01', // arXiv 2507: July 2025
     cta: 'Read paper',
+    figure: '/pub-nmpc.webp',
+    figureAlt: 'A white quadruped robot mid-stride, carrying a robot arm on its back that reaches forward',
   },
   {
     title: 'ADMM-Based Distributed MPC with Control Barrier Functions for Safe Multi-Robot Quadrupedal Locomotion',
@@ -24,6 +25,8 @@ const publications = [
     href: 'https://arxiv.org/abs/2603.19170',
     posted: '2026-03-01', // arXiv 2603: March 2026
     cta: 'Read paper',
+    figure: '/pub-admm.webp',
+    figureAlt: 'Three quadruped robots, each standing inside its own glowing amber safety ring on the floor',
   },
   {
     title: 'Multi-Agent Navigation via Distributed Consensus-Based Optimization and Learned Locomotion',
@@ -32,6 +35,8 @@ const publications = [
       'A hierarchical control architecture for multi-agent legged navigation that integrates high-level distributed NMPC using ADMM for scalable collision avoidance with a low-level reinforcement learning policy for robust real-time locomotion.',
     href: null,
     cta: 'Coming soon',
+    figure: '/pub-hier.webp',
+    figureAlt: 'Three quadruped robots following dotted amber paths; two of them trade places on paths that bow around each other',
   },
   {
     title: "Master's Thesis",
@@ -39,14 +44,16 @@ const publications = [
     summary: 'Thesis research focused on multi agent locomotion via blending of classical and learning-based controls.',
     href: 'https://hdl.handle.net/10919/143475',
     cta: 'Read thesis',
+    figure: '/pub-thesis.webp',
+    figureAlt: 'Three small quadruped robots walking across the cover of a large hardback book',
   },
 ];
 
 const skills = [
-  { name: 'Python & C++', projects: ['humanoid-on-a-macbook', 'bones-seed-in-92-bytes', 'squeaky-greyhound', 'neural-trader'] },
+  { name: 'Python & C++', projects: ['humanoid-on-a-macbook', 'bones-seed-on-a-5070', 'squeaky-greyhound', 'neural-trader'] },
   { name: 'PyTorch & TensorFlow', projects: ['neural-trader'] },
   { name: 'ROS 2', projects: ['squeaky-greyhound'] },
-  { name: 'Isaac Lab, MuJoCo & Raisim', projects: ['humanoid-on-a-macbook', 'bones-seed-in-92-bytes', 'squeaky-greyhound'] },
+  { name: 'Isaac Lab, MuJoCo & Raisim', projects: ['humanoid-on-a-macbook', 'bones-seed-on-a-5070', 'squeaky-greyhound'] },
   { name: 'Distributed NMPC', projects: ['controls-ios-application', 'nawcad'] },
   { name: 'Multi-Agent RL', projects: ['neural-trader'] },
   { name: 'Embodied AI', projects: ['mailclient'] },
@@ -63,17 +70,22 @@ const projects = {
     skills: ['Python', 'MLX', 'MuJoCo', 'Reinforcement Learning'],
     href: '/humanoid-on-a-macbook',
     posted: '2026-11-13',
-    image: '/mlx-humanoid-figure.webp',
-    imageAlt: '1,024 simulated G1 robots on a MacBook, a robot with its imagined future steps, and a strip comparing 128 GPUs for 7 days, 1 GPU for 3 hours and 1 MacBook for 79 minutes',
+    // The card shows the render alone; the post has the full figure it comes from.
+    image: '/mlx-humanoid-laptop.webp',
+    imageSize: [1600, 1024],
+    imageAlt: 'A crowd of small G1 humanoid robots moving across the keyboard of an open MacBook whose display shows a training curve',
   },
-  'bones-seed-in-92-bytes': {
-    title: '131 Hours of Motion in 92 Bytes a Frame',
+  'bones-seed-on-a-5070': {
+    title: '131 Hours of Motion on an RTX 5070',
     short: 'BONES-SEED',
-    description: 'A 131-hour humanoid motion library stored as root pose, quaternion and int16 joint angles, so it trains on one 12 GB GPU.',
+    description: 'The full 131-hour BONES-SEED motion library, trained on with one RTX 5070: a mid-range consumer GPU with 12 GB of memory, where the same run used to need 40 GB.',
     skills: ['Python', 'JAX', 'MuJoCo', 'Reinforcement Learning'],
-    href: '/bones-seed-in-92-bytes',
+    href: '/bones-seed-on-a-5070',
     posted: '2026-11-13',
-    figure: 'memory',
+    // The card shows the idea as a render; the post has the memory chart.
+    image: '/bones-seed-gpu.webp',
+    imageSize: [1600, 1024],
+    imageAlt: 'A crowd of small G1 humanoid robots running, dancing and fighting across the top of a graphics card',
   },
   'squeaky-greyhound': {
     title: 'Squeaky and Greyhound',
@@ -127,20 +139,14 @@ const projects = {
 
 // Projects that have a figure are featured, each as a full-width card; the others fill the grid below.
 // A project is listed only once its page exists in src/pages, so a post that is not published yet stays off the site.
-const pages = import.meta.glob('./*.astro');
+// The pages are globbed as raw text, only for their names: importing them as pages would pull every page's styles
+// into this one.
+const pages = import.meta.glob('./*.astro', { query: '?raw' });
 const live = (id: string) => `./${id}.astro` in pages;
 const all = Object.entries(projects).filter(([id]) => live(id)).map(([id, p]) => ({ id, ...p }));
-const featured = all.filter(p => p.image || p.figure);
-const rest = all.filter(p => !(p.image || p.figure));
+const featured = all.filter(p => p.image);
+const rest = all.filter(p => !p.image);
 
-const papers = publications.filter(p => !p.title.includes('Thesis')).length;
-const sections = [
-  { id: 'publications', label: 'Publications', meta: `${papers} papers · 1 thesis` },
-  { id: 'projects', label: 'Projects', meta: `${all.length} builds` },
-  { id: 'skills', label: 'Skills', meta: `${skills.length} areas` },
-  { id: 'activity', label: 'Activity', meta: 'GitHub, past year' },
-  { id: 'contact', label: 'Contact', meta: 'LinkedIn · GitHub · Email' },
-];
 const num = (i: number) => String(i + 1).padStart(2, '0');
 // The first card of the grid (the newest project) spans however many columns leave every row full.
 const span = (cols: number) => ((1 - rest.length) % cols + cols) % cols || cols;
@@ -176,12 +182,12 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
             <p class="kicker">01</p>
             <h2 class="zone-title">Publications</h2>
           </div>
-          <p class="meta">{sections[0].meta}</p>
         </header>
         <div class="pub-grid">
           {publications.map(p => {
             const body = (
               <>
+                <img class="pub-fig" src={p.figure} alt={p.figureAlt} width="1600" height="700" loading="lazy" />
                 <p class="kicker pub-venue">
                   {p.posted && <span class="pill" data-posted={p.posted} hidden>New</span>}
                   {p.venue}
@@ -203,7 +209,6 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
             <p class="kicker">02</p>
             <h2 class="zone-title">Projects</h2>
           </div>
-          <p class="meta">{sections[1].meta}</p>
         </header>
 
         {featured.map(f => (
@@ -215,9 +220,7 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
               <div class="tags">{f.skills.map(s => <span class="tag">{s}</span>)}</div>
               <span class="go">Read the post</span>
             </div>
-            {f.image
-              ? <img class="featured-fig" src={f.image} alt={f.imageAlt} width="2808" height="1853" loading="lazy" />
-              : <div class="featured-fig framed paper-light"><MemoryChart /></div>}
+            <img class="featured-fig" src={f.image} alt={f.imageAlt} width={f.imageSize[0]} height={f.imageSize[1]} loading="lazy" />
           </a>
         ))}
 
@@ -247,7 +250,6 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
             <p class="kicker">03</p>
             <h2 class="zone-title">Skills</h2>
           </div>
-          <p class="meta">skill → where it was used</p>
         </header>
         <div class="card skills">
           {skills.map((s, i) => (
@@ -271,7 +273,6 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
             <p class="kicker">04</p>
             <h2 class="zone-title">Activity</h2>
           </div>
-          <p class="meta">live from GitHub</p>
         </header>
         <div class="activity-grid">
           <ContributionGrid />
@@ -357,6 +358,7 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
   @media (min-width: 1500px) { .pub-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   .pub { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
   .pub h3 { text-wrap: pretty; }
+  .pub-fig { display: block; width: 100%; height: auto; border-radius: 8px; margin-bottom: 4px; }
   .pub-venue { display: flex; align-items: center; gap: 8px; }
   .pub .card-text { flex: 1; }
 
@@ -366,7 +368,6 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
   .featured-title { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; text-wrap: balance; }
   .featured .card-text { font-size: 1rem; max-width: 34rem; }
   .featured-fig { display: block; width: 100%; height: auto; border-radius: 8px; }
-  .featured-fig.framed { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--card-pad); }
   @media (min-width: 900px) {
     .featured { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
   }

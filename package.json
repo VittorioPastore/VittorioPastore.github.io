@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "figures": "sh figures/render.sh"
   },
   "dependencies": {
     "@astrojs/react": "^3.0.9",

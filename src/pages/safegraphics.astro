@@ -2,7 +2,7 @@
 // src/pages/safegraphics.astro — Minimalistic safe graphics version of the homepage
 import '../styles/tokens.css';
 const skills = [
-  { name: 'Python', projects: ['humanoid-on-a-macbook', 'bones-seed-in-92-bytes', 'neural-trader', 'squeaky-greyhound'] },
+  { name: 'Python', projects: ['humanoid-on-a-macbook', 'bones-seed-on-a-5070', 'neural-trader', 'squeaky-greyhound'] },
   { name: 'PyTorch', projects: ['neural-trader'] },
   { name: 'TensorFlow', projects: ['neural-trader'] },
   { name: 'ROS', projects: ['squeaky-greyhound'] },
@@ -19,11 +19,11 @@ const projects = {
     skills: ['Python', 'MLX', 'MuJoCo', 'Reinforcement Learning'],
     href: '/humanoid-on-a-macbook'
   },
-  'bones-seed-in-92-bytes': {
-    title: '131 Hours of Motion in 92 Bytes a Frame',
-    description: 'A 131-hour humanoid motion library stored as root pose, quaternion and int16 joint angles, so it trains on one 12 GB GPU.',
+  'bones-seed-on-a-5070': {
+    title: '131 Hours of Motion on an RTX 5070',
+    description: 'The full 131-hour BONES-SEED motion library, trained on with one RTX 5070: a mid-range consumer GPU with 12 GB of memory, where the same run used to need 40 GB.',
     skills: ['Python', 'JAX', 'MuJoCo', 'Reinforcement Learning'],
-    href: '/bones-seed-in-92-bytes'
+    href: '/bones-seed-on-a-5070'
   },
   'mailclient': {
     title: 'Prysm Mail',
@@ -65,20 +65,13 @@ const projects = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="paper-dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Vittorio Pastore - Portfolio (Safe Graphics)</title>
     <meta name="description" content="Vittorio Pastore's personal website — safe graphics mode" />
-    <script is:inline>
-      try {
-        var saved = localStorage.getItem('paper-theme');
-        var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.classList.toggle('dark-mode', dark);
-      } catch (e) {}
-    </script>
   </head>
   <body>
     <header>
@@ -127,7 +120,7 @@ const projects = {
       <section id="projects">
         <h2>## Featured Projects</h2>
         <div class="project-list">
-          {Object.entries(projects).filter(([id]) => `./${id}.astro` in import.meta.glob('./*.astro')).map(([id, project]) => (
+          {Object.entries(projects).filter(([id]) => `./${id}.astro` in import.meta.glob('./*.astro', { query: '?raw' })).map(([id, project]) => (
             <div class="project-card" id={`project-${id}`} data-skills={project.skills.join(',')}>
               <h3>
                 <a href={project.href}>→ {project.title}</a>

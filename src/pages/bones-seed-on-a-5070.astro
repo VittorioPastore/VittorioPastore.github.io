@@ -1,16 +1,15 @@
 ---
-// src/pages/bones-seed-in-92-bytes.astro
+// src/pages/bones-seed-on-a-5070.astro
 import Layout from '../layouts/Layout.astro';
 import ByteMap from '../components/ByteMap.astro';
-import MemoryChart from '../components/MemoryChart.astro';
-const title = '131 hours of motion in 92 bytes a frame';
+const title = '131 hours of motion on an RTX 5070';
 const publishDate = 'November 13, 2026';
 
 const stats = [
-  { value: '92 B', label: 'per frame, down from 1.35 kB' },
+  { value: '12 GB', label: 'RTX 5070, a mid-range consumer GPU' },
   { value: '131 h', label: 'of motion, 23.6 M frames' },
-  { value: '2.18 GB', label: 'for the whole library' },
-  { value: '12 GB', label: 'GPU it trains on' },
+  { value: '10.6 GB', label: 'in use while training, down from 40.3' },
+  { value: '92 B', label: 'per frame of motion, down from 1.35 kB' },
 ];
 
 const errors = [
@@ -36,17 +35,17 @@ const velCode = `def vel(self, f):
     v = (self.root_p[fp] - self.root_p[fm]) / dt
     ...`;
 ---
-<Layout title={`${title} - Project`} active="projects" description="Storing a 131-hour humanoid motion library in 92 bytes per frame so it trains on one 12 GB GPU.">
+<Layout title={`${title} - Project`} active="projects" description="Training a humanoid motion tracker on the full 131-hour BONES-SEED library with one RTX 5070, a mid-range consumer GPU with 12 GB of memory.">
   <main class="page">
     <article class="wrap post">
       <header class="page-head">
         <div>
-          <p class="kicker"><a href="/#projects">Projects</a> / bones-seed-in-92-bytes</p>
+          <p class="kicker"><a href="/#projects">Projects</a> / bones-seed-on-a-5070</p>
           <h1 class="page-title">{title}</h1>
           <p class="page-caption">
-            The whole feasible BONES-SEED motion set fits on an RTX 5070 next to the trainer that learns from it. The
-            trick is to drop everything that can be recomputed and to store what is left as a root pose, a quaternion
-            and int16 joint angles.
+            XMimic now trains on the whole feasible BONES-SEED motion set with one RTX 5070, a mid-range consumer
+            GPU with 12 GB of memory. The same run used to need 40 GB. Nearly all of the difference was the motion
+            library, which went from 32 GB to 2.2 GB.
           </p>
         </div>
         <div class="page-meta meta">
@@ -58,8 +57,8 @@ const velCode = `def vel(self, f):
 
       <div class="zone lead-zone">
         <figure class="fig">
-          <div class="fig-frame pad grow chart paper-light">
-            <MemoryChart />
+          <div class="fig-frame grow chart paper-light">
+            <img width="1984" height="1264" src="/bones-seed-gpu-memory.png" alt="GPU memory before: 40.3 GB, of which the motion library is 31.9 GB. After: 10.6 GB, of which the motion library is 2.2 GB, which fits under the 12 GB of the RTX 5070" />
           </div>
           <figcaption>
             GPU memory with the motion library on the card, before and after. "Training" is the trainer's own state
@@ -79,7 +78,7 @@ const velCode = `def vel(self, f):
       <section class="post-sec">
         <header class="post-sec-head">
           <p class="kicker">01</p>
-          <h2>The data is bigger than the GPU</h2>
+          <h2>A 12 GB card and 131 hours of motion</h2>
         </header>
         <div class="prose">
           <p>
@@ -95,8 +94,17 @@ const velCode = `def vel(self, f):
             rate.
           </p>
           <p>
-            The library stored 1.35 kB for each of those frames, which comes to about 32 GB. The GPU I had was an
-            RTX 5070 with 12 GB.
+            The GPU I have is an RTX 5070: a mid-range consumer card with 12 GB of memory. I wanted the whole set to
+            train on it.
+          </p>
+          <p>
+            The trainer holds 4.7 GB of its own state and the compiled program needs another 3.7 GB of temporaries,
+            which leaves 3.6 GB of the card for motion data. The library stored 1.35 kB for each frame, about 32 GB
+            in all. Together that is 40.3 GB, more than the 32 GB of an RTX 5090 at the top of the same lineup, so
+            the run belonged on a 48 GB workstation or datacenter card.
+          </p>
+          <p>
+            The rest of this post is how 32 GB of reference motion got into those 3.6 GB.
           </p>
         </div>
       </section>
@@ -139,8 +147,8 @@ const velCode = `def vel(self, f):
         </header>
         <div class="prose">
           <p>
-            4.26 GB was still about 0.7 GB too much once the trainer's own memory was counted. The remaining bytes
-            went in four places:
+            4.26 GB is still about 0.7 GB more than the 3.6 GB the card has free. The remaining bytes went in four
+            places:
           </p>
           <ul>
             <li><strong>Root rotation</strong> as a float32 quaternion instead of a 3×3 matrix: 16 bytes instead of 36.</li>
@@ -183,17 +191,18 @@ const velCode = `def vel(self, f):
       <section class="post-sec">
         <header class="post-sec-head">
           <p class="kicker">04</p>
-          <h2>Does it fit?</h2>
+          <h2>Training on the 5070</h2>
         </header>
         <div class="prose">
           <p>
-            Next to the library, the trainer holds 4.7 GB of its own state and the compiled program needs another
-            3.7 GB of temporaries. On a 12 GB card that leaves 3.6 GB for motion data.
+            With everything precomputed the run needed 40.3 GB. Dropping the recomputable fields brought it to
+            12.7 GB, within reach of the card but still over, and the quaternion and the int16 angles got it under
+            the line at 10.6 GB: 2.2 GB of motion next to the trainer's 8.4 GB, with 1.4 GB of the card to spare.
           </p>
           <p>
-            With everything precomputed the total would have been 40.3 GB. Dropping the recomputable fields brought
-            it to 12.7 GB, within reach but still over, and the quaternion and the int16 angles got it under the line
-            at 10.6 GB. With that, XMimic trains on all 131 hours on the one RTX 5070, and I left it running overnight.
+            With that, XMimic trains on all 131 hours on the one RTX 5070, and I left it running overnight. What the
+            policy learns from is the same as before: the reward and observation code read the same fields, to within
+            the differences in the table above.
           </p>
         </div>
       </section>
@@ -241,7 +250,7 @@ const velCode = `def vel(self, f):
         </header>
         <div class="prose">
           <ul>
-            <li>This post is about fitting the data. It makes no claim about how well the policy tracks all 131 hours.</li>
+            <li>This post is about getting the training run onto the card. It makes no claim about how well the policy tracks all 131 hours.</li>
             <li>Deriving velocities and body poses on demand costs compute on every lookup. I have not measured how much it slows an iteration.</li>
             <li>Joint angles beyond ±3.2 rad would be clipped. The loader counts them and warns.</li>
             <li>The error figures compare the compact library with the float32 one, not with the original motion capture.</li>
