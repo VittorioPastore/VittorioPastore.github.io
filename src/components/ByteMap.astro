@@ -1,0 +1,73 @@
+---
+// ByteMap.astro — one frame of the motion library before and after compaction, drawn to scale, with a key.
+// Used in the BONES-SEED post and on its card on the home page.
+const fields = [
+  { bytes: 58, name: 'Joint angles', type: '29 × int16', shade: 'var(--ink)' },
+  { bytes: 16, name: 'Root rotation', type: 'quaternion, 4 × float32', shade: 'var(--muted)' },
+  { bytes: 12, name: 'Root position', type: '3 × float32', shade: 'var(--faint)' },
+  { bytes: 4, name: 'Reset bin', type: 'int32', shade: 'var(--line-strong)' },
+  { bytes: 2, name: 'Foot contacts', type: '2 × uint8', shade: 'var(--line)' },
+];
+---
+
+<div class="bm">
+  <div class="bm-row">
+    <p class="kicker">Before · 1.35 kB per frame</p>
+    <div class="bm-bar">
+      <span class="keep" style="flex: 180"></span>
+      <span class="drop" style="flex: 1170"><i>recomputable</i></span>
+    </div>
+  </div>
+  <div class="bm-row">
+    <p class="kicker">After · 92 bytes per frame, same scale</p>
+    <div class="bm-bar">
+      <span class="keep" style="flex: 92"></span>
+      <span class="gone" style="flex: 1258"></span>
+    </div>
+  </div>
+  <div class="bm-row">
+    <p class="kicker">The 92 bytes</p>
+    <div class="bm-bar tall">
+      {fields.map(f => <span style={`flex: ${f.bytes}; background: ${f.shade}`}></span>)}
+    </div>
+    <div class="bm-key">
+      {fields.map(f => (
+        <>
+          <i style={`background: ${f.shade}`}></i>
+          <b>{f.bytes}</b>
+          <span>{f.name}</span>
+          <span class="meta">{f.type}</span>
+        </>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .bm { display: grid; gap: clamp(14px, 1.8vw, 26px); align-content: center; width: 100%; min-width: 0; }
+  .bm-row { display: grid; gap: 8px; min-width: 0; }
+  .bm-bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; }
+  .bm-bar.tall { height: 40px; gap: 2px; border-radius: 8px; }
+  .bm-bar span { display: flex; align-items: center; justify-content: center; min-width: 0; }
+  .keep { background: var(--ink); }
+  .drop {
+    background: repeating-linear-gradient(135deg, var(--zone) 0 6px, var(--zone-2) 6px 12px);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .drop i { font: 400 0.66rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .gone { box-shadow: inset 0 0 0 1px var(--line); border-radius: 0 6px 6px 0; }
+
+  /* The key is a small table: swatch, bytes, field, type, each in its own column so every row lines up. */
+  .bm-key {
+    display: grid;
+    grid-template-columns: 10px max-content max-content minmax(0, 1fr);
+    gap: 7px 12px;
+    align-items: center;
+    margin-top: 6px;
+    font-size: 0.88rem;
+    line-height: 1.3;
+  }
+  .bm-key i { width: 10px; height: 10px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--line-strong); }
+  .bm-key b { font: 500 0.8rem var(--mono); text-align: right; }
+  .bm-key .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>

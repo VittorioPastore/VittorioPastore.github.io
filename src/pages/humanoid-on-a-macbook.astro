@@ -1,0 +1,293 @@
+---
+// src/pages/humanoid-on-a-macbook.astro
+import Layout from '../layouts/Layout.astro';
+const title = "Training a humanoid on a MacBook";
+const publishDate = "November 13, 2026";
+
+const stats = [
+  { value: '79 min', label: 'to track all 40 clips' },
+  { value: '1,024', label: 'simulated robots' },
+  { value: '2.6 GB', label: 'of memory' },
+  { value: '0', label: 'NVIDIA GPUs' },
+];
+
+const results = [
+  { it: '1,000', min: 24, ret: '0.624', failed: 14 },
+  { it: '2,000', min: 52, ret: '0.732', failed: 8 },
+  { it: '3,000', min: 79, ret: '0.824', failed: 0 },
+  { it: '4,000', min: 102, ret: '0.832', failed: 0 },
+  { it: '4,500', min: 112, ret: '0.834', failed: 0 },
+];
+
+const mm3Code = `# slow on Metal: a broadcast product summed over an inner axis
+def mm3(A, B):
+    return (A[..., :, :, None] * B[..., None, :, :]).sum(-2)
+
+# 10-20x faster: three column-row products, fused into one kernel
+def mm3(A, B):
+    return (A[..., :, 0:1] * B[..., 0:1, :]
+          + A[..., :, 1:2] * B[..., 1:2, :]
+          + A[..., :, 2:3] * B[..., 2:3, :])`;
+
+const eluCode = `# mlx.nn.elu
+mx.where(x > 0, x, mx.exp(x) - 1)        # gradient is NaN for x > 88
+
+# what the trainer uses now
+mx.where(x > 0, x, mx.expm1(mx.where(x > 0, 0.0, x)))`;
+---
+<Layout title={`${title} - Project`} active="projects" description="Porting a world-model humanoid motion tracker from NVIDIA GPUs to Apple's MLX and training it on one M1 Pro MacBook in 79 minutes.">
+  <main class="page">
+    <article class="wrap post">
+      <header class="page-head">
+        <div>
+          <p class="kicker"><a href="/#projects">Projects</a> / humanoid-on-a-macbook</p>
+          <h1 class="page-title">{title}</h1>
+          <p class="page-caption">
+            I ported a world-model motion tracker from a rack of NVIDIA GPUs to Apple's MLX. One M1 Pro with 16 GB now
+            teaches a simulated Unitree G1 to walk, run, dance, fight and get up off the floor in 79 minutes.
+          </p>
+        </div>
+        <div class="page-meta meta">
+          <span>{publishDate}</span>
+          <span>6 min read</span>
+          <span>Python · MLX · MuJoCo · RL</span>
+        </div>
+      </header>
+
+      <div class="zone lead-zone">
+        <figure class="fig">
+          <div class="fig-frame">
+            <video autoplay loop muted playsinline controls poster="/mlx-humanoid-rollouts.jpg" width="1280" height="960">
+              <source src="/mlx-humanoid-rollouts.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <figcaption>
+            One policy, four of the 40 clips it tracks. Grey is the simulated G1 driven by the policy; amber is the
+            reference motion it is asked to follow.
+          </figcaption>
+        </figure>
+        <div class="stats">
+          {stats.map(s => (
+            <div class="card stat">
+              <span class="stat-value">{s.value}</span>
+              <span class="kicker">{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">01</p>
+          <h2>Why this should not work</h2>
+        </header>
+        <div class="prose">
+        <p>
+          Whole-body control for humanoids is usually a data-center job. The standard recipe is model-free
+          reinforcement learning over thousands of GPU-simulated robots, and the
+          <a href="https://arxiv.org/abs/2610.28480">SuperMimic</a> paper puts a number on it: its baseline trains for
+          7 days on 128 GPUs.
+        </p>
+        <p>
+          SuperMimic's own answer is a different algorithm. Learn a differentiable world model of the robot from
+          simulator data, then improve the policy by backpropagating through short rollouts imagined inside that
+          model. The paper reports beating the 128-GPU baseline in about 3 hours on a single GPU.
+          <a href="https://nico-bohlinger.github.io/papers/2026_xmimic_xsoma.pdf">XMimic</a>, by Nico Bohlinger and
+          Jan Peters, rebuilt that recipe in JAX and tracks the 40 LAFAN1 clips in under a minute on four H100s.
+        </p>
+        <p>
+          All of it assumes CUDA. The simulator is MuJoCo Warp, the learner leans on bf16 tensor cores, and whole
+          training iterations are compiled into single GPU programs. A MacBook has none of that. What it does have is
+          eight CPU cores, a GPU that shares memory with them, and MLX.
+        </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">02</p>
+          <h2>Why it works anyway</h2>
+        </header>
+        <div class="prose">
+        <p>
+          The method is sample-efficient, and that changes where the compute goes. Each training iteration needs only
+          about 2,500 new simulated steps, because the policy learns mostly from imagination: 512 rollouts of 32 steps
+          through the world model, differentiated end to end. So the physics can be slow and the learning has to be
+          fast, which is exactly the shape of a laptop.
+        </p>
+        <ul>
+          <li>
+            <strong>CPU, physics.</strong> MuJoCo's plain C engine steps 1,024 robots in a pool of eight threads, about
+            22,000 control steps per second. Every robot keeps its own friction and center-of-mass randomization.
+          </li>
+          <li>
+            <strong>GPU, learning.</strong> The world model, the policy, the critic, the rewards and the forward
+            kinematics all run in MLX. The replay buffer is a numpy array, which costs nothing to hand over because
+            host and GPU share memory.
+          </li>
+        </ul>
+        <figure class="fig">
+          <div class="fig-frame"><img width="2808" height="1853" loading="lazy" src="/mlx-humanoid-figure.webp" alt="1,024 simulated G1 robots standing on a MacBook whose display shows the training curve; a running robot with its next 32 imagined steps; the policy next to its reference; and a strip comparing 128 GPUs for 7 days, 1 GPU for 3 hours and 1 MacBook for 79 minutes" /></div>
+          <figcaption>
+            The loop: the CPU simulates, the GPU imagines and backpropagates, the new policy goes back to the
+            simulator. The curve on the laptop's display is this run's own reward. The first two entries of the bottom
+            strip are the SuperMimic paper's numbers for its large benchmark; mine is for 40 clips.
+          </figcaption>
+        </figure>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">03</p>
+          <h2>Same algorithm, checked to six digits</h2>
+        </header>
+        <div class="prose">
+        <p>
+          A port that "seems to train" is worth little, so before the first real run I wrote a test that feeds the
+          same inputs to the original JAX code and to the MLX port and compares the outputs: rotations, kinematics,
+          motion features, rewards, networks, optimizers, and finally the gradients themselves.
+        </p>
+        <p>
+          All <strong>351 checks</strong> pass. The gradient of the policy loss through 32 imagined steps agrees with
+          JAX to a relative error of <strong>2e-6</strong>, in float32 on both sides.
+        </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">04</p>
+          <h2>What broke on the way</h2>
+        </header>
+        <div class="prose">
+
+        <h3>Metal hates small matrices</h3>
+        <p>
+          The first working version took 2.5 seconds per iteration, and the big matrix multiplies were not the
+          problem. The 3x3 rotation products were. Thousands of them run in the kinematics and the reward, and both
+          obvious ways to write one are slow on Apple's GPU: a batched matmul of tiny matrices, and a broadcast
+          product summed over an inner axis.
+        </p>
+        <pre class="code"><code>{mm3Code}</code></pre>
+        <p>
+          Automatic differentiation then puts the slow reductions back into the backward pass, so the products also
+          got hand-written gradients, which are products of the same kind. Together with precomputing the reference
+          motion's kinematics once, forward kinematics with gradients for 16,000 robot poses dropped to 18 ms and an
+          iteration to about 1.3 seconds.
+        </p>
+
+        <h3>Two compiler bugs</h3>
+        <p>
+          <code>mx.compile</code> is what makes those formulations fast, and it failed twice. Splitting the same
+          intermediate array twice crashes it with a missing-key error, so the rotation code uses slices instead.
+          Then the fused gradient kernels grew past Metal's limit on kernel arguments, which a no-op
+          <code>mx.contiguous</code> on each custom gradient fixes by acting as a fusion barrier.
+        </p>
+
+        <h3>The NaN at iteration 620</h3>
+        <p>
+          The first long run looked healthy for 16 minutes. Then every policy update started getting skipped as
+          non-finite, and the policy silently stopped improving. The loss was finite. Only its gradient was NaN.
+        </p>
+        <pre class="code"><code>{eluCode}</code></pre>
+        <p>
+          MLX's built-in ELU evaluates <code>exp(x)</code> on the branch it does not select. For a pre-activation
+          above 88 that overflows in float32, and a zero cotangent times infinity is NaN. One imagined rollout with a
+          large activation was enough to poison the critic for good. JAX's ELU guards against this; the port now does
+          too.
+        </p>
+
+        <h3>16 GB is not much</h3>
+        <p>
+          MLX keeps freed GPU buffers in a cache whose default limit is nearly all of the machine's memory. The
+          trainer grew to 7.5 GB, I started a second process next to it, and the laptop went into swap and stopped
+          making progress. Capping the cache at 1 GB and giving each physics thread a copy of the robot with its
+          meshes reduced to convex hulls (15 MB instead of 75 MB, same contact dynamics) brought the footprint to
+          2.6 GB at the same speed.
+        </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">05</p>
+          <h2>Results</h2>
+        </header>
+        <div class="prose">
+        <p>
+          The run trained for two hours on the 40 G1-retargeted LAFAN1 clips, about 2.4 hours of motion. Each
+          checkpoint is scored by playing every clip from its first frame without noise; a clip fails if the robot
+          strays too far from the reference in height or tilt.
+        </p>
+        <div class="card table-wrap">
+          <table>
+            <thead>
+              <tr><th>Iteration</th><th>Training (min)</th><th>Normalized return</th><th>Failed clips</th></tr>
+            </thead>
+            <tbody>
+              {results.map(r => (
+                <tr class={r.failed === 0 && r.min === 79 ? 'hit' : ''}>
+                  <td>{r.it}</td><td>{r.min}</td><td>{r.ret}</td><td>{r.failed} / 40</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          The target used for the H100 runs is a return of at least 0.82 with no failed clip, held for three
+          checkpoints. The MacBook gets there at iteration 3,000, after 79 minutes. The hardest clips are the
+          fall-and-get-up sequences: a first run that I stopped at 37 minutes failed all six of them, and the full run
+          completes them.
+        </p>
+        <p>The honest fine print:</p>
+        <ul>
+          <li>An H100 reaches the same target in about 2.5 minutes. The laptop is roughly 30 times slower, at a quarter of the batch sizes.</li>
+          <li>The policy tracks body pose closely (4 to 7 degrees of mean joint error) but its position in the world drifts 0.1 to 0.7 m from the reference over 12 seconds.</li>
+          <li>My checkpoints are 250 iterations apart and each clip is evaluated in one deterministic world, a coarser protocol than the published one.</li>
+          <li>The SuperMimic numbers I quote are from the paper's abstract and are for a far larger motion benchmark than these 40 clips.</li>
+          <li>This is simulation only. Nothing here has touched a real robot.</li>
+        </ul>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">06</p>
+          <h2>Why I care</h2>
+        </header>
+        <div class="prose">
+        <p>
+          Not because a laptop should replace a cluster. It is because the loop of changing something and seeing a
+          humanoid move differently now fits on the machine I already carry around, with no queue and no cloud bill.
+          An algorithm that needs a thousand times less compute stops being a data-center experiment and becomes
+          something you can iterate on from a couch.
+        </p>
+        <p>
+          I did the port in one long pairing session with Claude Code, which wrote most of the code while I steered,
+          and the equivalence test is what let me trust the result.
+        </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">07</p>
+          <h2>Credits</h2>
+        </header>
+        <div class="prose credits">
+        <p>
+          The method is <a href="https://arxiv.org/abs/2610.28480">SuperMimic</a> (Liao et al.). The trainer I ported
+          is <a href="https://nico-bohlinger.github.io/papers/2026_xmimic_xsoma.pdf">XMimic</a> by Nico Bohlinger and
+          Jan Peters, itself a JAX rebuild of <a href="https://github.com/fuyichen0725/blinkmimic">BlinkMimic</a> by
+          Fuyi Chen. Physics is <a href="https://mujoco.org">MuJoCo</a>, the learner is
+          <a href="https://github.com/ml-explore/mlx">MLX</a>, the robot is the Unitree G1. The motions are LAFAN1 by
+          Ubisoft La Forge (CC BY-NC-ND 4.0), so the trained policy is for non-commercial use only. The laptop in the
+          figure is a model from the pmndrs examples repository.
+        </p>
+        </div>
+      </section>
+    </article>
+  </main>
+</Layout>
+

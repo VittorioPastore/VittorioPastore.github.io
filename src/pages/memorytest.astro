@@ -4,7 +4,7 @@ import '../styles/tokens.css';
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="memtest">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -87,17 +87,16 @@ import '../styles/tokens.css';
       </footer>
     </div>
 
-    <style is:global>
-      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-      html {
+    <style is:global>html.memtest *, html.memtest *::before, html.memtest *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      html.memtest {
         background: var(--paper);
         color: var(--ink-2);
         font-family: var(--mono);
         font-size: 15px;
         line-height: 1.45;
       }
-      body { min-height: 100vh; min-height: 100svh; display: flex; justify-content: center; }
-      #app {
+      html.memtest body { min-height: 100vh; min-height: 100svh; display: flex; justify-content: center; }
+      html.memtest #app {
         width: min(100% - 2 * var(--gutter), 1100px);
         padding: var(--gap) 0;
         display: flex;
@@ -106,11 +105,11 @@ import '../styles/tokens.css';
         min-height: 100vh;
         min-height: 100svh;
       }
-      a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
-      a:hover { text-decoration-color: var(--ink); }
+      html.memtest a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+      html.memtest a:hover { text-decoration-color: var(--ink); }
 
       /* Header */
-      header {
+      html.memtest header {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -122,12 +121,12 @@ import '../styles/tokens.css';
         padding: 0.7rem 1rem;
         font-size: 0.85rem;
       }
-      .header-left, .header-right { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-      .sep { color: var(--line-strong); }
-      .brand { color: var(--ink); font-weight: 500; }
+      html.memtest .header-left, html.memtest .header-right { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+      html.memtest .sep { color: var(--line-strong); }
+      html.memtest .brand { color: var(--ink); font-weight: 500; }
 
       /* Stats bar */
-      #stats-bar {
+      html.memtest #stats-bar {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem 1.5rem;
@@ -136,11 +135,11 @@ import '../styles/tokens.css';
         padding: 0.6rem 1rem;
         font-size: 0.85rem;
       }
-      .stat { display: flex; align-items: center; gap: 0.4rem; }
-      .stat-label { color: var(--muted); }
-      .stat-val { color: var(--ink); font-weight: 500; }
-      .progress-stat { flex: 1; min-width: 180px; }
-      .progress-bar {
+      html.memtest .stat { display: flex; align-items: center; gap: 0.4rem; }
+      html.memtest .stat-label { color: var(--muted); }
+      html.memtest .stat-val { color: var(--ink); font-weight: 500; }
+      html.memtest .progress-stat { flex: 1; min-width: 180px; }
+      html.memtest .progress-bar {
         flex: 1;
         max-width: 220px;
         height: 8px;
@@ -148,12 +147,12 @@ import '../styles/tokens.css';
         border-radius: 999px;
         overflow: hidden;
       }
-      .progress-fill { height: 100%; width: 0%; background: var(--green); border-radius: 999px; transition: width 0.3s; }
+      html.memtest .progress-fill { height: 100%; width: 0%; background: var(--green); border-radius: 999px; transition: width 0.3s; }
 
       /* Difficulty */
-      #difficulty-select { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; }
-      .diff-label { color: var(--muted); margin-right: 0.3rem; }
-      .diff-btn {
+      html.memtest #difficulty-select { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; }
+      html.memtest .diff-label { color: var(--muted); margin-right: 0.3rem; }
+      html.memtest .diff-btn {
         background: var(--card);
         color: var(--ink-2);
         border: 1px solid var(--line);
@@ -163,11 +162,11 @@ import '../styles/tokens.css';
         font-size: 0.85rem;
         cursor: pointer;
       }
-      .diff-btn:hover { border-color: var(--ink); color: var(--ink); }
-      .diff-btn.active { background: var(--pill-bg); color: var(--pill-fg); border-color: var(--pill-bg); }
+      html.memtest .diff-btn:hover { border-color: var(--ink); color: var(--ink); }
+      html.memtest .diff-btn.active { background: var(--pill-bg); color: var(--pill-fg); border-color: var(--pill-bg); }
 
       /* Game grid: sized to fit the screen in either orientation */
-      #game-grid {
+      html.memtest #game-grid {
         display: grid;
         gap: clamp(5px, 1vmin, 10px);
         justify-content: center;
@@ -176,11 +175,11 @@ import '../styles/tokens.css';
         width: 100%;
         flex: 1;
       }
-      .grid-4 { grid-template-columns: repeat(4, 1fr); max-width: min(100%, 62vh, 620px); }
-      .grid-6 { grid-template-columns: repeat(6, 1fr); max-width: min(100%, 92vh, 900px); }
+      html.memtest .grid-4 { grid-template-columns: repeat(4, 1fr); max-width: min(100%, 62vh, 620px); }
+      html.memtest .grid-6 { grid-template-columns: repeat(6, 1fr); max-width: min(100%, 92vh, 900px); }
 
       /* Cards */
-      .card {
+      html.memtest .card {
         aspect-ratio: 1;
         border: 1px solid var(--line);
         border-radius: var(--r-card);
@@ -195,18 +194,18 @@ import '../styles/tokens.css';
         transition: background 0.15s, border-color 0.15s;
         position: relative;
       }
-      .card::before { content: '?'; color: var(--faint); font-size: clamp(1.1rem, 3.6vmin, 1.8rem); }
-      .card.flipped, .card.matched { background: var(--card); border-color: var(--ink); }
-      .card.flipped::before, .card.matched::before { display: none; }
-      .card .card-face { display: none; }
-      .card.flipped .card-face, .card.matched .card-face { display: block; }
-      .card.matched { border-color: var(--green); }
-      .card.matched .card-face { opacity: 0.65; }
-      .card.wrong { border-color: var(--danger); }
-      .card:hover:not(.flipped):not(.matched) { border-color: var(--line-strong); background: var(--zone-2); }
+      html.memtest .card::before { content: '?'; color: var(--faint); font-size: clamp(1.1rem, 3.6vmin, 1.8rem); }
+      html.memtest .card.flipped, html.memtest .card.matched { background: var(--card); border-color: var(--ink); }
+      html.memtest .card.flipped::before, html.memtest .card.matched::before { display: none; }
+      html.memtest .card .card-face { display: none; }
+      html.memtest .card.flipped .card-face, html.memtest .card.matched .card-face { display: block; }
+      html.memtest .card.matched { border-color: var(--green); }
+      html.memtest .card.matched .card-face { opacity: 0.65; }
+      html.memtest .card.wrong { border-color: var(--danger); }
+      html.memtest .card:hover:not(.flipped):not(.matched) { border-color: var(--line-strong); background: var(--zone-2); }
 
       /* Win screen */
-      #win-screen {
+      html.memtest #win-screen {
         text-align: center;
         padding: 2rem 1rem;
         flex: 1;
@@ -215,7 +214,7 @@ import '../styles/tokens.css';
         align-items: center;
         justify-content: center;
       }
-      #win-ascii {
+      html.memtest #win-ascii {
         color: var(--ink);
         font-family: ui-monospace, Menlo, Consolas, monospace;
         font-size: clamp(8px, 2vw, 15px);
@@ -223,9 +222,9 @@ import '../styles/tokens.css';
         margin-bottom: 1.5rem;
         text-align: left;
       }
-      #win-stats { color: var(--ink); font-size: 0.95rem; margin-bottom: 1.5rem; }
-      .win-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
-      .action-btn {
+      html.memtest #win-stats { color: var(--ink); font-size: 0.95rem; margin-bottom: 1.5rem; }
+      html.memtest .win-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+      html.memtest .action-btn {
         color: var(--ink);
         border: 1px solid var(--line-strong);
         border-radius: 999px;
@@ -237,10 +236,10 @@ import '../styles/tokens.css';
         text-decoration: none;
         display: inline-block;
       }
-      .action-btn:hover { border-color: var(--ink); }
+      html.memtest .action-btn:hover { border-color: var(--ink); }
 
       /* Footer */
-      footer {
+      html.memtest footer {
         display: flex;
         gap: 0.75rem;
         flex-wrap: wrap;
@@ -251,7 +250,7 @@ import '../styles/tokens.css';
         border-top: 1px solid var(--line);
         margin-top: auto;
       }
-      footer a { color: var(--muted); }
+      html.memtest footer a { color: var(--muted); }
     </style>
 
     <script>

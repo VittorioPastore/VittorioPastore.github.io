@@ -1,0 +1,274 @@
+---
+// src/pages/bones-seed-in-92-bytes.astro
+import Layout from '../layouts/Layout.astro';
+import ByteMap from '../components/ByteMap.astro';
+import MemoryChart from '../components/MemoryChart.astro';
+const title = '131 hours of motion in 92 bytes a frame';
+const publishDate = 'November 13, 2026';
+
+const stats = [
+  { value: '92 B', label: 'per frame, down from 1.35 kB' },
+  { value: '131 h', label: 'of motion, 23.6 M frames' },
+  { value: '2.18 GB', label: 'for the whole library' },
+  { value: '12 GB', label: 'GPU it trains on' },
+];
+
+const errors = [
+  { what: 'Joint angles', err: '4.9e-5 rad' },
+  { what: 'Body positions', err: '0.06 mm' },
+  { what: 'Goal features', err: '5e-5 relative' },
+  { what: 'Foot contact flags flipped', err: '0.004 %' },
+];
+
+const quantCode = `Q_MAX = 3.2  # rad: int16 fixed point over [-Q_MAX, Q_MAX], step 9.8e-5 rad
+
+# when the library is built
+q_i16 = np.round(np.clip(q, -Q_MAX, Q_MAX) * (32767 / Q_MAX)).astype(np.int16)
+
+# when a frame is read
+q = q_i16[f].astype(jnp.float32) * np.float32(Q_MAX / 32767)`;
+
+const velCode = `def vel(self, f):
+    c = self.clip_id[f]
+    fp = jnp.minimum(f + 1, self.clip_end[c])     # stay inside the clip
+    fm = jnp.maximum(f - 1, self.clip_start[c])
+    dt = (jnp.maximum(fp - fm, 1) * CONTROL_DT)[..., None]
+    v = (self.root_p[fp] - self.root_p[fm]) / dt
+    ...`;
+---
+<Layout title={`${title} - Project`} active="projects" description="Storing a 131-hour humanoid motion library in 92 bytes per frame so it trains on one 12 GB GPU.">
+  <main class="page">
+    <article class="wrap post">
+      <header class="page-head">
+        <div>
+          <p class="kicker"><a href="/#projects">Projects</a> / bones-seed-in-92-bytes</p>
+          <h1 class="page-title">{title}</h1>
+          <p class="page-caption">
+            The whole feasible BONES-SEED motion set fits on an RTX 5070 next to the trainer that learns from it. The
+            trick is to drop everything that can be recomputed and to store what is left as a root pose, a quaternion
+            and int16 joint angles.
+          </p>
+        </div>
+        <div class="page-meta meta">
+          <span>{publishDate}</span>
+          <span>4 min read</span>
+          <span>Python · JAX · MuJoCo · RL</span>
+        </div>
+      </header>
+
+      <div class="zone lead-zone">
+        <figure class="fig">
+          <div class="fig-frame pad grow chart paper-light">
+            <MemoryChart />
+          </div>
+          <figcaption>
+            GPU memory with the motion library on the card, before and after. "Training" is the trainer's own state
+            (4.7 GB) plus the compiled program's temporaries (3.7 GB), as measured with the compact library.
+          </figcaption>
+        </figure>
+        <div class="stats">
+          {stats.map(s => (
+            <div class="card stat">
+              <span class="stat-value">{s.value}</span>
+              <span class="kicker">{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">01</p>
+          <h2>The data is bigger than the GPU</h2>
+        </header>
+        <div class="prose">
+          <p>
+            <a href="https://nico-bohlinger.github.io/papers/2026_xmimic_xsoma.pdf">XMimic</a> trains a humanoid
+            motion tracker entirely on the GPU: the simulator, the replay buffer, the networks and the reference
+            motions all live in device memory, and whole training iterations are compiled into one program. That is
+            what makes it fast, and it means the motion library has to fit on the card too.
+          </p>
+          <p>
+            With the 40 LAFAN1 clips this is a non-issue. <a href="https://huggingface.co/datasets/bones-studio/seed">BONES-SEED</a>
+            is another scale. After dropping the clips that cannot be done on a flat, empty floor (more on that
+            below), 64,697 of its 67,036 clips remain: 131 hours of motion, 23.6 million frames at the 50 Hz control
+            rate.
+          </p>
+          <p>
+            The library stored 1.35 kB for each of those frames, which comes to about 32 GB. The GPU I had was an
+            RTX 5070 with 12 GB.
+          </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">02</p>
+          <h2>Keep only what cannot be recomputed</h2>
+        </header>
+        <div class="prose">
+          <p>
+            Most of those 1.35 kB were conveniences. For every frame the loader precomputed the root's linear and
+            angular velocity, the joint velocities, and the position, rotation and velocities of every tracked body.
+            All of it is a function of three things: where the root is, how it is rotated, and the 29 joint angles.
+          </p>
+          <p>
+            So the library now stores only those three, and the rest is computed at the moment a frame is indexed,
+            with the same formulas the loader used:
+          </p>
+          <ul>
+            <li><strong>Velocities</strong> are central differences of the neighbouring frames, one-sided at the two ends of a clip.</li>
+            <li><strong>Body poses and velocities</strong> come from forward kinematics on the stored root and joints.</li>
+          </ul>
+          <pre class="code"><code>{velCode}</code></pre>
+          <p>
+            The derived fields still index like arrays (<code>motion.body_p[f]</code>, <code>motion.qd[f]</code>), so
+            the reward and observation code did not change. Inside a compiled iteration the compiler merges the work
+            that several fields share at the same frames.
+          </p>
+          <p>
+            This alone takes a frame from 1.35 kB to about 180 bytes, and the library from 32 GB to 4.26 GB.
+          </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">03</p>
+          <h2>Then squeeze what is left</h2>
+        </header>
+        <div class="prose">
+          <p>
+            4.26 GB was still about 0.7 GB too much once the trainer's own memory was counted. The remaining bytes
+            went in four places:
+          </p>
+          <ul>
+            <li><strong>Root rotation</strong> as a float32 quaternion instead of a 3×3 matrix: 16 bytes instead of 36.</li>
+            <li><strong>Joint angles</strong> as int16 fixed point over ±3.2 rad: 58 bytes instead of 116, with a step of 9.8e-5 rad.</li>
+            <li><strong>Clip index</strong> not stored at all. Every frame already knows its one-second reset bin, and the bin knows its clip.</li>
+            <li><strong>Foot contacts</strong> as one byte per foot.</li>
+          </ul>
+          <figure class="fig">
+            <div class="fig-frame pad paper-light">
+              <ByteMap />
+            </div>
+            <figcaption>
+              One frame of reference motion, before and after. The hatched part held velocities and the poses and
+              velocities of the tracked bodies, all of which follow from the root and joint trajectories.
+            </figcaption>
+          </figure>
+          <pre class="code"><code>{quantCode}</code></pre>
+          <p>
+            That is 92 bytes a frame and 2.18 GB for the 131 hours. Compared against the float32 library on the same
+            frames, the largest differences are:
+          </p>
+          <div class="card table-wrap">
+            <table>
+              <thead>
+                <tr><th>Quantity</th><th>Largest difference</th></tr>
+              </thead>
+              <tbody>
+                {errors.map(e => (
+                  <tr><td>{e.what}</td><td>{e.err}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p>
+            A sixteenth of a millimetre in body position is far below anything a tracking reward can feel.
+          </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">04</p>
+          <h2>Does it fit?</h2>
+        </header>
+        <div class="prose">
+          <p>
+            Next to the library, the trainer holds 4.7 GB of its own state and the compiled program needs another
+            3.7 GB of temporaries. On a 12 GB card that leaves 3.6 GB for motion data.
+          </p>
+          <p>
+            With everything precomputed the total would have been 40.3 GB. Dropping the recomputable fields brought
+            it to 12.7 GB, within reach but still over, and the quaternion and the int16 angles got it under the line
+            at 10.6 GB. With that, XMimic trains on all 131 hours on the one RTX 5070, and I left it running overnight.
+          </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">05</p>
+          <h2>What else broke at this size</h2>
+        </header>
+        <div class="prose">
+          <h3>Clips that need furniture</h3>
+          <p>
+            A motion-capture set of this size is full of people sitting on chairs, climbing stairs and leaning on
+            railings. The simulator has a flat, empty floor, so a robot asked to follow those clips can only fall.
+            Clips whose description names a prop the body stands on, sits on or leans against are dropped; held or hit
+            props stay.
+          </p>
+          <p>
+            A second check works from the reference motion alone. It flags a clip when tracked bodies sink into the
+            floor, when the body floats, or when a nearly still pose has the pelvis outside the support of the limbs
+            on the ground, which means sitting on or leaning against something that is not there. Push-ups, planks,
+            crawling and get-ups pass. 64,697 of 67,036 clips survive.
+          </p>
+
+          <h3>Sampling where to start</h3>
+          <p>
+            Each simulated robot restarts from a random one-second bin of the library, weighted by how badly the
+            policy does there. The stock categorical sampler builds an array of random numbers with one entry per
+            robot and per bin. With roughly half a million bins that array was its own memory problem, so the bins
+            are now drawn by inverse-CDF sampling, which needs one number per robot.
+          </p>
+
+          <h3>Loading it at all</h3>
+          <p>
+            Parsing tens of thousands of CSV files and resampling them to 50 Hz takes a while, so files are parsed in
+            parallel processes and the resampled clips are cached next to the data.
+          </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">06</p>
+          <h2>Fine print</h2>
+        </header>
+        <div class="prose">
+          <ul>
+            <li>This post is about fitting the data. It makes no claim about how well the policy tracks all 131 hours.</li>
+            <li>Deriving velocities and body poses on demand costs compute on every lookup. I have not measured how much it slows an iteration.</li>
+            <li>Joint angles beyond ±3.2 rad would be clipped. The loader counts them and warns.</li>
+            <li>The error figures compare the compact library with the float32 one, not with the original motion capture.</li>
+            <li>"Fits" means 10.6 GB of the card's 12 GB, at the batch sizes of this run.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">07</p>
+          <h2>Credits</h2>
+        </header>
+        <div class="prose credits">
+          <p>
+            Motion Data by <a href="https://bones.studio">Bones Studio</a>. The trainer is
+            <a href="https://nico-bohlinger.github.io/papers/2026_xmimic_xsoma.pdf">XMimic</a> by Nico Bohlinger and Jan
+            Peters, a JAX rebuild of <a href="https://github.com/fuyichen0725/blinkmimic">BlinkMimic</a> by Fuyi Chen;
+            the method is <a href="https://arxiv.org/abs/2610.28480">SuperMimic</a> (Liao et al.). The robot is the
+            Unitree G1 and the physics is <a href="https://mujoco.org">MuJoCo</a>.
+          </p>
+        </div>
+      </section>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .chart { display: flex; align-items: center; }
+</style>
