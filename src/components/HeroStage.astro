@@ -35,10 +35,10 @@ const clips = [
     width: 100%;
     min-width: 0;
     aspect-ratio: 1 / 1;
-    max-height: min(62svh, 34rem);
+    max-height: min(66svh, 38rem);
   }
   @media (min-width: 640px) and (min-aspect-ratio: 5 / 4) {
-    .stage { aspect-ratio: 1.12 / 1; max-height: calc(100svh - var(--header-h) - 2 * var(--hero-pad)); }
+    .stage { aspect-ratio: 1 / 1; max-height: calc(100svh - var(--header-h) - 2 * var(--hero-pad)); }
   }
 
   /* The canvas edges are feathered, so the floor never ends in a visible rectangle. */
@@ -116,20 +116,23 @@ const clips = [
     pmrem.dispose();
 
     const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 60);
-    const target = new THREE.Vector3(0, 0.8, 0);
+    const target = new THREE.Vector3(0, 0.74, 0);
 
-    // Three-point lighting: a warm key spot from the front that casts the shadow, a strong cool rim from behind that
+    // Three-point lighting: a warm key from the front that casts the shadow, a strong cool rim from behind that
     // outlines the body, a warm kicker on the other side, and very little fill.
     const fill = new THREE.HemisphereLight(0xdfe8ff, 0x1c1d22, 0.3);
-    const key = new THREE.SpotLight(0xffe4c8, 5, 0, 0.44, 0.9, 0);
+    // A directional key: its shadow map covers the whole visible floor, so the map's edge never shows as a line.
+    const key = new THREE.DirectionalLight(0xffe4c8, 5);
     key.position.set(2.6, 4.4, 3.2);
     key.target.position.copy(target);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
-    key.shadow.camera.near = 1;
-    key.shadow.camera.far = 14;
-    key.shadow.bias = -0.0003;
-    key.shadow.radius = 7;
+    key.shadow.camera.left = key.shadow.camera.bottom = -5;
+    key.shadow.camera.right = key.shadow.camera.top = 5;
+    key.shadow.camera.near = 0.5;
+    key.shadow.camera.far = 16;
+    key.shadow.bias = -0.0005;
+    key.shadow.radius = 4;
     const rim = new THREE.DirectionalLight(0xa9c8ff, 3.5);
     rim.position.set(-3.2, 2.8, -3.4);
     const kicker = new THREE.DirectionalLight(0xffc48a, 1.2);
@@ -139,9 +142,10 @@ const clips = [
     // Floor: the shadow, a soft pool of light, and a hairline grid. Pool and grid fade out with distance from the
     // robot, so the floor dissolves into the page instead of ending at the canvas edge.
     const shadowMat = new THREE.ShadowMaterial({ opacity: 0.3, depthWrite: false });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), shadowMat);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), shadowMat);
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
+    floor.position.y = -0.02; // just under the soles, so a limb resting on the ground is never drawn over
     floor.renderOrder = -3; // floor layers draw first, in this order, and never hide one another
     scene.add(floor);
 
@@ -169,7 +173,6 @@ const clips = [
       new THREE.ShaderMaterial({
         transparent: true,
         depthWrite: false,
-        depthTest: false,
         vertexShader: fadeVertex,
         fragmentShader: fadeFragment,
         uniforms: { uColor: { value: new THREE.Color() }, uOpacity: { value: 1 }, uInner: { value: inner }, uOuter: { value: outer } },
@@ -178,6 +181,7 @@ const clips = [
     const poolMat = fading(0, 2.1);
     const pool = new THREE.Mesh(new THREE.CircleGeometry(2.2, 48), poolMat);
     pool.rotation.x = -Math.PI / 2;
+    pool.position.y = -0.02;
     pool.renderOrder = -2;
     scene.add(pool);
 
@@ -189,6 +193,7 @@ const clips = [
     gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
     const gridMat = fading(0.3, 3.2);
     const grid = new THREE.LineSegments(gridGeo, gridMat);
+    grid.position.y = -0.02;
     grid.renderOrder = -1;
     grid.frustumCulled = false;
     scene.add(grid);
@@ -235,7 +240,7 @@ const clips = [
       renderer.toneMappingExposure = dark ? 1.0 : 1.05;
       scene.environmentIntensity = dark ? 0.22 : 0.6;
       fill.intensity = dark ? 0.08 : 0.55;
-      key.intensity = dark ? 4.2 : 4.4;
+      key.intensity = dark ? 2.6 : 2.8;
       rim.intensity = dark ? 6.0 : 2.6;
       kicker.intensity = dark ? 2.0 : 0.8;
     };
@@ -327,9 +332,9 @@ const clips = [
       if (w === 0 || h === 0) return;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
-      // Far enough to keep about 2.05 m of height and 2.5 m of width in frame.
+      // Far enough to keep about 1.8 m of height and 2.2 m of width in frame.
       const t = Math.tan((camera.fov * Math.PI) / 360);
-      distance = Math.max(2.05 / (2 * t), 2.5 / (2 * t * camera.aspect));
+      distance = Math.max(1.8 / (2 * t), 2.2 / (2 * t * camera.aspect));
       camera.updateProjectionMatrix();
     };
     new ResizeObserver(resize).observe(stage);
