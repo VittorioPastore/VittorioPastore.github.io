@@ -13,7 +13,9 @@ import '../styles/tokens.css';
     <meta name="description" content="Memory card matching game — memtest86+ style" />
     <script is:inline>
       try {
-        if (localStorage.getItem('paper-theme') === 'dark') document.documentElement.classList.add('dark-mode');
+        var saved = localStorage.getItem('paper-theme');
+        var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark-mode', dark);
       } catch (e) {}
     </script>
   </head>

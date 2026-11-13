@@ -40,10 +40,12 @@ const year = new Date().getFullYear();
     <meta name="keywords" content="software engineer, full stack developer, AI, Reinforcement Learning, software development, portfolio" />
     <meta name="author" content="Vittorio Pastore" />
 
-    <!-- Paper is the default; dark only when the visitor chose it. Applied before first paint. -->
+    <!-- Theme: the visitor's saved choice, otherwise the system's. Applied before first paint. -->
     <script is:inline>
       try {
-        if (localStorage.getItem('paper-theme') === 'dark') document.documentElement.classList.add('dark-mode');
+        var saved = localStorage.getItem('paper-theme');
+        var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark-mode', dark);
       } catch (e) {}
     </script>
   </head>
@@ -117,6 +119,14 @@ const year = new Date().getFullYear();
         try {
           localStorage.setItem('paper-theme', dark ? 'dark' : 'light');
         } catch (e) {}
+      });
+      // Until the visitor picks a theme, follow the system when it changes.
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        let saved: string | null = null;
+        try {
+          saved = localStorage.getItem('paper-theme');
+        } catch (err) {}
+        if (!saved) html.classList.toggle('dark-mode', e.matches);
       });
 
       // Mobile menu
