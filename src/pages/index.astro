@@ -173,10 +173,10 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
 
     <div class="wrap stack">
       <!-- Work. Only what is already public: the role as on LinkedIn, and a video Foundation published itself. -->
-      <section id="work" class="zone">
-        <div class="card featured work">
+      <section id="work">
+        <div class="featured work">
           <div class="featured-text">
-            <p class="kicker">Now, since May 2026</p>
+            <p class="kicker">Since May 2026</p>
             <h2 class="featured-title">Member of Technical Staff at Foundation</h2>
             <p class="card-text">
               Working on whole-body control for humanoid robots, in San Francisco.
@@ -196,7 +196,6 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
                 <span class="btn primary">Play</span>
               </a>
             </div>
-            <figcaption>“How We Train Humanoid Robots”, a video from Foundation. I am in it.</figcaption>
           </figure>
         </div>
       </section>
@@ -440,9 +439,11 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
   .zone-head > div { width: 100%; }
 
   /* ── Work: one card, the role beside the company's video ── */
-  .featured.work { margin-bottom: 0; } /* the only card in its zone: the same gap on every side */
+  /* No zone and no card: the role and the video sit on the bare page, as the tail of the hero, inset like a zone's content. */
+  #work { padding: 0 var(--zone-pad) var(--zone-pad); }
+  .featured.work { margin-bottom: 0; }
   .work .fig { align-self: center; }
-  .work .fig-frame { border: 0; } /* the poster is paper on paper: no frame around it */
+  .work .fig-frame { border: 0; background: none; } /* the poster is paper on paper: no frame around it */
   /* The frame is white type on black; inverted and multiplied onto the card it is ink on paper, as the hero is. */
   .poster { position: relative; display: block; height: 100%; }
   .poster img { width: 100%; height: 100%; object-fit: cover; filter: invert(1) grayscale(1) contrast(1.2); mix-blend-mode: multiply; }
@@ -468,6 +469,9 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
   .featured-fig { display: block; width: 100%; height: auto; border-radius: 8px; }
   @media (min-width: 900px) {
     .featured { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+    /* The poster's art sits low in its frame (the top fifth is blank, the Play pill is at the bottom), so the text
+       is pushed down to center on the art, not on the frame. */
+    .work .featured-text { padding-top: 17%; }
   }
   /* One to four columns. The first card spans --s2 / --s3 / --s4 columns (set from the number of cards) so no
      row is left with a single stretched or orphaned card. */
