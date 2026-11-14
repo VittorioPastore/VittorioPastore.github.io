@@ -160,7 +160,7 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
     <section class="wrap hero">
       <h1 class="hero-name"><span>Vittorio</span> <span>Pastore</span></h1>
       <p class="hero-bio">
-        Robotics Researcher at Virginia Tech.<br />
+        Member of Technical Staff at Foundation.<br />
         Passionate about Reinforcement Learning, Music, and Photography.
       </p>
       <div class="btn-row hero-cta">
@@ -172,6 +172,35 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
     </section>
 
     <div class="wrap stack">
+      <!-- Work. Only what is already public: the role as on LinkedIn, and a video Foundation published itself. -->
+      <section id="work" class="zone">
+        <div class="card featured work">
+          <div class="featured-text">
+            <p class="kicker">Now, since May 2026</p>
+            <h2 class="featured-title">Member of Technical Staff at Foundation</h2>
+            <p class="card-text">
+              Working on whole-body control for humanoid robots, in San Francisco.
+            </p>
+            <p class="meta">Before that: robotics research at Virginia Tech</p>
+            <a class="go" href="https://foundation.bot">Foundation</a>
+          </div>
+          <figure class="fig">
+            <div class="fig-frame video">
+              <!-- Our own poster over Foundation's frame; a click swaps in the player. Without JavaScript it is a link. -->
+              <a
+                class="poster"
+                href="https://www.youtube.com/watch?v=oRymQyooWjE"
+                data-embed="https://www.youtube.com/embed/oRymQyooWjE?autoplay=1"
+                aria-label="Play “How We Train Humanoid Robots”, a video by Foundation Robotics">
+                <img src="https://i.ytimg.com/vi/oRymQyooWjE/maxres1.jpg" alt="" loading="lazy" />
+                <span class="btn primary">Play</span>
+              </a>
+            </div>
+            <figcaption>“How We Train Humanoid Robots”, a video from Foundation. I am in it.</figcaption>
+          </figure>
+        </div>
+      </section>
+
       <!-- 01 Publications -->
       <section id="publications" class="zone">
         <header class="zone-head">
@@ -316,6 +345,20 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
     var age = (Date.now() - Date.parse(pill.getAttribute('data-posted'))) / 86400000;
     if (age >= 0 && age <= 30) pill.hidden = false;
   });
+
+  // The video poster: a plain click swaps it for the player; a modified click still opens the link.
+  document.querySelectorAll('.poster[data-embed]').forEach(function (poster) {
+    poster.addEventListener('click', function (event) {
+      if (event.ctrlKey || event.metaKey || event.shiftKey) return;
+      event.preventDefault();
+      var frame = document.createElement('iframe');
+      frame.src = poster.getAttribute('data-embed');
+      frame.title = 'How We Train Humanoid Robots, a video by Foundation Robotics';
+      frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      frame.allowFullscreen = true;
+      poster.replaceWith(frame);
+    });
+  });
 </script>
 
 <style>
@@ -395,6 +438,17 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
 
   /* ── Section titles: the word as flat type with its robots live over it (TitleStage) ── */
   .zone-head > div { width: 100%; }
+
+  /* ── Work: one card, the role beside the company's video ── */
+  .work { margin-bottom: 0; align-items: start; }
+  .work .fig { align-self: center; }
+  .work .fig-frame { border: 0; } /* the poster is paper on paper: no frame around it */
+  /* The frame is white type on black; inverted and multiplied onto the card it is ink on paper, as the hero is. */
+  .poster { position: relative; display: block; height: 100%; }
+  .poster img { width: 100%; height: 100%; object-fit: cover; filter: invert(1) grayscale(1) contrast(1.2); mix-blend-mode: multiply; }
+  .poster .btn { position: absolute; right: 10px; bottom: 10px; min-height: 34px; padding: 0 16px; } /* clear of the figure */
+  .poster:hover .btn { opacity: 0.85; }
+  .poster:focus-visible { outline-offset: -4px; } /* the frame clips anything outside it */
 
   /* ── Publications ── */
   .pub-grid { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
