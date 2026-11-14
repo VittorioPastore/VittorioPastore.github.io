@@ -330,6 +330,8 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-content: center;
+    justify-items: center; /* stacked, everything under the name sits on the center line, as the robots do */
+    text-align: center;
     gap: clamp(14px, 2.4vh, 26px);
     min-height: calc(100vh - var(--header-h));
     min-height: calc(100svh - var(--header-h));
@@ -341,7 +343,9 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
     font-weight: 500;
     line-height: 0.9;
     letter-spacing: -0.045em;
-    margin-left: -0.045em; /* the V's side bearing: lines its stroke up with the text below */
+    margin-left: -0.045em; /* the V's side bearing: lines its stroke up with the page's left edge */
+    justify-self: start; /* the name always hangs from the left */
+    text-align: left;
     white-space: nowrap;
   }
   .hero-name span { display: block; }
@@ -355,7 +359,7 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
     max-width: 30rem;
     text-wrap: balance;
   }
-  .hero-cta { position: relative; z-index: 2; order: 4; }
+  .hero-cta { position: relative; z-index: 2; order: 4; justify-content: center; }
   .hero :global(.stage) {
     order: 2;
     z-index: 1;
@@ -367,8 +371,11 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
     .hero {
       --name-size: min(100cqw / 6.6, 30vh); /* the whole name is 6.5em wide */
       grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+      justify-items: start; /* side by side, the text hangs from the left edge */
+      text-align: left;
     }
     .hero-name { grid-column: 1 / -1; }
+    .hero-cta { justify-content: flex-start; }
     .hero-name span { display: inline; }
     .hero-bio { grid-column: 1 / -1; max-width: min(30rem, 37cqw); }
     .hero-cta { grid-column: 1; }
