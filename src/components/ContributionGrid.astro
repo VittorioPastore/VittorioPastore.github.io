@@ -427,7 +427,7 @@ const fetchContributions = async (username: string): Promise<ClientContribution[
     cursor: default;
   }
 
-  /* Small squares grow to full size in a scattered order; the ones with contributions take their colour as they do. */
+  /* Small squares grow to full size in a scattered order; the ones with contributions take their color as they do. */
   @keyframes contribFill {
     from { background: var(--contrib-level-0); transform: scale(0.6); }
     to   { background: var(--color-target); transform: scale(1); }

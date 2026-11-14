@@ -7,6 +7,8 @@
   G1_DIR   folder holding g1_23dof.xml and meshes/*.STL (the Unitree G1 MJCF)
   HDRI     a studio environment map (.hdr)
   OUTDIR   where <scene>.png is written; scenes are nmpc, admm, hier, thesis, gpu
+           (and go2glb, which is not a picture: it writes OUTDIR/go2.glb, the Go2 the section titles of the home
+           page pose live)
 
 The gpu scene also uses the G1 of the hero, public/g1-hero.glb, for the motions baked into it.
 
@@ -16,7 +18,7 @@ pictures are transparent apart from the objects and the shadows they cast on the
 the page.
 Each scene comes out as layers, which figures/composite.py puts together: <scene>.png is the objects alone,
 <scene>_shadow.png the same with the shadows they cast on the floor (so the shadows can be softened and faded out
-before the picture's edge), and <scene>_ghost<k>.png each rank of ghost (shading in the colour, coverage in the
+before the picture's edge), and <scene>_ghost<k>.png each rank of ghost (shading in the color, coverage in the
 alpha), which is laid over the picture as flat orange, the way the hero does. `npm run figures` runs both and writes public/pub-*.webp.
 """
 import math
@@ -88,7 +90,7 @@ def materials():
     # the arm and the props
     "shell": mat("shell", (0.88, 0.88, 0.89), 0.36, coat=0.4),
     "arm": mat("arm", (0.012, 0.012, 0.014), 0.22, coat=0.7),             # the Kinova's glossy black links
-    "band": mat("band", (0.5, 0.51, 0.53), 0.35, metal=0.7),              # and the grey rings at its joints
+    "band": mat("band", (0.5, 0.51, 0.53), 0.35, metal=0.7),              # and the gray rings at its joints
     "paper": mat("paper", (0.9, 0.89, 0.86), 0.75),
     "cover": mat("cover", (0.03, 0.032, 0.04), 0.72),
     "glow": mat("glow", (1.0, 0.45, 0.08), 0.4, emit=((1.0, 0.33, 0.03), 7.0)),
@@ -158,7 +160,7 @@ def camera(tgt, az, el, dist, lens=60, fit=0.8):
     cu, cv = (min(us) + max(us)) / 2 - 0.5, (min(vs) + max(vs)) / 2 - 0.5
     fwd = (tgt - c.location).normalized(); right = fwd.cross(Vector((0, 0, 1))).normalized(); up = right.cross(fwd)
     d = (tgt - c.location).length
-    span_w = 36.0 / lens * d  # width of the view at the target, in metres (36 mm sensor)
+    span_w = 36.0 / lens * d  # width of the view at the target, in meters (36 mm sensor)
     tgt = tgt + right * cu * span_w + up * cv * span_w / aspect
     d *= max(max(us) - min(us), max(vs) - min(vs)) / fit
     c.location = tgt - fwd * d
@@ -242,7 +244,7 @@ class Robot:
         T = T @ Matrix.Rotation(pose.get(name, self.rest(name)), 4, Vector(vec(j.get("axis"), (0, 0, 1))))
       for g in body.findall("geom"):
         if g.get("mesh") and (g.get("class") == "visual" or g.get("contype") == "0"):
-          # the Go2 names its materials; the G1 only gives a grey level, which becomes shell or dark
+          # the Go2 names its materials; the G1 only gives a gray level, which becomes shell or dark
           material = g.get("material") or ("black" if vec(g.get("rgba"), (1, 1, 1, 1))[0] < 0.5 else "shell")
           out.append((g.get("mesh"), material, T @ xform(g)))
       for b in body.findall("body"):
@@ -372,13 +374,13 @@ def floor_ring(M, at, r, t=0.011):
 
 
 def add_arm(M, T):
-  """The arm on the Go2's back, after the Kinova in the paper: glossy black links with grey bands at the joints,
+  """The arm on the Go2's back, after the Kinova in the paper: glossy black links with gray bands at the joints,
   a tall upper arm leaning back and a forearm reaching forward. Points are in the robot's base frame."""
   P = lambda x, y, z: T @ Vector((x, y, z))
 
   def link(p0, p1, r, bands=(0.12, 0.88)):
     rod(M, "arm", p0, p1, r)
-    for t in bands:  # a short grey ring, a little proud of the link
+    for t in bands:  # a short gray ring, a little proud of the link
       c = p0.lerp(p1, t); h = (p1 - p0).normalized() * 0.016
       rod(M, "band", c - h, c + h, r + 0.003)
 
@@ -397,7 +399,7 @@ def add_arm(M, T):
 
 
 def along(path, dist):
-  """The point `dist` metres along the polyline `path`, and the heading there."""
+  """The point `dist` meters along the polyline `path`, and the heading there."""
   for (x0, y0), (x1, y1) in zip(path, path[1:]):
     seg = math.hypot(x1 - x0, y1 - y0)
     if dist <= seg:
@@ -464,7 +466,7 @@ def scene_thesis(M):
 
 def scene_gpu(M):
   """131 hours of motion on a mid-range GPU: a graphics card lying fans up, a crowd of G1s moving across it."""
-  u = 2.3  # the card is this many times a real one's proportions in metres, so the robots are small on it
+  u = 2.3  # the card is this many times a real one's proportions in meters, so the robots are small on it
   L, D, T = 3.3 * u, 1.5 * u, 0.42 * u  # the card: length, depth, thickness
   shroud = box(M, "shroud", (0, 0, T / 2 + 0.02 * u), (L, D, T - 0.04 * u), bevel=0.035 * u)
   box(M, "steel", (0, 0, 0.02 * u), (L, D, 0.04 * u), bevel=0.008 * u)                  # backplate
@@ -505,8 +507,50 @@ def scene_gpu(M):
   camera(Vector((0, 0, 1.0)), -60, 24, 14, lens=55, fit=0.86)
 
 
+def export_go2(path):
+  """The Go2 as a model the page can pose (src/scripts/titles.ts): a tree of its bodies and joints, each joint node
+  carrying its axis, with the meshes thinned to a size a browser can load."""
+  setup(); ROBOTS.clear(); M = materials(); r = robot("go2"); sc = bpy.context.scene; thin = {}
+
+  def node(name, parent, local):
+    e = bpy.data.objects.new(name, None); sc.collection.objects.link(e); e.parent = parent; e.matrix_local = local
+    return e
+
+  def mesh(name, material):
+    if (name, material) not in thin:
+      me = r.mesh(name)[0].copy()
+      ob = bpy.data.objects.new("tmp", me); sc.collection.objects.link(ob)
+      d = ob.modifiers.new("d", "DECIMATE"); d.ratio = min(1.0, 1800 / max(len(me.polygons), 1))
+      out = bpy.data.meshes.new_from_object(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+      bpy.data.objects.remove(ob); out.shade_smooth(); out.materials.clear(); out.materials.append(M[material])
+      while out.uv_layers:  # nothing is textured
+        out.uv_layers.remove(out.uv_layers[0])
+      thin[(name, material)] = out
+    return thin[(name, material)]
+
+  def walk(body, parent, local):
+    at = node("body_" + body.get("name"), parent, local)
+    for j in body.findall("joint"):
+      if j.get("type") == "free":
+        continue
+      at = node("joint_" + j.get("name").replace("_joint", ""), at, Matrix.Identity(4))
+      at["axis"] = vec(j.get("axis"), (0, 0, 1))
+    for g in body.findall("geom"):
+      if g.get("mesh") and (g.get("class") == "visual" or g.get("contype") == "0"):
+        ob = bpy.data.objects.new(g.get("mesh"), mesh(g.get("mesh"), g.get("material") or "white"))
+        sc.collection.objects.link(ob); ob.parent = at; ob.matrix_local = xform(g)
+    for b in body.findall("body"):
+      walk(b, at, xform(b))
+
+  walk(r.root.find("worldbody/body"), None, Matrix.Identity(4))
+  bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", export_yup=True, export_extras=True, export_animations=False)
+  print("RENDERED", path, flush=True)
+
+
 H_WIDE = H
 for name in SCENES:
+  if name == "go2glb":
+    export_go2(f"{OUT}/go2.glb"); continue
   H = round(W / ASPECT[name]) if name in ASPECT else H_WIDE
   setup(); ROBOTS.clear(); SWEEPS.clear()
   globals()[f"scene_{name}"](materials())

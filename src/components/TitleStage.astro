@@ -1,0 +1,62 @@
+---
+// TitleStage.astro — a section title: the word as flat type, set large like the name in the hero, with the robots
+// of its section live on a transparent canvas over it, played by the scroll (src/scripts/titles.ts).
+// Without WebGL or JavaScript, or for visitors who ask for reduced motion, it is simply the heading.
+interface Props {
+  name: 'publications' | 'projects' | 'skills' | 'activity';
+  title: string;
+}
+const { name, title } = Astro.props;
+---
+
+<div class="title-stage" data-title={name}>
+  <h2><span class="word">{title}</span></h2>
+  <canvas aria-hidden="true"></canvas>
+</div>
+
+<style>
+  /* The stage is the heading plus the room its scene needs above the type (a robot on a letter) and below it (the
+     floor in front of the word). Sizes are in ems of the title, so the room scales with the type. */
+  .title-stage {
+    position: relative;
+    font-size: clamp(2.9rem, 11.5vw, 10rem);
+    line-height: 1;
+    padding: var(--above, 0.28em) 0 var(--below, 0.4em);
+  }
+  .title-stage[data-title='skills'] { --above: 0.3em; --below: 0.34em; }
+  .title-stage[data-title='publications'] { --above: 0.42em; --below: 0.62em; }
+  .title-stage[data-title='projects'] { --above: 0.95em; --below: 0.68em; }
+  .title-stage[data-title='activity'] { --above: 0.3em; --below: 0.76em; }
+
+  h2 {
+    margin: 0 0 0 -0.045em; /* the first letter's side bearing, as in the hero */
+    font: inherit;
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  .word { position: relative; display: inline-block; }
+
+  /* The canvas reaches past the heading into the zone's padding, and its sides are feathered, as the hero's stage
+     is: a robot walking in or out never meets a hard edge, and one standing on the first letter is not faded. */
+  canvas {
+    position: absolute;
+    inset: 0 calc(-1 * var(--zone-pad));
+    z-index: 1;
+    display: block;
+    width: calc(100% + 2 * var(--zone-pad));
+    height: 100%;
+    max-width: none;
+    pointer-events: none;
+    visibility: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 2.5%, #000 97.5%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 2.5%, #000 97.5%, transparent);
+  }
+  .title-stage.is-live canvas { visibility: visible; }
+</style>
+
+<script>
+  import { startTitles } from '../scripts/titles';
+  startTitles();
+</script>

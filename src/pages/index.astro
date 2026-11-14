@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import ContributionGrid from '../components/ContributionGrid.astro';
 import FunnyFeed from '../components/FunnyFeed';
 import HeroStage from '../components/HeroStage.astro';
+import TitleStage from '../components/TitleStage.astro';
 
 const publications = [
   {
@@ -155,20 +156,16 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
 
 <Layout title="Vittorio Pastore - Portfolio">
   <main class="page">
-    <!-- Hero: one screen, laid out like a figure page -->
+    <!-- Hero: one screen. The name runs the full width of the page and the live robot stands in front of it. -->
     <section class="wrap hero">
-      <div class="hero-text">
-        <div class="hero-lead">
-          <h1 class="hero-name">Vittorio<br />Pastore</h1>
-          <p class="hero-bio">
-            Robotics Researcher at Virginia Tech.<br />
-            Passionate about Reinforcement Learning, Music, and Photography.
-          </p>
-          <div class="btn-row">
-            <a class="btn primary" href="#projects">View projects</a>
-            <a class="btn" href="#contact">Contact me</a>
-          </div>
-        </div>
+      <h1 class="hero-name"><span>Vittorio</span> <span>Pastore</span></h1>
+      <p class="hero-bio">
+        Robotics Researcher at Virginia Tech.<br />
+        Passionate about Reinforcement Learning, Music, and Photography.
+      </p>
+      <div class="btn-row hero-cta">
+        <a class="btn primary" href="#projects">View projects</a>
+        <a class="btn" href="#contact">Contact me</a>
       </div>
 
       <HeroStage />
@@ -180,7 +177,7 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
         <header class="zone-head">
           <div>
             <p class="kicker">01</p>
-            <h2 class="zone-title">Publications</h2>
+            <TitleStage name="publications" title="Publications" />
           </div>
         </header>
         <div class="pub-grid">
@@ -207,7 +204,7 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
         <header class="zone-head">
           <div>
             <p class="kicker">02</p>
-            <h2 class="zone-title">Projects</h2>
+            <TitleStage name="projects" title="Projects" />
           </div>
         </header>
 
@@ -248,7 +245,7 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
         <header class="zone-head">
           <div>
             <p class="kicker">03</p>
-            <h2 class="zone-title">Skills</h2>
+            <TitleStage name="skills" title="Skills" />
           </div>
         </header>
         <div class="card skills">
@@ -271,7 +268,7 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
         <header class="zone-head">
           <div>
             <p class="kicker">04</p>
-            <h2 class="zone-title">Activity</h2>
+            <TitleStage name="activity" title="Activity" />
           </div>
         </header>
         <div class="activity-grid">
@@ -322,35 +319,75 @@ const leadSpans = `--s2: ${span(2)}; --s3: ${span(3)}; --s4: ${span(4)};`;
 </script>
 
 <style>
-  /* ── Hero: one screen. The text and the live stage share a bottom line (both rows of buttons), and the pair is
-     centred in the space under the header. Side by side on landscape screens, stacked on portrait. ── */
+  /* ── Hero: one screen. The name is set as wide as the page; the stage sits over it, so the robot stands in front
+     of the letters and its ghosts trail across them. Landscape: one line, the robot in the gap between the two
+     words. Portrait: two lines, the stage tucked up under the second. ── */
   .hero {
     --hero-pad: clamp(14px, 3vh, 36px);
+    --name-size: min(100cqw / 3.3, 16svh); /* "Pastore" is 3.2em wide; capped so a tall tablet still fits the buttons */
+    container-type: inline-size;
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-content: center;
-    gap: clamp(24px, 5vh, 56px) clamp(16px, 3vw, 56px);
+    gap: clamp(14px, 2.4vh, 26px);
     min-height: calc(100vh - var(--header-h));
     min-height: calc(100svh - var(--header-h));
     padding-block: var(--hero-pad);
   }
 
-  .hero-text { min-width: 0; }
-  .hero-lead { display: flex; flex-direction: column; gap: clamp(14px, 2.4vh, 26px); }
-
   .hero-name {
-    font-size: clamp(2.9rem, min(15vw, 15vh), 9.5rem);
+    font-size: var(--name-size);
     font-weight: 500;
-    line-height: 0.94;
+    line-height: 0.9;
     letter-spacing: -0.045em;
     margin-left: -0.045em; /* the V's side bearing: lines its stroke up with the text below */
+    white-space: nowrap;
   }
-  .hero-bio { font-size: clamp(1rem, 0.92rem + 0.45vw, 1.3rem); line-height: 1.5; color: var(--ink-2); max-width: 30rem; text-wrap: balance; }
+  .hero-name span { display: block; }
+  .hero-bio {
+    position: relative;
+    z-index: 2;
+    order: 3;
+    font-size: clamp(1rem, 0.92rem + 0.45vw, 1.3rem);
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 30rem;
+    text-wrap: balance;
+  }
+  .hero-cta { position: relative; z-index: 2; order: 4; }
+  .hero :global(.stage) {
+    order: 2;
+    z-index: 1;
+    margin-top: calc(var(--name-size) * -0.34);
+    max-height: min(46svh, 38rem);
+  }
 
   @media (min-width: 640px) and (min-aspect-ratio: 5 / 4) {
-    .hero { grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr); align-items: end; }
-    .hero-name { font-size: clamp(2.9rem, min(8.4vw, 17vh), 9.5rem); }
+    .hero {
+      --name-size: min(100cqw / 6.6, 30vh); /* the whole name is 6.5em wide */
+      grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+    }
+    .hero-name { grid-column: 1 / -1; }
+    .hero-name span { display: inline; }
+    .hero-bio { grid-column: 1 / -1; max-width: min(30rem, 37cqw); }
+    .hero-cta { grid-column: 1; }
+    /* The stage takes the right 70% at full height: its robot lands on the word space, its ghosts on "Pastore". */
+    .hero :global(.stage) {
+      position: absolute;
+      inset: var(--hero-pad) 0 var(--hero-pad) auto;
+      width: 70%;
+      height: auto;
+      margin: 0;
+      aspect-ratio: auto;
+      max-height: none;
+    }
+    /* Without WebGL the photo stands in: kept to the corner, so it does not cover the name. */
+    .hero :global(.stage.is-failed) { top: auto; width: 44%; height: 58%; }
   }
+
+  /* ── Section titles: the word as flat type with its robots live over it (TitleStage) ── */
+  .zone-head > div { width: 100%; }
 
   /* ── Publications ── */
   .pub-grid { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }

@@ -1,0 +1,146 @@
+---
+// PidPlayground.astro — a browser sketch of the simulator the page describes: a setpoint of 50, gains Kp, Ki and Kd,
+// a noise knob and a nudge. The plant is a damped mass (x'' = u - 0.8 x'). Amber is the reference, as in the figures.
+const sliders = [
+  { id: 'kp', label: 'Kp', max: 10, value: 4 },
+  { id: 'ki', label: 'Ki', max: 5, value: 1 },
+  { id: 'kd', label: 'Kd', max: 5, value: 2 },
+  { id: 'noise', label: 'Noise', max: 40, value: 0 },
+];
+---
+
+<figure class="fig pid" id="pid">
+  <div class="fig-frame">
+    <div class="pid-head">
+      <p class="kicker">Try it</p>
+      <p class="meta" id="pid-readout"></p>
+    </div>
+    <canvas id="pid-plot" role="img" aria-label="Live plot of the current value tracking a setpoint of 50"></canvas>
+    <div class="pid-controls">
+      {sliders.map(s => (
+        <label>
+          <span class="meta">{s.label}</span>
+          <input type="range" id={`pid-${s.id}`} min="0" max={s.max} step="0.1" value={s.value} />
+          <output class="meta">{s.value.toFixed(1)}</output>
+        </label>
+      ))}
+      <button type="button" class="btn" id="pid-nudge">Nudge</button>
+    </div>
+  </div>
+  <figcaption>A browser sketch of the same loop, not the app's code. Drag a gain, or nudge the value and watch it recover.</figcaption>
+</figure>
+
+<style>
+  .pid-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 16px; padding: var(--card-pad) var(--card-pad) 0; }
+  #pid-readout { font-variant-numeric: tabular-nums; white-space: pre; }
+  canvas { display: block; width: 100%; height: 13rem; }
+  .pid-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 10px 24px;
+    align-items: center;
+    padding: 14px var(--card-pad) var(--card-pad);
+    border-top: 1px solid var(--line);
+  }
+  label { display: grid; grid-template-columns: 3rem minmax(0, 1fr) 2.2rem; align-items: center; gap: 10px; }
+  output { text-align: right; font-variant-numeric: tabular-nums; }
+  input { width: 100%; accent-color: var(--ink); }
+  .btn { justify-self: start; min-height: 36px; }
+</style>
+
+<script>
+  const root = document.getElementById('pid')!;
+  const canvas = document.getElementById('pid-plot') as HTMLCanvasElement;
+  const readout = document.getElementById('pid-readout')!;
+  const ctx = canvas.getContext('2d')!;
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const gain = (id: string) => Number((document.getElementById(`pid-${id}`) as HTMLInputElement).value);
+  const token = (name: string) => getComputedStyle(root).getPropertyValue(name).trim();
+  const ink = token('--ink'), amber = token('--amber'), line = token('--line');
+
+  const SETPOINT = 50;
+  const DT = 1 / 60;
+  const HISTORY = 60 * 8; // 8 seconds on screen
+
+  let x = 0, v = 0, integral = 0, prevError = SETPOINT, signal = 0;
+  let history: number[] = [];
+  let visible = false, looping = false;
+  let runUntil = calm ? 0 : Infinity; // reduced motion: only run for a while after an interaction
+  let W = 0, H = 0;
+
+  const resize = () => {
+    const dpr = window.devicePixelRatio || 1;
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  const step = () => {
+    const error = SETPOINT - x;
+    integral = Math.max(-200, Math.min(200, integral + error * DT)); // anti-windup clamp
+    const derivative = (error - prevError) / DT;
+    prevError = error;
+    signal = Math.max(-400, Math.min(400, gain('kp') * error + gain('ki') * integral + gain('kd') * derivative));
+    const disturbance = (Math.random() - 0.5) * 2 * gain('noise');
+    v += (signal + disturbance - 0.8 * v) * DT;
+    x += v * DT;
+    history.push(x);
+    if (history.length > HISTORY) history.shift();
+  };
+
+  const draw = () => {
+    // The plot scales itself so the trace never leaves it.
+    const lo = Math.min(0, ...history) - 5, hi = Math.max(SETPOINT * 1.3, ...history) + 5;
+    const y = (val: number) => H - ((val - lo) / (hi - lo)) * H;
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = line;
+    ctx.beginPath(); ctx.moveTo(0, y(0)); ctx.lineTo(W, y(0)); ctx.stroke();
+    ctx.strokeStyle = ctx.fillStyle = amber;
+    ctx.setLineDash([4, 5]);
+    ctx.beginPath(); ctx.moveTo(0, y(SETPOINT)); ctx.lineTo(W, y(SETPOINT)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = "400 10px 'Google Sans Code Variable', ui-monospace, monospace";
+    ctx.fillText('setpoint 50', 12, y(SETPOINT) - 7);
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    history.forEach((val, i) => {
+      const px = (i / (HISTORY - 1)) * W;
+      i ? ctx.lineTo(px, y(val)) : ctx.moveTo(px, y(val));
+    });
+    ctx.stroke();
+    readout.textContent = `Current value ${x.toFixed(1).padStart(5)}   Signal ${signal.toFixed(1).padStart(6)}`;
+  };
+
+  const loop = () => {
+    if (!visible || document.hidden || performance.now() > runUntil) { looping = false; return; }
+    step();
+    draw();
+    requestAnimationFrame(loop);
+  };
+  const wake = () => {
+    if (calm) runUntil = performance.now() + 6000;
+    if (!looping && visible) { looping = true; requestAnimationFrame(loop); }
+  };
+
+  root.querySelectorAll('input').forEach(input => input.addEventListener('input', () => {
+    (input.nextElementSibling as HTMLOutputElement).value = Number(input.value).toFixed(1);
+    wake();
+  }));
+  document.getElementById('pid-nudge')!.addEventListener('click', () => {
+    x += (Math.random() < 0.5 ? -1 : 1) * 18;
+    wake();
+  });
+  new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting;
+    if (!calm) wake();
+  }).observe(root);
+  document.addEventListener('visibilitychange', () => { if (!calm) wake(); });
+  new ResizeObserver(() => { resize(); draw(); }).observe(canvas);
+
+  resize();
+  for (let i = 0; i < HISTORY; i++) step(); // settled, so the plot is not empty before it is first seen
+  draw();
+</script>

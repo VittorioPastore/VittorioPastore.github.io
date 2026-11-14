@@ -6,6 +6,9 @@
 # its assets/ folder), the Unitree G1 model (g1_23dof.xml with its meshes/ folder) and a studio environment map.
 # Point GO2_DIR, G1_DIR and HDRI at them.
 #
+#   - the Go2 that the section titles of the home page pose live (src/scripts/titles.ts): public/go2.glb, the same
+#     model as in the publication images, thinned and written as glTF by the same Blender script
+#
 # Not rendered here: public/mlx-humanoid-laptop.webp, the MacBook project card. It is the `laptop` scene of
 # figures/mlx/src/illus_g1.py in the training repository, at 1600x1024 with the camera's fit set to 0.85 (the
 # figure in the post uses 0.92), from poses baked by that folder's bake_g1.py out of runs/mlx_lafan1/rollouts and
@@ -24,4 +27,5 @@ echo "public/bones-seed-gpu-memory.png"
 TILES="$(mktemp -d)"
 blender -b -P figures/publications.py -- "$GO2_DIR" "$G1_DIR" "$HDRI" "$TILES" nmpc,admm,hier,thesis,gpu 1600 700 128 | grep RENDERED
 python3 figures/composite.py "$TILES" public nmpc admm hier thesis gpu:bones-seed-gpu
+blender -b -P figures/publications.py -- "$GO2_DIR" "$G1_DIR" "$HDRI" public go2glb | grep RENDERED
 rm -rf "$TILES"
