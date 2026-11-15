@@ -296,6 +296,7 @@ a:hover > .go::after, a.go:hover::after { transform: translateX(3px); }
   margin-top: 14px;
   text-wrap: pretty;
 }
+.page-head .head-actions { margin-top: 18px; }
 .page-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; padding-bottom: 4px; }
 @media (max-width: 720px) {
   .page-head { grid-template-columns: minmax(0, 1fr); }
