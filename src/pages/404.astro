@@ -1,0 +1,99 @@
+---
+// src/pages/404.astro — what an address with nothing behind it gets: the number as flat type, set as large as the
+// name in the hero, and the hero's robot in front of its zero, falling over and getting up again. Each fall lands
+// it against one of the 4s, which leans away and comes back (src/scripts/fallen.ts).
+// GitHub Pages serves this page for every address the site does not have.
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Not found - Vittorio Pastore" description="There is no page at this address on Vittorio Pastore's site.">
+  <main class="page">
+    <section class="wrap lost">
+      <p class="kicker">Error 404 · Not found</p>
+
+      <div class="lost-stage" id="lost-stage">
+        <!-- Each digit has a slot of its own: the digit turns in it, and its ghosts are laid in under it. -->
+        <h1 class="word" aria-label="404">
+          <span class="slot"><span class="digit" data-side="left">4</span></span><span class="slot"><span class="digit zero">0</span></span><span class="slot"><span class="digit" data-side="right">4</span></span>
+        </h1>
+        <canvas aria-hidden="true"></canvas>
+      </div>
+
+      <div class="lost-text">
+        <p class="lost-line">This page fell over.</p>
+        <p class="lost-note">There is nothing at this address. The rest of the site is still standing.</p>
+        <div class="btn-row">
+          <a class="btn primary" href="/">Back home</a>
+          <a class="btn" href="/#projects">View projects</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  /* One screen, as the hero is: the number hangs from the left edge of the page. On a wide screen the text stands
+     beside it; on a narrow one, under it. */
+  .lost {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: clamp(10px, 2vh, 22px) clamp(24px, 5vw, 96px);
+    min-height: calc(100vh - var(--header-h) - 4.5rem);
+    min-height: calc(100svh - var(--header-h) - 4.5rem);
+    padding-block: clamp(18px, 4vh, 44px);
+  }
+  @media (min-width: 900px) and (min-aspect-ratio: 5 / 4) {
+    .lost { grid-template-columns: auto minmax(0, 1fr); align-items: center; }
+    .lost .kicker { grid-column: 1 / -1; }
+    .lost-stage { font-size: min(25vw, 56vh); font-size: min(25vw, 56svh); }
+  }
+
+  /* The stage is the number plus the room its scene needs: a little above for an arm, more below for a robot lying
+     in front of the type and the shadow it casts. Sizes are in ems of the number, so the room scales with it. */
+  .lost-stage {
+    position: relative;
+    font-size: min(44vw, 40vh); /* stacked, the number may take most of the width: a leaning 4 still has to fit */
+    font-size: min(44vw, 40svh);
+    line-height: 0.9;
+    padding: 0.1em 0 0.3em;
+  }
+  .word {
+    margin: 0 0 0 -0.045em; /* the first digit's side bearing, as in the hero */
+    font: inherit;
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  .slot { position: relative; display: inline-block; }
+  .digit { position: relative; z-index: 1; display: inline-block; will-change: transform; }
+  .lost-stage :global(.digit-ghost) { position: absolute; left: 0; top: 0; will-change: transform; }
+
+  /* The canvas reaches past the number into the page's gutters, with feathered sides, as the titles' canvases do. */
+  canvas {
+    position: absolute;
+    inset: 0 calc(-1 * var(--gutter));
+    z-index: 2;
+    display: block;
+    width: calc(100% + 2 * var(--gutter));
+    height: 100%;
+    max-width: none;
+    pointer-events: none;
+    visibility: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+  }
+  .lost-stage:global(.is-live) canvas { visibility: visible; }
+
+  .lost-text { display: grid; gap: 12px; justify-items: start; }
+  .lost-line { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; }
+  .lost-note { font-size: clamp(1rem, 0.92rem + 0.45vw, 1.3rem); line-height: 1.5; color: var(--ink-2); max-width: 34rem; text-wrap: pretty; }
+  .lost-text .btn-row { margin-top: 6px; }
+</style>
+
+<script>
+  import { startFallen } from '../scripts/fallen';
+  const stage = document.getElementById('lost-stage');
+  if (stage) startFallen(stage).catch(err => console.warn('404 stage unavailable:', err));
+</script>

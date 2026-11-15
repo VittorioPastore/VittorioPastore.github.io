@@ -21,6 +21,7 @@ const links = [
   { id: 'skills', label: 'Skills' },
   { id: 'activity', label: 'Activity' },
   { id: 'contact', label: 'Contact' },
+  { id: 'resume', label: 'Resume', href: '/resume' },
 ];
 const year = new Date().getFullYear();
 ---
@@ -55,7 +56,7 @@ const year = new Date().getFullYear();
 
         <nav class="site-nav" id="site-nav" aria-label="Sections">
           {links.map(l => (
-            <a href={`/#${l.id}`} data-nav={l.id} aria-current={active === l.id ? 'true' : undefined}>{l.label}</a>
+            <a href={l.href ?? `/#${l.id}`} data-nav={l.id} aria-current={active === l.id ? 'true' : undefined}>{l.label}</a>
           ))}
         </nav>
 

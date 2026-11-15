@@ -1,0 +1,337 @@
+---
+// src/pages/resume.astro — the resume as a page of the site. The PDF (in /public) is the full text; this page is
+// its outline, shown: the roles are stretches of a timeline that a Unitree G1 runs (src/scripts/career.ts), each
+// stretch lying over its role's card, and the papers are their figures. The phone number stays in the PDF only.
+import Layout from '../layouts/Layout.astro';
+
+const pdf = '/Pastore_Vittorio_Resume.pdf';
+
+// Oldest first: the order of the walk, and of the row of cards under it. Phones list them newest first.
+const roles = [
+  {
+    year: '2022',
+    short: 'TREC Lab',
+    when: 'May 2022 – May 2024',
+    org: 'Terrestrial Robotics Engineering & Controls Lab',
+    role: 'Undergraduate Research Assistant',
+    where: 'Virginia Tech',
+    logo: { src: '/trec-logo.png', w: 380, h: 365, drawn: [375, 341], ink: 0.17 },
+    points: ['Embedded systems for Greyhound, an open-source quadruped', 'Upper-body design for PANDORA, a 30-DoF humanoid', 'Rigid-body dynamics running 25% faster'],
+  },
+  {
+    year: '2024',
+    short: 'Agile Robots Lab',
+    when: 'Aug 2024 – May 2026',
+    org: 'Agile Robots for Control, Optimization, and Learning Lab',
+    role: 'Graduate Research Assistant',
+    where: 'Virginia Tech',
+    logo: { src: '/vt-logo.png', w: 628, h: 295, ink: 0.25 },
+    points: ['Nonlinear MPC for quadruped loco-manipulation, in IEEE RA-L', 'Distributed NMPC, ADMM and CBFs for safe robot teams', 'RL training scaled across HPC clusters'],
+  },
+  {
+    year: '2026',
+    short: 'Foundation',
+    when: 'May 2026 – Present',
+    org: 'Foundation Robotics',
+    role: 'Tech Lead, Whole\u00a0Body\u00a0Controls',
+    where: 'San Francisco',
+    current: true,
+    logo: { src: '/foundation-logo.png', w: 168, h: 492, ink: 0.46 },
+    points: ['Ghost-WBC: production whole-body control, trained 20× faster', 'Backpropagation through a learned world model, in place of PPO', 'Sim-to-real, real-time C++ inference, VR teleoperation', 'Training and evaluation infrastructure for a 15-person team'],
+  },
+];
+
+// The three logos are three shapes: one nearly square, one wide, one tall and narrow. At one height the wide one
+// looks large and the narrow one small, so each is drawn with the same amount of ink instead. `ink` is how much of
+// a logo's box is inked, measured from its file: the share of the box that is drawn on, with pale ink counted for
+// less than dark. `drawn` is that box where the file has an empty margin (the box's top right corner is the file's
+// in all three, so each still sits in the corner of its card).
+const LOGO_INK = 485; // square pixels of ink in each logo, at its size on the page
+const HEAD = 48, ROW_GAP = 8; // pixels: the height of a card's first row, and the gap between its rows
+const sized = (logo: { w: number; h: number; ink: number; drawn?: number[] }) => {
+  const [w, h] = logo.drawn ?? [logo.w, logo.h];
+  const k = Math.sqrt(LOGO_INK / (logo.ink * w * h)); // pixels of the page to one of the file's
+  const round = (v: number) => Math.round(v * 10) / 10;
+  // A logo no taller than the first row is centered in it; a taller one hangs from the top of the card, and if it
+  // reaches the title's row the title keeps clear of it.
+  return { w: round(logo.w * k), tall: round(h * k), inset: h * k > HEAD + ROW_GAP ? round(logo.w * k) + 14 : 0 };
+};
+
+const publications = [
+  {
+    title: 'A Nonlinear MPC Framework for Loco-Manipulation of Quadrupedal Robots with Non-Negligible Manipulator Dynamics',
+    venue: 'IEEE RA-L',
+    href: 'https://arxiv.org/abs/2507.22042',
+    figure: '/pub-nmpc.webp',
+    figureAlt: 'A white quadruped robot mid-stride, carrying a robot arm on its back that reaches forward',
+  },
+  {
+    title: 'ADMM-Based Distributed MPC with Control Barrier Functions for Safe Multi-Robot Quadrupedal Locomotion',
+    venue: 'Submitted',
+    href: 'https://arxiv.org/abs/2603.19170',
+    figure: '/pub-admm.webp',
+    figureAlt: 'Three quadruped robots, each standing inside its own glowing amber safety ring on the floor',
+  },
+  {
+    title: 'A Hybrid Framework for Multi-Agent Navigation: Integrating ADMM-Based Distributed NMPC with Reinforcement Learning',
+    venue: 'Submitted',
+    href: null,
+    figure: '/pub-hier.webp',
+    figureAlt: 'Three quadruped robots following dotted amber paths; two of them trade places on paths that bow around each other',
+  },
+  {
+    title: 'Multi-Agent Hierarchical Distributed NMPC with Learned Locomotion',
+    venue: "Master's thesis · 2026",
+    href: 'https://hdl.handle.net/10919/143475',
+    figure: '/pub-thesis.webp',
+    figureAlt: 'Three small quadruped robots walking across the cover of a large hardback book',
+  },
+];
+
+const education = [
+  { degree: 'M.S. Mechanical Engineering', detail: 'Robotics', when: '2026' },
+  { degree: 'B.S. Mechanical Engineering', detail: 'Cum Laude · Robotics & Mechatronics', when: '2024' },
+];
+
+const skills = [
+  { group: 'Languages', items: ['C++', 'Python', 'ROS 2', 'Swift', 'PyTorch', 'Core ML', 'NumPy', 'MATLAB', 'Simulink', 'C'] },
+  { group: 'Control & learning', items: ['RL (PPO, SAC)', 'Whole-Body Control', 'Distributed NMPC', 'ADMM', 'Sim-to-Real', 'Loco-Manipulation'] },
+  { group: 'Simulation & systems', items: ['Isaac Lab / Gym', 'RaiSim', 'MuJoCo', 'SLURM', 'HPC', 'Linux', 'Docker', 'Singularity', 'Git / CI-CD'] },
+];
+
+---
+
+<Layout title="Resume - Vittorio Pastore" active="resume" description="Resume of Vittorio Pastore: reinforcement learning and controls engineer working on whole-body control for humanoid robots.">
+  <main class="page">
+    <div class="wrap">
+      <!-- The title, set as the section titles of the home page are, with the PDF beside it. -->
+      <header class="top">
+        <h1 class="top-title">Resume</h1>
+        <div class="top-side">
+          <p class="top-bio">Reinforcement learning and controls for legged robots.</p>
+          <div class="btn-row">
+            <a class="btn primary" href={pdf} download="Pastore_Vittorio_Resume.pdf">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" /></svg>
+              Download PDF
+            </a>
+            <a class="btn" href={pdf} target="_blank" rel="noopener">View</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- Experience: a timeline on the bare page with a runner on it, and under each stretch the role of those years. -->
+      <section class="career" data-career aria-label="Experience">
+        <div class="walk-stage" data-career-stage>
+          <!-- The drawn timeline: shown instead of the live figure where that one will not come (see the styles). -->
+          <div class="walk-still" aria-hidden="true">
+            {[0, 1, 2, 3].map(i => <i style={`left: ${(i * 100) / 3}%;`} />)}
+          </div>
+          {['2022', '2024', '2026', 'Now'].map((y, i) => (
+            <span class="walk-year" data-career-year={i} style={`left: ${(i * 100) / 3}%;`} aria-hidden="true">{y}</span>
+          ))}
+        </div>
+
+        <ol class="roles">
+          {roles.map((r, i) => {
+            const logo = sized(r.logo);
+            return (
+              <li class="card role" data-stop={i} tabindex="0" style={`--at: ${i}; --head: ${HEAD}px; --row-gap: ${ROW_GAP}px; --logo-w: ${logo.w}px; --logo-h: ${logo.tall}px; --title-inset: ${logo.inset}px;`}>
+                <img class="role-logo" src={r.logo.src} alt="" width={r.logo.w} height={r.logo.h} />
+                <p class="kicker role-when">
+                  {r.current && <span class="pill">Now</span>}
+                  {r.when}
+                </p>
+                <h2 class="role-title">{r.role}</h2>
+                <p class="role-org">{r.org}<span class="meta">{r.where}</span></p>
+                <ul class="role-points">
+                  {r.points.map(p => <li>{p}</li>)}
+                </ul>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      <div class="stack">
+        <!-- 01 Publications: each paper is its figure -->
+        <section class="zone">
+          <header class="zone-head">
+            <div>
+              <p class="kicker">01</p>
+              <h2 class="zone-title">Publications</h2>
+            </div>
+          </header>
+          <div class="pub-grid">
+            {publications.map(p => {
+              const body = (
+                <>
+                  <img class="pub-fig" src={p.figure} alt={p.figureAlt} width="1600" height="700" loading="lazy" />
+                  <p class="kicker">{p.venue}</p>
+                  <h3>{p.title}</h3>
+                </>
+              );
+              return p.href ? <a class="card pub" href={p.href}>{body}</a> : <article class="card pub">{body}</article>;
+            })}
+          </div>
+        </section>
+
+        <!-- 02 Education and 03 Skills -->
+        <div class="pair">
+          <section class="zone">
+            <header class="zone-head">
+              <div>
+                <p class="kicker">02 · Virginia Tech</p>
+                <h2 class="zone-title">Education</h2>
+              </div>
+            </header>
+            <div class="card rows">
+              {education.map(e => (
+                <div class="row edu">
+                  <span class="meta">{e.when}</span>
+                  <span>
+                    <span class="edu-degree">{e.degree}</span>
+                    <span class="edu-detail">{e.detail}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section class="zone">
+            <header class="zone-head">
+              <div>
+                <p class="kicker">03</p>
+                <h2 class="zone-title">Skills</h2>
+              </div>
+            </header>
+            <div class="card rows">
+              {skills.map(s => (
+                <div class="row skill">
+                  <p class="kicker">{s.group}</p>
+                  <div class="tags">{s.items.map(t => <span class="tag">{t}</span>)}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { startCareer } from '../scripts/career';
+  document.querySelectorAll<HTMLElement>('[data-career]').forEach(startCareer);
+</script>
+
+<style>
+  /* ── Title: the word set large, as the name is in the hero and the section titles are on the home page ── */
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 14px 40px;
+    padding-top: clamp(18px, 3vw, 44px);
+  }
+  .top-title {
+    font-size: clamp(4rem, 15vw, 12.5rem);
+    font-weight: 500;
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    margin-left: -0.045em; /* the R's side bearing, as in the hero */
+  }
+  .top-side { display: grid; gap: 14px; padding-bottom: clamp(4px, 1.1vw, 18px); }
+  .top-bio { font-size: clamp(1rem, 0.92rem + 0.45vw, 1.3rem); line-height: 1.5; color: var(--ink-2); max-width: 22rem; text-wrap: balance; }
+  .top .btn svg { width: 17px; height: 17px; }
+
+  /* ── The walk: a timeline on the bare page. The whole section listens for the pointer; the canvas only draws. ── */
+  .career { padding-bottom: var(--gap); }
+  .walk-stage { position: relative; width: 100%; height: clamp(230px, 64vw, 300px); touch-action: pan-y; }
+  .walk-stage :global(canvas) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+  }
+  .walk-stage:global(.is-live) :global(canvas) { opacity: 1; }
+
+  /* The drawn timeline: amber dots with four small rings. It stands in for the live one only where the live one
+     will not come: without scripts, for a visitor who asks for reduced motion, or without WebGL. While the live
+     one is on its way the stage is left empty and the figure fades in, so that a refresh never shows one timeline
+     turning into another. The years wait with it: the live figure puts them under its own rings before it shows. */
+  .walk-still { display: none; position: absolute; left: 0; right: 0; bottom: 40px; height: 0; border-top: 4px dotted #ff9a4a; }
+  .walk-still i { position: absolute; top: -9px; width: 14px; height: 14px; margin-left: -7px; border: 2px solid #ff9a4a; border-radius: 50%; background: var(--paper); }
+  .walk-stage:global(.is-failed) .walk-still { display: block; }
+  @media (prefers-reduced-motion: reduce), (scripting: none) { .walk-still { display: block; } }
+
+  /* The years, under the ticks. The live figure moves them to where its ticks are. */
+  .walk-year {
+    position: absolute;
+    top: calc(100% - 22px);
+    transform: translateX(-50%);
+    font: 400 0.68rem/1 var(--mono);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--faint);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: color 0.15s, opacity 0.6s ease;
+  }
+  .walk-stage:global(.is-live) .walk-year, .walk-stage:global(.is-failed) .walk-year { opacity: 1; }
+  @media (prefers-reduced-motion: reduce), (scripting: none) { .walk-year { opacity: 1; } }
+  .walk-year:first-of-type { transform: none; }
+  .walk-year:last-of-type { transform: translateX(-100%); }
+  .walk-year:global(.is-here) { color: var(--ink); }
+
+  /* ── Roles: a row of three under the rings; stacked, the newest comes first ── */
+  .roles { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
+  .role { position: relative; order: calc(-1 * var(--at)); display: flex; flex-direction: column; gap: var(--row-gap); cursor: default; transition: border-color 0.15s; }
+  .role:global(.is-here) { border-color: var(--ink); }
+  .role-when { display: flex; align-items: center; gap: 8px; min-height: var(--head); padding-right: calc(var(--logo-w) + 14px); }
+  /* The logo, in the card's top right corner at the size worked out for it above: centered in the first row if it
+     is no taller than that row, and hanging from the top of the card if it is. */
+  .role-logo { position: absolute; top: calc(var(--card-pad) + max(0px, (var(--head) - var(--logo-h)) / 2)); right: var(--card-pad); width: var(--logo-w); height: auto; }
+  /* The role is the heading; where it was held is the line under it. */
+  .role-title { font-size: clamp(1.3rem, 1.02rem + 0.85vw, 1.75rem); font-weight: 500; letter-spacing: -0.015em; line-height: 1.15; text-wrap: balance; padding-right: var(--title-inset); }
+  .role-org { font-weight: 500; line-height: 1.4; color: var(--ink-2); text-wrap: pretty; }
+  .role-org .meta { margin-left: 10px; white-space: nowrap; }
+  .role-points { list-style: none; margin: 6px 0 0; padding: 0; font-size: 0.9rem; line-height: 1.45; color: var(--ink-2); }
+  .role-points li { padding: 8px 0; border-top: 1px solid var(--line); text-wrap: pretty; }
+  .role-points li:last-child { padding-bottom: 0; }
+  @media (min-width: 900px) {
+    .walk-stage { height: clamp(260px, 24vw, 400px); margin-top: clamp(-40px, -2vw, -8px); }
+    /* In a row, the three cards share their rows: the dates, the roles, the places and the lists each start on
+       one line across the page, however many lines a role or a place takes in its own card. */
+    .roles { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, auto); }
+    .role { order: 0; display: grid; grid-row: span 4; grid-template-rows: subgrid; align-content: start; row-gap: var(--row-gap); }
+  }
+
+  /* ── Publications: the cards of the home page, figure first ── */
+  .pub-grid { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 640px) { .pub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1300px) { .pub-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .pub { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .pub-fig { display: block; width: 100%; height: auto; border-radius: 8px; }
+  .pub h3 { font-size: 0.98rem; text-wrap: pretty; }
+
+  /* ── Education and skills: two small tables ── */
+  .pair { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 1000px) { .pair { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
+  /* The two zones are one height, and each table fills its zone: its rows share whatever height there is. */
+  .pair .zone { display: flex; flex-direction: column; }
+  .rows { flex: 1; padding: 0; display: grid; grid-auto-rows: 1fr; }
+  .row { padding: 14px var(--card-pad); align-content: center; }
+  .row + .row { border-top: 1px solid var(--line); }
+  .edu { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: baseline; }
+  .edu-degree { font-size: 1.08rem; }
+  .edu-degree { display: block; font-weight: 500; }
+  .edu-detail { display: block; font-size: 0.86rem; color: var(--muted); }
+  .skill { display: grid; gap: 9px; }
+  @media (min-width: 640px) { .skill { grid-template-columns: 11rem minmax(0, 1fr); align-items: center; } }
+</style>

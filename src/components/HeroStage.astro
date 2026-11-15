@@ -3,6 +3,8 @@
 // trained on a MacBook (run mlx_lafan1_2h, iteration 4,750). The model and motions are baked into /g1-hero.glb.
 // The robot is white, faces the visitor, and stands directly on the page: there is no backdrop. The translucent
 // orange figures to its side are its own next poses. If WebGL is unavailable the photo is shown instead.
+// The first time in a visit, and whenever the page comes back up from the boot menu, the robot is found where a
+// machine that has just been switched on would be: on the floor. It gets up, and then goes into its round.
 const clips = [
   { id: 'dance', label: 'Dance' },
   { id: 'run', label: 'Run' },
@@ -251,13 +253,17 @@ const clips = [
         turnYaw: 0,
         turning: null as { from: number; to: number; t: number } | null,
         retiring: [] as { clip: Clip; at: number }[],
+        until: null as number | null, // a time in the motion at which to leave it for the first of the round
         time: () => (fig.cur ? actions.get(fig.cur.name)!.time : 0),
-        play(name: string) {
+        /** Starts a motion, `from` seconds into it. */
+        play(name: string, from = 0) {
           const next = clipsByName.get(name);
           if (!next || next === fig.cur) return;
           const prev = fig.cur;
           const action = actions.get(name)!;
           action.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();
+          action.time = from;
+          fig.until = null;
           if (prev) {
             actions.get(prev.name)!.crossFadeTo(action, FADE, false);
             // Start the new motion facing the way the figure faces now, by turning the whole figure over the blend.
@@ -297,8 +303,10 @@ const clips = [
             if (fig.cur !== r.clip) actions.get(r.clip.name)!.stop();
             return false;
           });
-          // Blend into the next motion a little before this one ends.
-          if (fig.cur && fig.time() >= fig.cur.duration - FADE - 0.05 && order.length > 1) {
+          // Leave the motion where it was told to,
+          if (fig.cur && fig.until !== null && fig.time() >= fig.until) fig.play(order[0]);
+          // or blend into the next one a little before this one ends.
+          else if (fig.cur && fig.time() >= fig.cur.duration - FADE - 0.05 && order.length > 1) {
             fig.play(order[(order.indexOf(fig.cur.name) + 1) % order.length]);
           }
         },
@@ -477,7 +485,33 @@ const clips = [
       renderer.render(scene, camera);
     };
 
-    play(order[0]);
+    // Waking up. The get-up motion has the robot fall first; the robot starts in it already down, rolls over, gets
+    // to its feet (the hardest thing the policy does) and leaves the motion for the first of its round before the
+    // second fall. Its ghosts, a little ahead of it as always, are up first. It is turned so that it comes up facing
+    // the visitor: lying down it has no heading for the steering to work on.
+    const WAKE = { clip: 'fallAndGetUp', from: 2.9, until: 5.7 };
+    const headingAt = (clip: Clip, t: number) => {
+      const rot = clip.anim.tracks.find(tr => tr.name === `${rootName}.quaternion`);
+      if (!rot) return clip.yaw0;
+      let i = 0;
+      while (i < rot.times.length - 1 && rot.times[i] < t) i++;
+      return yawOf({ x: rot.values[4 * i], y: rot.values[4 * i + 1], z: rot.values[4 * i + 2], w: rot.values[4 * i + 3] });
+    };
+    let fresh = false; // nobody has seen it get up yet in this visit, or the page has just been booted
+    try {
+      const from = document.referrer ? new URL(document.referrer).pathname.replace(/\/$/, '') : '';
+      fresh = !sessionStorage.getItem('robotUp') || from === '/boot';
+      sessionStorage.setItem('robotUp', '1');
+    } catch { /* no session storage: it just dances */ }
+    const waking = clipsByName.get(WAKE.clip);
+    if (fresh && waking && !calm) {
+      [robot, ...ghosts].forEach((f, k) => {
+        f.play(WAKE.clip, WAKE.from);
+        f.turnYaw = FACING - headingAt(waking, WAKE.until);
+        f.until = WAKE.until;
+        if (k > 0) f.advance(k * LEAD);
+      });
+    } else play(order[0]);
     // Render only while the stage is on screen and the tab is visible.
     let visible = true;
     let running = false;

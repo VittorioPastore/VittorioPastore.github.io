@@ -1,32 +1,163 @@
 ---
-// src/pages/website.astro
-import ProjectLayout from '../layouts/ProjectLayout.astro';
+// src/pages/website.astro — the post about the site itself: what it is made of, and how its robots are drawn.
+// The figure (public/site-walk.webp, and site-walk-tall.webp for narrow pages) is eight frames of the runner on the
+// resume page, taken from that page.
+import Layout from '../layouts/Layout.astro';
+const title = 'This Website';
+const publishDate = 'April 11, 2025';
+const updated = 'November 14, 2026';
 ---
-<ProjectLayout title="This Website" slug="website" date="April 11, 2025" tags={['Web Development', 'JavaScript', 'Astro']}>
-  <p>
-    I have recently become fascinated with glassmorphic UI design, like the one on VisionOS and rumored to arrive to IOS 19. My previous website was a simple google site that was quick to make and, more importantly, free. It was functional, yet bland.
-  </p>
-  <p>
-    I wanted to create a website that truly represented my personality as a creative and tech enthusiast. Therefore, I chose a new tech stack, that I was previously unfamiliar with, based on the astro framework to push myself to create something stunning.
-  </p>
-  <p>
-    Check out the source code on <a href="https://github.com/VittorioPastore/VittorioPastore.github.io">Github</a>!
-  </p>
-  <hr />
-  <p>
-    I used the following pinterest post as inspiration for my UI design. I learned along the way that the best way to get this look is to have bright and high-contrast shapes in the background. Otherwise it will look like your "glass" elements are simply static gradients. Other than that, having a blur effect on each element and adding opacity is the simplest way to achieve this beautiful effect
-  </p>
+<Layout title={`${title} - Project`} active="projects" description="How this site is put together: static pages built with Astro, with robots that are drawn live in the browser and one that walks on inverse kinematics.">
+  <main class="page">
+    <article class="wrap post">
+      <header class="page-head">
+        <div>
+          <p class="kicker"><a href="/#projects">Projects</a> / website</p>
+          <h1 class="page-title">{title}</h1>
+          <p class="page-caption">
+            A static site whose robots are drawn live in the browser. The ones on the home page play motions from my
+            own training runs. The one on the resume page has no recording of a walk to play, so it works one out.
+          </p>
+        </div>
+        <div class="page-meta meta">
+          <span>{publishDate}</span>
+          <span>Updated {updated}</span>
+          <span>Astro · TypeScript · three.js</span>
+        </div>
+      </header>
 
-  <Fragment slot="media">
-    <figure class="fig">
-      <div class="fig-frame pin">
-        <iframe src="https://assets.pinterest.com/ext/embed.html?id=953074339895381511" title="Pinterest post" height="500" width="500" loading="lazy"></iframe>
+      <div class="zone">
+        <figure class="fig">
+          <div class="fig-frame">
+            <!-- The same eight frames: in one row on a wide page, in two rows of four on a narrow one. -->
+            <picture>
+              <source media="(max-width: 700px)" srcset="/site-walk-tall.webp" width="1400" height="1144" />
+              <img width="2400" height="484" src="/site-walk.webp" alt="Eight frames of a white humanoid robot walking along a dotted line on the floor: its heel lands, its body passes over the standing foot, the foot behind rolls onto its toe and leaves the floor, and the other leg swings through" />
+            </picture>
+          </div>
+          <figcaption>
+            One stride of the walk on the resume page, a frame every 0.12 seconds. No stride is played back: each frame
+            is worked out from where the feet are planted.
+          </figcaption>
+        </figure>
       </div>
-    </figure>
-  </Fragment>
-</ProjectLayout>
 
-<style>
-  .pin { display: flex; justify-content: center; padding: var(--card-pad); }
-  .pin iframe { border: 0; width: min(100%, 500px); height: 500px; border-radius: 8px; }
-</style>
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">01</p>
+          <h2>What it is</h2>
+        </header>
+        <div class="prose">
+        <p>
+          The site is a set of static pages, built with <a href="https://astro.build">Astro</a> and served by GitHub
+          Pages. There is no server behind it and no content system: a page is a file, and so is a post like this one.
+        </p>
+        <p>
+          Every page is set in one small style. White paper, one typeface with its code face for labels, neutral
+          grays, and a single black pill for whatever is selected. Color is kept for meaning: amber is a reference,
+          such as a path a robot has been asked to follow, and a translucent orange figure is where a robot will be
+          next.
+        </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">02</p>
+          <h2>The robots are drawn, not filmed</h2>
+        </header>
+        <div class="prose">
+        <p>
+          The humanoid at the top of the home page is a Unitree G1, rendered with
+          <a href="https://threejs.org">three.js</a>. Its motions are rollouts of the policy from
+          <a href="/humanoid-on-a-macbook">Training a Humanoid on a MacBook</a>, stored in the model's file: a dance,
+          a run, a fight, and a fall it gets up from. The orange figures beside it are its own next poses. On a first
+          visit it starts on the floor and gets up, and dragging the stage turns the view around it.
+        </p>
+        <p>
+          The section titles work the same way at a smaller scale. The word is ordinary type, the robots of that
+          section stand on it, and the scroll moves them. The page for an address that does not exist has the robot
+          falling against the digits of <a href="/404">404</a>.
+        </p>
+        <p>
+          Each figure is drawn only while it is on screen. Without WebGL, or for a visitor who asks for reduced
+          motion, the page shows the type or a picture and nothing is lost.
+        </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">03</p>
+          <h2>A walk that is worked out</h2>
+        </header>
+        <div class="prose">
+        <p>
+          The <a href="/resume">resume</a> is a timeline with a G1 on it that goes wherever the pointer is. The motions
+          stored with the model have no walk among them, and a run played slowly is a slow jog. So the walk is
+          computed, the way a walking robot computes one:
+        </p>
+        <ul>
+          <li>A gait clock lifts the feet in turn.</li>
+          <li>
+            Each foot is set down where its hip is about to be, which is Raibert's rule, and then stays exactly where
+            it was put. It rolls from its heel onto its toe as the body passes over it.
+          </li>
+          <li>
+            The pelvis rides as high as the legs allow: lowest when both feet are down, highest over the standing leg.
+          </li>
+          <li>
+            The six joints of each leg are solved by inverse kinematics on every frame, with damped least squares on
+            the leg's Jacobian.
+          </li>
+        </ul>
+        <p>
+          Standing still is the same machine with nothing to do. A small move of the pointer only shifts its weight,
+          and turning to face the viewer is the same machine stepping around. Over a longer way it breaks into a jog,
+          which is one stride of the recorded run closed into a loop. The walk hands over to the jog in step, and
+          takes it back by planting whichever foot is down.
+        </p>
+        <p>
+          The two quadrupeds behind the line stand on the same kind of machinery, and the arm on one of them reaches
+          for the runner as it goes by.
+        </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">04</p>
+          <h2>The pictures</h2>
+        </header>
+        <div class="prose">
+        <p>
+          The pictures on the publication cards are renders. They use the robots' own models, the Unitree Go2 and G1,
+          in Blender, with the same orange ghosts laid over them, and no backdrop, so they sit directly on the page.
+          One command draws them all again.
+        </p>
+        </div>
+      </section>
+
+      <section class="post-sec">
+        <header class="post-sec-head">
+          <p class="kicker">05</p>
+          <h2>Before this</h2>
+        </header>
+        <div class="prose">
+        <p>
+          My first site was a Google Site: quick to make, free, and bland. The first version of this one, in April
+          2025, was my first project in Astro, and it was built around frosted glass: blurred, translucent panels over
+          bright shapes. In 2026 it was redrawn in the paper style it has now.
+        </p>
+        <p>
+          The header's power button still restarts the site from a boot menu, where there is a safe-graphics mode and
+          a memory test.
+        </p>
+        <p>
+          The source is on <a href="https://github.com/VittorioPastore/VittorioPastore.github.io">GitHub</a>.
+        </p>
+        </div>
+      </section>
+    </article>
+  </main>
+</Layout>
